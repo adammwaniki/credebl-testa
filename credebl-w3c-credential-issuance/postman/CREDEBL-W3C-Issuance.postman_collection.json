@@ -1,0 +1,690 @@
+{
+  "info": {
+    "_postman_id": "credebl-w3c-issuance-collection",
+    "name": "CREDEBL W3C Credential Issuance",
+    "description": "Complete workflow for issuing W3C JSON-LD Verifiable Credentials from a CREDEBL dedicated agent to a mobile wallet.\n\n## Setup\n1. Import this collection\n2. Import the environment file or create variables\n3. Run requests in order from top to bottom\n\n## Required Environment Variables\n- `base_url`: Agent admin URL (default: http://localhost:8004)\n- `api_key`: Agent API key\n- `issuer_did`: Your issuer DID (auto-populated by Get DIDs request)\n\n## Workflow\n1. Health Check → Verify agent is running\n2. Get DIDs → Fetch available DIDs\n3. Create OOB Invitation → Generate QR code for wallet\n4. List Connections → Find established connection\n5. Issue Credential → Send W3C credential offer\n6. Monitor Credential → Check issuance status",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    {
+      "key": "base_url",
+      "value": "http://localhost:8004",
+      "type": "string"
+    },
+    {
+      "key": "api_key",
+      "value": "supersecret-that-too-16chars",
+      "type": "string"
+    },
+    {
+      "key": "issuer_did",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "connection_id",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "credential_record_id",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "holder_did",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "invitation_url",
+      "value": "",
+      "type": "string"
+    }
+  ],
+  "item": [
+    {
+      "name": "1. Setup & Health Check",
+      "item": [
+        {
+          "name": "1.1 Health Check - Get Agent Info",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Agent is initialized\", function () {",
+                  "    var jsonData = pm.response.json();",
+                  "    pm.expect(jsonData.isInitialized).to.eql(true);",
+                  "});",
+                  "",
+                  "pm.test(\"Agent has endpoints configured\", function () {",
+                  "    var jsonData = pm.response.json();",
+                  "    pm.expect(jsonData.endpoints).to.be.an('array').that.is.not.empty;",
+                  "});",
+                  "",
+                  "// Store agent label for reference",
+                  "var jsonData = pm.response.json();",
+                  "pm.collectionVariables.set(\"agent_label\", jsonData.label);",
+                  "pm.collectionVariables.set(\"agent_endpoint\", jsonData.endpoints[0]);",
+                  "",
+                  "console.log(\"Agent Label:\", jsonData.label);",
+                  "console.log(\"Agent Endpoint:\", jsonData.endpoints[0]);"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "authorization",
+                "value": "{{api_key}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/agent",
+              "host": ["{{base_url}}"],
+              "path": ["agent"]
+            },
+            "description": "Verify the agent is running and properly configured."
+          },
+          "response": []
+        },
+        {
+          "name": "1.2 Get DIDs",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"DIDs retrieved successfully\", function () {",
+                  "    pm.response.to.have.status(200);",
+                  "    var jsonData = pm.response.json();",
+                  "    pm.expect(jsonData).to.be.an('array');",
+                  "});",
+                  "",
+                  "// Find and store the first did:key",
+                  "var jsonData = pm.response.json();",
+                  "var didKey = jsonData.find(d => d.did && d.did.startsWith('did:key:'));",
+                  "",
+                  "if (didKey) {",
+                  "    pm.collectionVariables.set(\"issuer_did\", didKey.did);",
+                  "    console.log(\"Issuer DID set to:\", didKey.did);",
+                  "} else if (jsonData.length > 0) {",
+                  "    pm.collectionVariables.set(\"issuer_did\", jsonData[0].did);",
+                  "    console.log(\"Issuer DID set to:\", jsonData[0].did);",
+                  "} else {",
+                  "    console.log(\"No DIDs found - you may need to create one first\");",
+                  "}"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "authorization",
+                "value": "{{api_key}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/dids",
+              "host": ["{{base_url}}"],
+              "path": ["dids"]
+            },
+            "description": "Retrieve available DIDs. The first did:key will be automatically set as the issuer_did variable."
+          },
+          "response": []
+        }
+      ],
+      "description": "Initial setup requests to verify agent health and retrieve configuration."
+    },
+    {
+      "name": "2. Connection Establishment",
+      "item": [
+        {
+          "name": "2.1 Create OOB Invitation",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Invitation created successfully\", function () {",
+                  "    pm.response.to.have.status(200);",
+                  "    var jsonData = pm.response.json();",
+                  "    pm.expect(jsonData.invitationUrl).to.exist;",
+                  "});",
+                  "",
+                  "var jsonData = pm.response.json();",
+                  "",
+                  "// Store invitation URL",
+                  "pm.collectionVariables.set(\"invitation_url\", jsonData.invitationUrl);",
+                  "",
+                  "// Store out-of-band record ID",
+                  "if (jsonData.outOfBandRecord && jsonData.outOfBandRecord.id) {",
+                  "    pm.collectionVariables.set(\"oob_record_id\", jsonData.outOfBandRecord.id);",
+                  "}",
+                  "",
+                  "console.log(\"=== INVITATION URL ===\");",
+                  "console.log(jsonData.invitationUrl);",
+                  "console.log(\"\");",
+                  "console.log(\"=== QR CODE ===\");",
+                  "console.log(\"Generate QR code for this URL and scan with mobile wallet:\");",
+                  "console.log(\"https://api.qrserver.com/v1/create-qr-code/?size=300x300&data=\" + encodeURIComponent(jsonData.invitationUrl));"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "authorization",
+                "value": "{{api_key}}",
+                "type": "text"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"label\": \"CREDEBL Issuer\",\n  \"goalCode\": \"issue-vc\",\n  \"goal\": \"Issue Verifiable Credential\",\n  \"handshake\": true,\n  \"handshakeProtocols\": [\n    \"https://didcomm.org/didexchange/1.x\",\n    \"https://didcomm.org/connections/1.x\"\n  ],\n  \"autoAcceptConnection\": true\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/didcomm/oob/create-invitation",
+              "host": ["{{base_url}}"],
+              "path": ["didcomm", "oob", "create-invitation"]
+            },
+            "description": "Create an Out-of-Band invitation for the holder to scan.\n\nThe response includes an invitationUrl that should be converted to a QR code for the mobile wallet to scan.\n\n**After running this request:**\n1. Copy the invitation URL from the response\n2. Generate a QR code (use the URL in the console output)\n3. Scan the QR code with your mobile wallet\n4. Wait for the connection to be established"
+          },
+          "response": []
+        },
+        {
+          "name": "2.2 List Connections",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Connections retrieved\", function () {",
+                  "    pm.response.to.have.status(200);",
+                  "    var jsonData = pm.response.json();",
+                  "    pm.expect(jsonData).to.be.an('array');",
+                  "});",
+                  "",
+                  "var jsonData = pm.response.json();",
+                  "",
+                  "// Find the most recent completed connection",
+                  "var completedConnections = jsonData.filter(c => c.state === 'completed');",
+                  "",
+                  "if (completedConnections.length > 0) {",
+                  "    // Sort by createdAt descending to get most recent",
+                  "    completedConnections.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));",
+                  "    var latestConnection = completedConnections[0];",
+                  "    ",
+                  "    pm.collectionVariables.set(\"connection_id\", latestConnection.id);",
+                  "    ",
+                  "    // Try to extract holder DID from theirDid",
+                  "    if (latestConnection.theirDid) {",
+                  "        pm.collectionVariables.set(\"holder_did\", latestConnection.theirDid);",
+                  "    }",
+                  "    ",
+                  "    console.log(\"=== LATEST CONNECTION ===\");",
+                  "    console.log(\"Connection ID:\", latestConnection.id);",
+                  "    console.log(\"State:\", latestConnection.state);",
+                  "    console.log(\"Their DID:\", latestConnection.theirDid);",
+                  "    console.log(\"Created:\", latestConnection.createdAt);",
+                  "} else {",
+                  "    console.log(\"No completed connections found.\");",
+                  "    console.log(\"Please scan the QR code with your mobile wallet first.\");",
+                  "    console.log(\"\");",
+                  "    console.log(\"All connections:\", jsonData.map(c => ({id: c.id, state: c.state})));",
+                  "}"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "authorization",
+                "value": "{{api_key}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/didcomm/connections",
+              "host": ["{{base_url}}"],
+              "path": ["didcomm", "connections"]
+            },
+            "description": "List all connections. Run this after the mobile wallet has scanned the QR code to find the established connection.\n\nThe most recent completed connection will be automatically stored as `connection_id`."
+          },
+          "response": []
+        },
+        {
+          "name": "2.3 Get Connection Details",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Connection retrieved\", function () {",
+                  "    pm.response.to.have.status(200);",
+                  "    var jsonData = pm.response.json();",
+                  "    pm.expect(jsonData.id).to.exist;",
+                  "});",
+                  "",
+                  "var jsonData = pm.response.json();",
+                  "",
+                  "pm.test(\"Connection is completed\", function () {",
+                  "    pm.expect(jsonData.state).to.eql('completed');",
+                  "});",
+                  "",
+                  "// Update holder DID if available",
+                  "if (jsonData.theirDid) {",
+                  "    pm.collectionVariables.set(\"holder_did\", jsonData.theirDid);",
+                  "    console.log(\"Holder DID:\", jsonData.theirDid);",
+                  "}",
+                  "",
+                  "console.log(\"Connection State:\", jsonData.state);",
+                  "console.log(\"Their Label:\", jsonData.theirLabel);"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "authorization",
+                "value": "{{api_key}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/didcomm/connections/{{connection_id}}",
+              "host": ["{{base_url}}"],
+              "path": ["didcomm", "connections", "{{connection_id}}"]
+            },
+            "description": "Get details of a specific connection to verify its state and retrieve the holder's DID."
+          },
+          "response": []
+        }
+      ],
+      "description": "Requests to establish a DIDComm connection with the holder's mobile wallet."
+    },
+    {
+      "name": "3. Credential Issuance",
+      "item": [
+        {
+          "name": "3.1 Issue W3C Employment Credential",
+          "event": [
+            {
+              "listen": "prerequest",
+              "script": {
+                "exec": [
+                  "// Generate current date for issuanceDate",
+                  "var now = new Date();",
+                  "var issuanceDate = now.toISOString().split('.')[0] + 'Z';",
+                  "pm.collectionVariables.set(\"issuance_date\", issuanceDate);",
+                  "",
+                  "console.log(\"Issuance Date:\", issuanceDate);",
+                  "console.log(\"Issuer DID:\", pm.collectionVariables.get(\"issuer_did\"));",
+                  "console.log(\"Holder DID:\", pm.collectionVariables.get(\"holder_did\"));",
+                  "console.log(\"Connection ID:\", pm.collectionVariables.get(\"connection_id\"));"
+                ],
+                "type": "text/javascript"
+              }
+            },
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Credential offer created\", function () {",
+                  "    pm.response.to.have.status(200);",
+                  "    var jsonData = pm.response.json();",
+                  "    pm.expect(jsonData.id).to.exist;",
+                  "    pm.expect(jsonData.state).to.eql('offer-sent');",
+                  "});",
+                  "",
+                  "var jsonData = pm.response.json();",
+                  "",
+                  "// Store credential record ID for monitoring",
+                  "pm.collectionVariables.set(\"credential_record_id\", jsonData.id);",
+                  "",
+                  "console.log(\"=== CREDENTIAL OFFER SENT ===\");",
+                  "console.log(\"Credential Record ID:\", jsonData.id);",
+                  "console.log(\"State:\", jsonData.state);",
+                  "console.log(\"Thread ID:\", jsonData.threadId);",
+                  "console.log(\"\");",
+                  "console.log(\"Please accept the credential offer in your mobile wallet.\");",
+                  "console.log(\"Then run the 'Monitor Credential Status' request to check progress.\");"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "authorization",
+                "value": "{{api_key}}",
+                "type": "text"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"connectionId\": \"{{connection_id}}\",\n  \"protocolVersion\": \"v2\",\n  \"credentialFormats\": {\n    \"jsonld\": {\n      \"credential\": {\n        \"@context\": [\n          \"https://www.w3.org/2018/credentials/v1\",\n          \"https://www.w3.org/2018/credentials/examples/v1\"\n        ],\n        \"type\": [\"VerifiableCredential\", \"EmploymentCredential\"],\n        \"issuer\": \"{{issuer_did}}\",\n        \"issuanceDate\": \"{{issuance_date}}\",\n        \"credentialSubject\": {\n          \"id\": \"{{holder_did}}\",\n          \"employeeOf\": {\n            \"name\": \"CREDEBL Issuer\",\n            \"position\": \"Software Engineer\",\n            \"startDate\": \"2024-01-01\"\n          }\n        }\n      },\n      \"options\": {\n        \"proofType\": \"Ed25519Signature2018\",\n        \"proofPurpose\": \"assertionMethod\"\n      }\n    }\n  },\n  \"autoAcceptCredential\": \"always\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/didcomm/credentials/create-offer",
+              "host": ["{{base_url}}"],
+              "path": ["didcomm", "credentials", "create-offer"]
+            },
+            "description": "Issue a W3C JSON-LD Employment Credential to the connected holder.\n\n**Important:** This request uses the correct JSON-LD context (`https://www.w3.org/2018/credentials/examples/v1`) that is compatible with Ed25519Signature2018.\n\n**After running this request:**\n1. Accept the credential offer in your mobile wallet\n2. Run 'Monitor Credential Status' to verify completion"
+          },
+          "response": []
+        },
+        {
+          "name": "3.2 Monitor Credential Status",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Credential record retrieved\", function () {",
+                  "    pm.response.to.have.status(200);",
+                  "    var jsonData = pm.response.json();",
+                  "    pm.expect(jsonData.id).to.exist;",
+                  "});",
+                  "",
+                  "var jsonData = pm.response.json();",
+                  "",
+                  "console.log(\"=== CREDENTIAL STATUS ===\");",
+                  "console.log(\"Credential ID:\", jsonData.id);",
+                  "console.log(\"State:\", jsonData.state);",
+                  "console.log(\"Updated:\", jsonData.updatedAt);",
+                  "",
+                  "// Check if completed",
+                  "if (jsonData.state === 'done' || jsonData.state === 'credential-issued') {",
+                  "    console.log(\"\");",
+                  "    console.log(\"✅ CREDENTIAL ISSUED SUCCESSFULLY!\");",
+                  "    console.log(\"The credential should now be in the holder's wallet.\");",
+                  "    ",
+                  "    pm.test(\"Credential issuance completed\", function () {",
+                  "        pm.expect(['done', 'credential-issued']).to.include(jsonData.state);",
+                  "    });",
+                  "} else if (jsonData.state === 'request-received') {",
+                  "    console.log(\"\");",
+                  "    console.log(\"⏳ Credential request received, waiting for issuance...\");",
+                  "    console.log(\"If stuck, check agent logs for errors.\");",
+                  "} else if (jsonData.state === 'offer-sent') {",
+                  "    console.log(\"\");",
+                  "    console.log(\"⏳ Waiting for holder to accept the offer...\");",
+                  "    console.log(\"Please accept the credential in your mobile wallet.\");",
+                  "} else {",
+                  "    console.log(\"\");",
+                  "    console.log(\"Current state:\", jsonData.state);",
+                  "}"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "authorization",
+                "value": "{{api_key}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/didcomm/credentials/{{credential_record_id}}",
+              "host": ["{{base_url}}"],
+              "path": ["didcomm", "credentials", "{{credential_record_id}}"]
+            },
+            "description": "Check the status of the credential exchange. Run this after accepting the credential in your wallet.\n\n**States:**\n- `offer-sent`: Waiting for holder to accept\n- `request-received`: Holder accepted, processing\n- `credential-issued`: Credential sent to holder\n- `done`: Exchange completed successfully"
+          },
+          "response": []
+        },
+        {
+          "name": "3.3 Get Issued Credential Details",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Credential format data retrieved\", function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "var jsonData = pm.response.json();",
+                  "",
+                  "if (jsonData.credential && jsonData.credential.jsonld) {",
+                  "    console.log(\"=== ISSUED CREDENTIAL ===\");",
+                  "    console.log(JSON.stringify(jsonData.credential.jsonld, null, 2));",
+                  "    ",
+                  "    pm.test(\"Credential has proof\", function () {",
+                  "        pm.expect(jsonData.credential.jsonld.proof).to.exist;",
+                  "    });",
+                  "    ",
+                  "    pm.test(\"Proof type is Ed25519Signature2018\", function () {",
+                  "        pm.expect(jsonData.credential.jsonld.proof.type).to.eql('Ed25519Signature2018');",
+                  "    });",
+                  "} else {",
+                  "    console.log(\"Credential not yet issued. Current data:\");",
+                  "    console.log(JSON.stringify(jsonData, null, 2));",
+                  "}"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "authorization",
+                "value": "{{api_key}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/didcomm/credentials/{{credential_record_id}}/form-data",
+              "host": ["{{base_url}}"],
+              "path": ["didcomm", "credentials", "{{credential_record_id}}", "form-data"]
+            },
+            "description": "Retrieve the full credential format data including the signed credential with proof."
+          },
+          "response": []
+        }
+      ],
+      "description": "Requests to issue W3C Verifiable Credentials to the connected holder."
+    },
+    {
+      "name": "4. Utilities",
+      "item": [
+        {
+          "name": "4.1 List All Credential Records",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Credentials retrieved\", function () {",
+                  "    pm.response.to.have.status(200);",
+                  "    var jsonData = pm.response.json();",
+                  "    pm.expect(jsonData).to.be.an('array');",
+                  "});",
+                  "",
+                  "var jsonData = pm.response.json();",
+                  "",
+                  "console.log(\"=== ALL CREDENTIAL RECORDS ===\");",
+                  "console.log(\"Total records:\", jsonData.length);",
+                  "console.log(\"\");",
+                  "",
+                  "// Group by state",
+                  "var byState = {};",
+                  "jsonData.forEach(c => {",
+                  "    if (!byState[c.state]) byState[c.state] = [];",
+                  "    byState[c.state].push({",
+                  "        id: c.id,",
+                  "        connectionId: c.connectionId,",
+                  "        createdAt: c.createdAt",
+                  "    });",
+                  "});",
+                  "",
+                  "Object.keys(byState).forEach(state => {",
+                  "    console.log(state + \": \" + byState[state].length + \" record(s)\");",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "authorization",
+                "value": "{{api_key}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/didcomm/credentials/",
+              "host": ["{{base_url}}"],
+              "path": ["didcomm", "credentials", ""]
+            },
+            "description": "List all credential exchange records to see history and current states."
+          },
+          "response": []
+        },
+        {
+          "name": "4.2 List W3C Credentials",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "authorization",
+                "value": "{{api_key}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/didcomm/credentials/w3c",
+              "host": ["{{base_url}}"],
+              "path": ["didcomm", "credentials", "w3c"]
+            },
+            "description": "List all W3C credentials stored by the agent."
+          },
+          "response": []
+        },
+        {
+          "name": "4.3 List OOB Records",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "authorization",
+                "value": "{{api_key}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/didcomm/oob",
+              "host": ["{{base_url}}"],
+              "path": ["didcomm", "oob"]
+            },
+            "description": "List all Out-of-Band invitation records."
+          },
+          "response": []
+        }
+      ],
+      "description": "Utility requests for debugging and exploration."
+    },
+    {
+      "name": "5. Custom Credentials",
+      "item": [
+        {
+          "name": "5.1 Issue Custom Credential (Template)",
+          "event": [
+            {
+              "listen": "prerequest",
+              "script": {
+                "exec": [
+                  "// Generate current date for issuanceDate",
+                  "var now = new Date();",
+                  "var issuanceDate = now.toISOString().split('.')[0] + 'Z';",
+                  "pm.collectionVariables.set(\"issuance_date\", issuanceDate);"
+                ],
+                "type": "text/javascript"
+              }
+            },
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "if (pm.response.code === 200) {",
+                  "    var jsonData = pm.response.json();",
+                  "    pm.collectionVariables.set(\"credential_record_id\", jsonData.id);",
+                  "    console.log(\"Credential Record ID:\", jsonData.id);",
+                  "}"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "authorization",
+                "value": "{{api_key}}",
+                "type": "text"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"connectionId\": \"{{connection_id}}\",\n  \"protocolVersion\": \"v2\",\n  \"credentialFormats\": {\n    \"jsonld\": {\n      \"credential\": {\n        \"@context\": [\n          \"https://www.w3.org/2018/credentials/v1\",\n          \"https://www.w3.org/2018/credentials/examples/v1\"\n        ],\n        \"type\": [\"VerifiableCredential\", \"YourCredentialType\"],\n        \"issuer\": \"{{issuer_did}}\",\n        \"issuanceDate\": \"{{issuance_date}}\",\n        \"credentialSubject\": {\n          \"id\": \"{{holder_did}}\",\n          \"yourAttribute1\": \"value1\",\n          \"yourAttribute2\": \"value2\",\n          \"nestedObject\": {\n            \"field1\": \"nested value\"\n          }\n        }\n      },\n      \"options\": {\n        \"proofType\": \"Ed25519Signature2018\",\n        \"proofPurpose\": \"assertionMethod\"\n      }\n    }\n  },\n  \"autoAcceptCredential\": \"always\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/didcomm/credentials/create-offer",
+              "host": ["{{base_url}}"],
+              "path": ["didcomm", "credentials", "create-offer"]
+            },
+            "description": "Template for issuing custom credentials. Modify the credentialSubject to match your use case.\n\n**Important:** Always use `https://www.w3.org/2018/credentials/examples/v1` as the second context to avoid JSON-LD conflicts."
+          },
+          "response": []
+        }
+      ],
+      "description": "Templates for custom credential types."
+    }
+  ]
+}
