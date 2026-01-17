@@ -1,0 +1,4 @@
+NGOTAG/.terraform/*
+NGOTAG/.vscode/
+NGOTAG/backend reference.tf
+NGOTAG/terraform.tfvars

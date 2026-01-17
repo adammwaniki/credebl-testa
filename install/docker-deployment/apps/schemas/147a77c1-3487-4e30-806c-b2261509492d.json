@@ -1,0 +1,192 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://example.com/schemas/farmerid",
+  "title": "FarmerID",
+  "description": "Farmer identification credential schema",
+  "type": "object",
+  "required": [
+    "@context",
+    "issuer",
+    "issuanceDate",
+    "type",
+    "credentialSubject"
+  ],
+  "properties": {
+    "@context": {
+      "$ref": "#/$defs/context"
+    },
+    "type": {
+      "type": "array",
+      "items": {
+        "anyOf": [
+          {
+            "const": "VerifiableCredential"
+          },
+          {
+            "const": "FarmerID"
+          }
+        ]
+      }
+    },
+    "credentialSubject": {
+      "$ref": "#/$defs/credentialSubject"
+    },
+    "id": {
+      "type": "string",
+      "format": "uri"
+    },
+    "issuer": {
+      "$ref": "#/$defs/uriOrId"
+    },
+    "issuanceDate": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "expirationDate": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "credentialStatus": {
+      "$ref": "#/$defs/credentialStatus"
+    },
+    "credentialSchema": {
+      "$ref": "#/$defs/credentialSchema"
+    }
+  },
+  "$defs": {
+    "context": {
+      "type": "array",
+      "prefixItems": [
+        {
+          "const": "https://www.w3.org/2018/credentials/v1"
+        }
+      ],
+      "items": {
+        "oneOf": [
+          {
+            "type": "string",
+            "format": "uri"
+          },
+          {
+            "type": "object"
+          },
+          {
+            "type": "array",
+            "items": false
+          }
+        ]
+      },
+      "minItems": 1,
+      "uniqueItems": true
+    },
+    "credentialSubject": {
+      "type": "object",
+      "required": [
+        "id",
+        "farmerId",
+        "farmerName",
+        "phoneNumber",
+        "county",
+        "ward"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "farmerId": {
+          "type": "string",
+          "title": "Farmer ID",
+          "description": "farmerId field"
+        },
+        "farmerName": {
+          "type": "string",
+          "title": "Farmer Name",
+          "description": "farmerName field"
+        },
+        "phoneNumber": {
+          "type": "string",
+          "title": "Phone Number",
+          "description": "phoneNumber field"
+        },
+        "county": {
+          "type": "string",
+          "title": "County",
+          "description": "county field"
+        },
+        "ward": {
+          "type": "string",
+          "title": "Ward",
+          "description": "ward field"
+        },
+        "id": {
+          "type": "string",
+          "format": "uri"
+        }
+      }
+    },
+    "credentialSchema": {
+      "oneOf": [
+        {
+          "$ref": "#/$defs/idAndType"
+        },
+        {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/idAndType"
+          },
+          "minItems": 1,
+          "uniqueItems": true
+        }
+      ]
+    },
+    "credentialStatus": {
+      "oneOf": [
+        {
+          "$ref": "#/$defs/idAndType"
+        },
+        {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/idAndType"
+          },
+          "minItems": 1,
+          "uniqueItems": true
+        }
+      ]
+    },
+    "idAndType": {
+      "type": "object",
+      "required": [
+        "id",
+        "type"
+      ],
+      "properties": {
+        "id": {
+          "type": "string",
+          "format": "uri"
+        },
+        "type": {
+          "type": "string"
+        }
+      }
+    },
+    "uriOrId": {
+      "oneOf": [
+        {
+          "type": "string",
+          "format": "uri"
+        },
+        {
+          "type": "object",
+          "required": [
+            "id"
+          ],
+          "properties": {
+            "id": {
+              "type": "string",
+              "format": "uri"
+            }
+          }
+        }
+      ]
+    }
+  }
+}

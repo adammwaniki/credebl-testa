@@ -1,0 +1,22 @@
+version: '3'
+
+services:
+  postgres:
+    container_name: credebl-postgres
+    image: postgres:16
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+    ports:
+      - "5432:5432"
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: credebl
+    volumes:
+      - platform-volume:/var/lib/postgresql/data
+      - ./init-db:/docker-entrypoint-initdb.d
+volumes:
+  platform-volume:

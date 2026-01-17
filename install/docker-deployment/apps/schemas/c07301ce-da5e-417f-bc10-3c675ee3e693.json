@@ -1,0 +1,184 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://example.com/schemas/farmerid",
+  "title": "FarmerID",
+  "description": "FarmerID",
+  "type": "object",
+  "required": [
+    "@context",
+    "issuer",
+    "issuanceDate",
+    "type",
+    "credentialSubject"
+  ],
+  "properties": {
+    "@context": {
+      "$ref": "#/$defs/context"
+    },
+    "type": {
+      "type": "array",
+      "items": {
+        "anyOf": [
+          {
+            "const": "VerifiableCredential"
+          },
+          {
+            "const": "FarmerID"
+          }
+        ]
+      }
+    },
+    "credentialSubject": {
+      "$ref": "#/$defs/credentialSubject"
+    },
+    "id": {
+      "type": "string",
+      "format": "uri"
+    },
+    "issuer": {
+      "$ref": "#/$defs/uriOrId"
+    },
+    "issuanceDate": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "expirationDate": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "credentialStatus": {
+      "$ref": "#/$defs/credentialStatus"
+    },
+    "credentialSchema": {
+      "$ref": "#/$defs/credentialSchema"
+    }
+  },
+  "$defs": {
+    "context": {
+      "type": "array",
+      "prefixItems": [
+        {
+          "const": "https://www.w3.org/2018/credentials/v1"
+        }
+      ],
+      "items": {
+        "oneOf": [
+          {
+            "type": "string",
+            "format": "uri"
+          },
+          {
+            "type": "object"
+          },
+          {
+            "type": "array",
+            "items": false
+          }
+        ]
+      },
+      "minItems": 1,
+      "uniqueItems": true
+    },
+    "credentialSubject": {
+      "type": "object",
+      "required": [
+        "id",
+        "ID Number",
+        "Name"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "ID Number": {
+          "type": "string",
+          "title": "ID Number",
+          "description": "ID Number field"
+        },
+        "Name": {
+          "type": "string",
+          "title": "Name",
+          "description": "Name field"
+        },
+        "State": {
+          "type": "string",
+          "title": "State",
+          "description": "State field"
+        },
+        "Land Size": {
+          "type": "string",
+          "title": "Land Size",
+          "description": "Land Size field"
+        },
+        "id": {
+          "type": "string",
+          "format": "uri"
+        }
+      }
+    },
+    "credentialSchema": {
+      "oneOf": [
+        {
+          "$ref": "#/$defs/idAndType"
+        },
+        {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/idAndType"
+          },
+          "minItems": 1,
+          "uniqueItems": true
+        }
+      ]
+    },
+    "credentialStatus": {
+      "oneOf": [
+        {
+          "$ref": "#/$defs/idAndType"
+        },
+        {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/idAndType"
+          },
+          "minItems": 1,
+          "uniqueItems": true
+        }
+      ]
+    },
+    "idAndType": {
+      "type": "object",
+      "required": [
+        "id",
+        "type"
+      ],
+      "properties": {
+        "id": {
+          "type": "string",
+          "format": "uri"
+        },
+        "type": {
+          "type": "string"
+        }
+      }
+    },
+    "uriOrId": {
+      "oneOf": [
+        {
+          "type": "string",
+          "format": "uri"
+        },
+        {
+          "type": "object",
+          "required": [
+            "id"
+          ],
+          "properties": {
+            "id": {
+              "type": "string",
+              "format": "uri"
+            }
+          }
+        }
+      ]
+    }
+  }
+}

@@ -1,0 +1,39 @@
+{
+  "label": "1445b78e-092c-445c-9f83-024b4d661b22_TestaIssuer002",
+  "walletId": "TestaIssuer002Wallet",
+  "walletKey": "AgentPass1234",
+  "walletType": "postgres",
+  "walletUrl": "192.168.1.105:5433",
+  "walletAccount": "postgres",
+  "walletPassword": "postgres",
+  "walletAdminAccount": "postgres",
+  "walletAdminPassword": "postgres",
+  "walletScheme": "DatabasePerWallet",
+  "indyLedger": [
+    {
+      "genesisTransactions": "https://raw.githubusercontent.com/Indicio-tech/indicio-network/main/genesis_files/pool_transactions_demonet_genesis",
+      "indyNamespace": "indicio:demonet"
+    }
+  ],
+  "endpoint": [
+    "https://e188ecee39a4b4.lhr.life"
+  ],
+  "autoAcceptConnections": true,
+  "autoAcceptCredentials": "contentApproved",
+  "autoAcceptProofs": "contentApproved",
+  "logLevel": 2,
+  "inboundTransport": [
+    {
+      "transport": "http",
+      "port": 9004
+    }
+  ],
+  "outboundTransport": [
+    "http"
+  ],
+  "webhookUrl": "http://192.168.1.105:5000/wh/1445b78e-092c-445c-9f83-024b4d661b22",
+  "adminPort": 8004,
+  "tenancy": false,
+  "schemaFileServerURL": "http://192.168.1.105:4001/schemas/",
+  "apiKey": "supersecret-that-too-16chars"
+}

@@ -1,0 +1,25 @@
+version: '3'
+
+services:
+  agent:
+    image: ghcr.io/credebl/credo-controller:latest
+
+    container_name: 0c2516f6-8478-4f45-9dce-761aeb3370b9_Platform-admin
+    restart: always
+    environment:
+      AFJ_REST_LOG_LEVEL: 1
+    ports:
+     - 9001:9001
+     - 8001:8001
+    env_file:
+      - ../../../agent.env
+   
+    volumes: 
+      - ./agent-config/0c2516f6-8478-4f45-9dce-761aeb3370b9_Platform-admin.json:/config.json   
+      
+    command: --auto-accept-connections --config /config.json
+      
+volumes:
+  pgdata:
+  agent-indy_client:
+  agent-tmp:

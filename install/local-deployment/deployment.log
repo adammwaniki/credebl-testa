@@ -1,0 +1,2839 @@
+
+
+=== Deployment started at Mon Jan 12 09:35:08 PM EAT 2026 ===
+🔍 
+ Setting up CREDEBL Platform...
+Provide branch name you want to work on: You entered branch: main
+Cloning into 'platform'...
+Already on 'main'
+Your branch is up to date with 'origin/main'.
+From https://github.com/credebl/platform
+ * branch              main       -> FETCH_HEAD
+Already up to date.
+📁 Copying .env.demo to .env...
+Assigned ports:
+PostgreSQL: 5432
+API Gateway: 5000
+Redis: 6380
+Keycloak: 8080
+Schema Server: 4000
+Studio: 3000
+✅ Updated .env file and docker-compose available ports
+📁 Preparing environment files...
+
+ Host IP fetched 192.168.1.105
+Enter SendGrid API key: 
+Enter SendGrid sender email: 
+# Provide S3 credentials, required for storing connection URLs
+Enter AWS S3 Access Key: 
+Enter AWS S3 Secret Key: 
+Enter AWS S3 Region: Enter AWS S3 Bucket: Do you want to use bulk issuance? (yes/no): Do you want to upload org logos? (yes/no): Do you want to use an existing PostgreSQL server? (yes/no): ✅ Environment file configured successfully.
+Do you want to use an existing PostgreSQL server for Keycloak? (yes/no): 📁 Keycloak DB will be created in credebl-postgres.
+✅ Keycloak database initialization SQL created.
+🔍 Detected Ubuntu. Checking Docker installation...
+✅ Docker and Docker Compose are already installed.
+🔍 Checking Terraform installation...
+📁 Installing Terraform on Linux...
+Get:1 https://download.docker.com/linux/ubuntu noble InRelease [48.5 kB]
+Hit:2 https://ftp.postgresql.org/pub/pgadmin/pgadmin4/apt/noble pgadmin4 InRelease
+Hit:3 http://ke.archive.ubuntu.com/ubuntu noble InRelease
+Hit:4 http://ke.archive.ubuntu.com/ubuntu noble-updates InRelease
+Hit:5 http://ke.archive.ubuntu.com/ubuntu noble-backports InRelease
+Get:6 http://security.ubuntu.com/ubuntu noble-security InRelease [126 kB]
+Hit:8 https://repo.protonvpn.com/debian stable InRelease
+Get:9 https://dl.google.com/linux/chrome/deb stable InRelease [1,825 B]
+Get:10 https://esm.ubuntu.com/apps/ubuntu noble-apps-security InRelease [8,371 B]
+Hit:11 https://repo.librewolf.net librewolf InRelease
+Get:12 https://esm.ubuntu.com/apps/ubuntu noble-apps-updates InRelease [8,220 B]
+Hit:7 https://prod-cdn.packages.k8s.io/repositories/isv:/kubernetes:/core:/stable:/v1.33/deb  InRelease
+Get:14 http://security.ubuntu.com/ubuntu noble-security/main i386 Packages [366 kB]
+Get:15 https://esm.ubuntu.com/infra/ubuntu noble-infra-security InRelease [8,214 B]
+Get:16 https://dl.google.com/linux/chrome/deb stable/main amd64 Packages [1,216 B]
+Get:17 https://esm.ubuntu.com/infra/ubuntu noble-infra-updates InRelease [8,213 B]
+Get:18 http://security.ubuntu.com/ubuntu noble-security/main amd64 Packages [1,402 kB]
+Hit:13 https://packagecloud.io/golang-migrate/migrate/ubuntu noble InRelease
+Get:19 http://security.ubuntu.com/ubuntu noble-security/main Translation-en [227 kB]
+Get:20 http://security.ubuntu.com/ubuntu noble-security/main amd64 Components [21.5 kB]
+Get:21 http://security.ubuntu.com/ubuntu noble-security/main amd64 c-n-f Metadata [9,724 B]
+Get:22 http://security.ubuntu.com/ubuntu noble-security/restricted amd64 Packages [2,293 kB]
+Get:23 http://security.ubuntu.com/ubuntu noble-security/restricted Translation-en [525 kB]
+Get:24 http://security.ubuntu.com/ubuntu noble-security/restricted amd64 Components [212 B]
+Get:25 http://security.ubuntu.com/ubuntu noble-security/universe i386 Packages [569 kB]
+Get:26 http://security.ubuntu.com/ubuntu noble-security/universe amd64 Packages [920 kB]
+Get:27 http://security.ubuntu.com/ubuntu noble-security/universe amd64 Components [71.5 kB]
+Get:28 http://security.ubuntu.com/ubuntu noble-security/universe amd64 c-n-f Metadata [19.7 kB]
+Get:29 http://security.ubuntu.com/ubuntu noble-security/multiverse amd64 Components [212 B]
+Fetched 6,635 kB in 5s (1,211 kB/s)
+Reading package lists...
+Reading package lists...
+Building dependency tree...
+Reading state information...
+gnupg is already the newest version (2.4.4-2ubuntu17.4).
+gnupg set to manually installed.
+software-properties-common is already the newest version (0.99.49.3).
+software-properties-common set to manually installed.
+0 upgraded, 0 newly installed, 0 to remove and 13 not upgraded.
+--2026-01-12 21:38:26--  https://apt.releases.hashicorp.com/gpg
+Resolving apt.releases.hashicorp.com (apt.releases.hashicorp.com)... 2600:9000:2949:a000:18:566b:ecc0:93a1, 2600:9000:2949:b000:18:566b:ecc0:93a1, 2600:9000:2949:3e00:18:566b:ecc0:93a1, ...
+Connecting to apt.releases.hashicorp.com (apt.releases.hashicorp.com)|2600:9000:2949:a000:18:566b:ecc0:93a1|:443... connected.
+HTTP request sent, awaiting response... 200 OK
+Length: 3980 (3.9K) [binary/octet-stream]
+Saving to: ‘STDOUT’
+
+     0K ...                                                   100%  461M=0s
+
+2026-01-12 21:38:27 (461 MB/s) - written to stdout [3980/3980]
+
+deb [signed-by=/usr/share/keyrings/hashicorp-archive-keyring.gpg]     https://apt.releases.hashicorp.com noble main
+
+WARNING: apt does not have a stable CLI interface. Use with caution in scripts.
+
+Hit:1 https://download.docker.com/linux/ubuntu noble InRelease
+Hit:2 http://ke.archive.ubuntu.com/ubuntu noble InRelease
+Hit:3 http://ke.archive.ubuntu.com/ubuntu noble-updates InRelease
+Hit:4 http://ke.archive.ubuntu.com/ubuntu noble-backports InRelease
+Get:5 https://apt.releases.hashicorp.com noble InRelease [12.9 kB]
+Get:6 https://apt.releases.hashicorp.com noble/main amd64 Packages [216 kB]
+Hit:8 https://ftp.postgresql.org/pub/pgadmin/pgadmin4/apt/noble pgadmin4 InRelease
+Hit:9 http://security.ubuntu.com/ubuntu noble-security InRelease
+Hit:10 https://repo.librewolf.net librewolf InRelease
+Hit:11 https://esm.ubuntu.com/apps/ubuntu noble-apps-security InRelease
+Hit:12 https://repo.protonvpn.com/debian stable InRelease
+Hit:7 https://prod-cdn.packages.k8s.io/repositories/isv:/kubernetes:/core:/stable:/v1.33/deb  InRelease
+Hit:13 https://esm.ubuntu.com/apps/ubuntu noble-apps-updates InRelease
+Hit:14 https://dl.google.com/linux/chrome/deb stable InRelease
+Get:15 https://apt.releases.hashicorp.com noble/main i386 Packages [88.2 kB]
+Hit:16 https://esm.ubuntu.com/infra/ubuntu noble-infra-security InRelease
+Hit:18 https://esm.ubuntu.com/infra/ubuntu noble-infra-updates InRelease
+Hit:17 https://packagecloud.io/golang-migrate/migrate/ubuntu noble InRelease
+Fetched 318 kB in 3s (119 kB/s)
+Reading package lists...
+Building dependency tree...
+Reading state information...
+13 packages can be upgraded. Run 'apt list --upgradable' to see them.
+Reading package lists...
+Building dependency tree...
+Reading state information...
+The following NEW packages will be installed:
+  terraform
+0 upgraded, 1 newly installed, 0 to remove and 13 not upgraded.
+Need to get 30.6 MB of archives.
+After this operation, 101 MB of additional disk space will be used.
+Get:1 https://apt.releases.hashicorp.com noble/main amd64 terraform amd64 1.14.3-1 [30.6 MB]
+Fetched 30.6 MB in 2s (13.4 MB/s)
+Selecting previously unselected package terraform.
+(Reading database ... (Reading database ... 5%(Reading database ... 10%(Reading database ... 15%(Reading database ... 20%(Reading database ... 25%(Reading database ... 30%(Reading database ... 35%(Reading database ... 40%(Reading database ... 45%(Reading database ... 50%(Reading database ... 55%(Reading database ... 60%(Reading database ... 65%(Reading database ... 70%(Reading database ... 75%(Reading database ... 80%(Reading database ... 85%(Reading database ... 90%(Reading database ... 95%(Reading database ... 100%(Reading database ... 318168 files and directories currently installed.)
+Preparing to unpack .../terraform_1.14.3-1_amd64.deb ...
+Unpacking terraform (1.14.3-1) ...
+Setting up terraform (1.14.3-1) ...
+✅ Terraform installed successfully.
+🛡️ Setting up Keycloak...
+time="2026-01-12T21:38:36+03:00" level=warning msg="/home/adam/cdpi/credebl/install/local-deployment/platform/docker-compose.postgres.yml: the attribute `version` is obsolete, it will be ignored, please remove it to avoid potential confusion"
+ postgres Pulling 
+ 02d7611c4eae Pulling fs layer 
+ be56d59d6531 Pulling fs layer 
+ 6b79f2b29884 Pulling fs layer 
+ 7f53036964f1 Pulling fs layer 
+ c3ce0464f73e Pulling fs layer 
+ 08375b6eb817 Pulling fs layer 
+ 31172abd8f4a Pulling fs layer 
+ 592e7afa2092 Pulling fs layer 
+ 74ee42a72ba8 Pulling fs layer 
+ 2809b03b8187 Pulling fs layer 
+ ff1a91754d0b Pulling fs layer 
+ 5773fb4a9d72 Pulling fs layer 
+ 3efabc308a47 Pulling fs layer 
+ 19a4bd73b5b6 Pulling fs layer 
+ c3ce0464f73e Waiting 
+ 08375b6eb817 Waiting 
+ 31172abd8f4a Waiting 
+ 592e7afa2092 Waiting 
+ 74ee42a72ba8 Waiting 
+ 2809b03b8187 Waiting 
+ 7f53036964f1 Waiting 
+ 19a4bd73b5b6 Waiting 
+ ff1a91754d0b Waiting 
+ 5773fb4a9d72 Waiting 
+ 3efabc308a47 Waiting 
+ 6b79f2b29884 Downloading [>                                                  ]  67.89kB/6.437MB
+ be56d59d6531 Downloading [========================================>          ]     953B/1.165kB
+ be56d59d6531 Downloading [==================================================>]  1.165kB/1.165kB
+ be56d59d6531 Verifying Checksum 
+ be56d59d6531 Download complete 
+ 6b79f2b29884 Downloading [=>                                                 ]  135.6kB/6.437MB
+ 02d7611c4eae Downloading [>                                                  ]  303.5kB/29.78MB
+ 6b79f2b29884 Downloading [===>                                               ]  412.9kB/6.437MB
+ 02d7611c4eae Downloading [=>                                                 ]  925.1kB/29.78MB
+ 6b79f2b29884 Downloading [======>                                            ]  806.3kB/6.437MB
+ 02d7611c4eae Downloading [==>                                                ]   1.54MB/29.78MB
+ 6b79f2b29884 Downloading [==========>                                        ]  1.331MB/6.437MB
+ 6b79f2b29884 Downloading [=================>                                 ]  2.261MB/6.437MB
+ 02d7611c4eae Downloading [====>                                              ]  2.769MB/29.78MB
+ 6b79f2b29884 Downloading [==================>                                ]  2.392MB/6.437MB
+ 02d7611c4eae Downloading [=======>                                           ]  4.612MB/29.78MB
+ 6b79f2b29884 Downloading [=======================>                           ]   3.06MB/6.437MB
+ 6b79f2b29884 Downloading [==============================>                    ]  3.923MB/6.437MB
+ 02d7611c4eae Downloading [=========>                                         ]  5.538MB/29.78MB
+ 6b79f2b29884 Downloading [=================================>                 ]  4.251MB/6.437MB
+ 6b79f2b29884 Downloading [======================================>            ]  4.907MB/6.437MB
+ 02d7611c4eae Downloading [============>                                      ]  7.385MB/29.78MB
+ 6b79f2b29884 Downloading [===============================================>   ]  6.091MB/6.437MB
+ 02d7611c4eae Downloading [=============>                                     ]  8.003MB/29.78MB
+ 6b79f2b29884 Downloading [================================================>  ]  6.222MB/6.437MB
+ 7f53036964f1 Downloading [>                                                  ]  13.27kB/1.257MB
+ 6b79f2b29884 Verifying Checksum 
+ 6b79f2b29884 Download complete 
+ 02d7611c4eae Downloading [================>                                  ]  9.535MB/29.78MB
+ 7f53036964f1 Downloading [==>                                                ]  54.34kB/1.257MB
+ 02d7611c4eae Downloading [==================>                                ]  10.77MB/29.78MB
+ 7f53036964f1 Downloading [====>                                              ]  119.1kB/1.257MB
+ 02d7611c4eae Downloading [====================>                              ]  12.01MB/29.78MB
+ 02d7611c4eae Downloading [======================>                            ]  13.25MB/29.78MB
+ 7f53036964f1 Downloading [=========>                                         ]    240kB/1.257MB
+ 02d7611c4eae Downloading [=======================>                           ]  14.16MB/29.78MB
+ 7f53036964f1 Downloading [==========>                                        ]  256.4kB/1.257MB
+ 7f53036964f1 Downloading [=======================================>           ]  998.9kB/1.257MB
+ 02d7611c4eae Downloading [=========================>                         ]  15.09MB/29.78MB
+ 7f53036964f1 Downloading [============================================>      ]  1.114MB/1.257MB
+ 7f53036964f1 Verifying Checksum 
+ 7f53036964f1 Download complete 
+ 02d7611c4eae Downloading [============================>                      ]  16.95MB/29.78MB
+ 02d7611c4eae Downloading [=============================>                     ]  17.56MB/29.78MB
+ 02d7611c4eae Downloading [================================>                  ]  19.41MB/29.78MB
+ 02d7611c4eae Downloading [==================================>                ]  20.65MB/29.78MB
+ 02d7611c4eae Downloading [====================================>              ]  21.58MB/29.78MB
+ 02d7611c4eae Downloading [=====================================>             ]  22.51MB/29.78MB
+ 02d7611c4eae Downloading [========================================>          ]  24.38MB/29.78MB
+ c3ce0464f73e Downloading [>                                                  ]  85.31kB/8.204MB
+ 02d7611c4eae Downloading [==========================================>        ]   25.3MB/29.78MB
+ c3ce0464f73e Downloading [=>                                                 ]  255.3kB/8.204MB
+ 02d7611c4eae Downloading [=============================================>     ]  27.16MB/29.78MB
+ 02d7611c4eae Downloading [===============================================>   ]  28.08MB/29.78MB
+ c3ce0464f73e Downloading [==>                                                ]  442.4kB/8.204MB
+ 02d7611c4eae Downloading [===============================================>   ]  28.38MB/29.78MB
+ c3ce0464f73e Downloading [=====>                                             ]  925.4kB/8.204MB
+ 02d7611c4eae Verifying Checksum 
+ 02d7611c4eae Download complete 
+ 08375b6eb817 Downloading [>                                                  ]  13.27kB/1.311MB
+ c3ce0464f73e Downloading [======>                                            ]  1.122MB/8.204MB
+ 02d7611c4eae Extracting [>                                                  ]  327.7kB/29.78MB
+ 08375b6eb817 Downloading [==>                                                ]  69.77kB/1.311MB
+ 02d7611c4eae Extracting [=======>                                           ]  4.588MB/29.78MB
+ c3ce0464f73e Downloading [============>                                      ]  2.105MB/8.204MB
+ 02d7611c4eae Extracting [==================>                                ]  10.81MB/29.78MB
+ 08375b6eb817 Downloading [======>                                            ]  168.2kB/1.311MB
+ 02d7611c4eae Extracting [===============================>                   ]  19.01MB/29.78MB
+ 08375b6eb817 Downloading [======================>                            ]  589.5kB/1.311MB
+ 02d7611c4eae Extracting [============================================>      ]  26.21MB/29.78MB
+ 08375b6eb817 Downloading [===============================>                   ]  835.3kB/1.311MB
+ 08375b6eb817 Verifying Checksum 
+ 08375b6eb817 Download complete 
+ c3ce0464f73e Downloading [====================>                              ]  3.351MB/8.204MB
+ 02d7611c4eae Extracting [================================================>  ]  29.16MB/29.78MB
+ 02d7611c4eae Extracting [==================================================>]  29.78MB/29.78MB
+ 02d7611c4eae Pull complete 
+ be56d59d6531 Extracting [==================================================>]  1.165kB/1.165kB
+ be56d59d6531 Extracting [==================================================>]  1.165kB/1.165kB
+ be56d59d6531 Pull complete 
+ 6b79f2b29884 Extracting [>                                                  ]  65.54kB/6.437MB
+ 6b79f2b29884 Extracting [=====================================>             ]  4.784MB/6.437MB
+ c3ce0464f73e Downloading [==============================>                    ]  4.948MB/8.204MB
+ 6b79f2b29884 Extracting [==================================================>]  6.437MB/6.437MB
+ 6b79f2b29884 Pull complete 
+ 7f53036964f1 Extracting [=>                                                 ]  32.77kB/1.257MB
+ c3ce0464f73e Downloading [========================================>          ]  6.566MB/8.204MB
+ 7f53036964f1 Extracting [==================================================>]  1.257MB/1.257MB
+ 7f53036964f1 Pull complete 
+ c3ce0464f73e Downloading [============================================>      ]  7.254MB/8.204MB
+ c3ce0464f73e Download complete 
+ c3ce0464f73e Extracting [>                                                  ]   98.3kB/8.204MB
+ c3ce0464f73e Extracting [========>                                          ]  1.475MB/8.204MB
+ 31172abd8f4a Downloading [==================================================>]     116B/116B
+ 31172abd8f4a Verifying Checksum 
+ 31172abd8f4a Download complete 
+ c3ce0464f73e Extracting [============================>                      ]  4.719MB/8.204MB
+ c3ce0464f73e Extracting [==================================================>]  8.204MB/8.204MB
+ c3ce0464f73e Pull complete 
+ 08375b6eb817 Extracting [=>                                                 ]  32.77kB/1.311MB
+ 08375b6eb817 Extracting [==================================================>]  1.311MB/1.311MB
+ 08375b6eb817 Pull complete 
+ 31172abd8f4a Extracting [==================================================>]     116B/116B
+ 31172abd8f4a Extracting [==================================================>]     116B/116B
+ 31172abd8f4a Pull complete 
+ 592e7afa2092 Downloading [===============>                                   ]     953B/3.138kB
+ 592e7afa2092 Downloading [==================================================>]  3.138kB/3.138kB
+ 592e7afa2092 Verifying Checksum 
+ 592e7afa2092 Download complete 
+ 592e7afa2092 Extracting [==================================================>]  3.138kB/3.138kB
+ 592e7afa2092 Extracting [==================================================>]  3.138kB/3.138kB
+ 592e7afa2092 Pull complete 
+ 2809b03b8187 Downloading [====>                                              ]     952B/10.01kB
+ 2809b03b8187 Downloading [==================================================>]  10.01kB/10.01kB
+ 2809b03b8187 Verifying Checksum 
+ 2809b03b8187 Download complete 
+ ff1a91754d0b Downloading [==================================================>]     129B/129B
+ ff1a91754d0b Download complete 
+ 74ee42a72ba8 Downloading [>                                                  ]  540.2kB/113.1MB
+ 74ee42a72ba8 Downloading [>                                                  ]  1.081MB/113.1MB
+ 74ee42a72ba8 Downloading [>                                                  ]   2.15MB/113.1MB
+ 74ee42a72ba8 Downloading [=>                                                 ]  3.211MB/113.1MB
+ 74ee42a72ba8 Downloading [=>                                                 ]  4.289MB/113.1MB
+ 5773fb4a9d72 Downloading [==================================================>]     167B/167B
+ 5773fb4a9d72 Verifying Checksum 
+ 5773fb4a9d72 Download complete 
+ 74ee42a72ba8 Downloading [==>                                                ]  4.817MB/113.1MB
+ 74ee42a72ba8 Downloading [==>                                                ]  6.423MB/113.1MB
+ 74ee42a72ba8 Downloading [===>                                               ]  8.028MB/113.1MB
+ 3efabc308a47 Downloading [===========>                                       ]  1.369kB/5.835kB
+ 74ee42a72ba8 Downloading [===>                                               ]  8.569MB/113.1MB
+ 3efabc308a47 Downloading [==================================================>]  5.835kB/5.835kB
+ 3efabc308a47 Verifying Checksum 
+ 3efabc308a47 Download complete 
+ 74ee42a72ba8 Downloading [====>                                              ]  9.097MB/113.1MB
+ 74ee42a72ba8 Downloading [====>                                              ]   10.7MB/113.1MB
+ 74ee42a72ba8 Downloading [=====>                                             ]  11.78MB/113.1MB
+ 19a4bd73b5b6 Downloading [==================================================>]     186B/186B
+ 19a4bd73b5b6 Verifying Checksum 
+ 19a4bd73b5b6 Download complete 
+ 74ee42a72ba8 Downloading [=====>                                             ]  12.87MB/113.1MB
+ 74ee42a72ba8 Downloading [======>                                            ]  14.48MB/113.1MB
+ 74ee42a72ba8 Downloading [======>                                            ]  15.02MB/113.1MB
+ 74ee42a72ba8 Downloading [=======>                                           ]  16.09MB/113.1MB
+ 74ee42a72ba8 Downloading [=======>                                           ]  17.16MB/113.1MB
+ 74ee42a72ba8 Downloading [========>                                          ]  18.23MB/113.1MB
+ 74ee42a72ba8 Downloading [========>                                          ]  18.77MB/113.1MB
+ 74ee42a72ba8 Downloading [========>                                          ]  19.85MB/113.1MB
+ 74ee42a72ba8 Downloading [=========>                                         ]  20.92MB/113.1MB
+ 74ee42a72ba8 Downloading [=========>                                         ]  22.53MB/113.1MB
+ 74ee42a72ba8 Downloading [==========>                                        ]  24.13MB/113.1MB
+ 74ee42a72ba8 Downloading [==========>                                        ]  24.66MB/113.1MB
+ 74ee42a72ba8 Downloading [===========>                                       ]  25.74MB/113.1MB
+ 74ee42a72ba8 Downloading [============>                                      ]  27.35MB/113.1MB
+ 74ee42a72ba8 Downloading [============>                                      ]  27.89MB/113.1MB
+ 74ee42a72ba8 Downloading [=============>                                     ]  29.51MB/113.1MB
+ 74ee42a72ba8 Downloading [=============>                                     ]  30.05MB/113.1MB
+ 74ee42a72ba8 Downloading [=============>                                     ]  31.13MB/113.1MB
+ 74ee42a72ba8 Downloading [==============>                                    ]  32.21MB/113.1MB
+ 74ee42a72ba8 Downloading [==============>                                    ]  33.28MB/113.1MB
+ 74ee42a72ba8 Downloading [===============>                                   ]  34.35MB/113.1MB
+ 74ee42a72ba8 Downloading [===============>                                   ]  35.42MB/113.1MB
+ 74ee42a72ba8 Downloading [================>                                  ]  37.03MB/113.1MB
+ 74ee42a72ba8 Downloading [================>                                  ]   38.1MB/113.1MB
+ 74ee42a72ba8 Downloading [=================>                                 ]  39.17MB/113.1MB
+ 74ee42a72ba8 Downloading [=================>                                 ]  40.25MB/113.1MB
+ 74ee42a72ba8 Downloading [==================>                                ]  41.86MB/113.1MB
+ 74ee42a72ba8 Downloading [==================>                                ]   42.4MB/113.1MB
+ 74ee42a72ba8 Downloading [===================>                               ]  43.46MB/113.1MB
+ 74ee42a72ba8 Downloading [===================>                               ]  44.53MB/113.1MB
+ 74ee42a72ba8 Downloading [====================>                              ]  46.14MB/113.1MB
+ 74ee42a72ba8 Downloading [====================>                              ]  46.68MB/113.1MB
+ 74ee42a72ba8 Downloading [=====================>                             ]  48.28MB/113.1MB
+ 74ee42a72ba8 Downloading [=====================>                             ]  48.82MB/113.1MB
+ 74ee42a72ba8 Downloading [======================>                            ]  50.43MB/113.1MB
+ 74ee42a72ba8 Downloading [======================>                            ]  50.97MB/113.1MB
+ 74ee42a72ba8 Downloading [=======================>                           ]  52.03MB/113.1MB
+ 74ee42a72ba8 Downloading [=======================>                           ]  54.17MB/113.1MB
+ 74ee42a72ba8 Downloading [========================>                          ]  55.78MB/113.1MB
+ 74ee42a72ba8 Downloading [=========================>                         ]  56.86MB/113.1MB
+ 74ee42a72ba8 Downloading [=========================>                         ]   57.4MB/113.1MB
+ 74ee42a72ba8 Downloading [==========================>                        ]  59.01MB/113.1MB
+ 74ee42a72ba8 Downloading [==========================>                        ]  60.63MB/113.1MB
+ 74ee42a72ba8 Downloading [===========================>                       ]  62.24MB/113.1MB
+ 74ee42a72ba8 Downloading [===========================>                       ]  62.78MB/113.1MB
+ 74ee42a72ba8 Downloading [============================>                      ]   64.4MB/113.1MB
+ 74ee42a72ba8 Downloading [=============================>                     ]  66.01MB/113.1MB
+ 74ee42a72ba8 Downloading [=============================>                     ]  66.54MB/113.1MB
+ 74ee42a72ba8 Downloading [=============================>                     ]  67.61MB/113.1MB
+ 74ee42a72ba8 Downloading [==============================>                    ]  69.22MB/113.1MB
+ 74ee42a72ba8 Downloading [===============================>                   ]  70.84MB/113.1MB
+ 74ee42a72ba8 Downloading [================================>                  ]  72.43MB/113.1MB
+ 74ee42a72ba8 Downloading [================================>                  ]  72.97MB/113.1MB
+ 74ee42a72ba8 Downloading [================================>                  ]  74.59MB/113.1MB
+ 74ee42a72ba8 Downloading [=================================>                 ]  75.13MB/113.1MB
+ 74ee42a72ba8 Downloading [=================================>                 ]  76.75MB/113.1MB
+ 74ee42a72ba8 Downloading [==================================>                ]  77.82MB/113.1MB
+ 74ee42a72ba8 Downloading [===================================>               ]  79.43MB/113.1MB
+ 74ee42a72ba8 Downloading [===================================>               ]  81.05MB/113.1MB
+ 74ee42a72ba8 Downloading [====================================>              ]  82.67MB/113.1MB
+ 74ee42a72ba8 Downloading [=====================================>             ]  83.73MB/113.1MB
+ 74ee42a72ba8 Downloading [=====================================>             ]  84.26MB/113.1MB
+ 74ee42a72ba8 Downloading [=====================================>             ]  85.87MB/113.1MB
+ 74ee42a72ba8 Downloading [======================================>            ]  86.41MB/113.1MB
+ 74ee42a72ba8 Downloading [=======================================>           ]  88.57MB/113.1MB
+ 74ee42a72ba8 Downloading [=======================================>           ]  89.65MB/113.1MB
+ 74ee42a72ba8 Downloading [========================================>          ]  91.27MB/113.1MB
+ 74ee42a72ba8 Downloading [=========================================>         ]  93.42MB/113.1MB
+ 74ee42a72ba8 Downloading [==========================================>        ]  95.03MB/113.1MB
+ 74ee42a72ba8 Downloading [==========================================>        ]  95.57MB/113.1MB
+ 74ee42a72ba8 Downloading [==========================================>        ]  97.19MB/113.1MB
+ 74ee42a72ba8 Downloading [===========================================>       ]  99.35MB/113.1MB
+ 74ee42a72ba8 Downloading [============================================>      ]  99.88MB/113.1MB
+ 74ee42a72ba8 Downloading [============================================>      ]  100.4MB/113.1MB
+ 74ee42a72ba8 Downloading [=============================================>     ]    102MB/113.1MB
+ 74ee42a72ba8 Downloading [=============================================>     ]  103.1MB/113.1MB
+ 74ee42a72ba8 Downloading [==============================================>    ]  104.7MB/113.1MB
+ 74ee42a72ba8 Downloading [==============================================>    ]  105.8MB/113.1MB
+ 74ee42a72ba8 Downloading [===============================================>   ]  107.4MB/113.1MB
+ 74ee42a72ba8 Downloading [===============================================>   ]  107.9MB/113.1MB
+ 74ee42a72ba8 Downloading [================================================>  ]  109.5MB/113.1MB
+ 74ee42a72ba8 Downloading [================================================>  ]  110.6MB/113.1MB
+ 74ee42a72ba8 Downloading [=================================================> ]  111.1MB/113.1MB
+ 74ee42a72ba8 Verifying Checksum 
+ 74ee42a72ba8 Download complete 
+ 74ee42a72ba8 Extracting [>                                                  ]  557.1kB/113.1MB
+ 74ee42a72ba8 Extracting [===>                                               ]  8.913MB/113.1MB
+ 74ee42a72ba8 Extracting [=======>                                           ]  17.27MB/113.1MB
+ 74ee42a72ba8 Extracting [===========>                                       ]  25.07MB/113.1MB
+ 74ee42a72ba8 Extracting [================>                                  ]  37.88MB/113.1MB
+ 74ee42a72ba8 Extracting [======================>                            ]  50.14MB/113.1MB
+ 74ee42a72ba8 Extracting [========================>                          ]  56.26MB/113.1MB
+ 74ee42a72ba8 Extracting [============================>                      ]  64.06MB/113.1MB
+ 74ee42a72ba8 Extracting [=================================>                 ]  76.32MB/113.1MB
+ 74ee42a72ba8 Extracting [======================================>            ]  87.46MB/113.1MB
+ 74ee42a72ba8 Extracting [==========================================>        ]  96.37MB/113.1MB
+ 74ee42a72ba8 Extracting [=============================================>     ]  101.9MB/113.1MB
+ 74ee42a72ba8 Extracting [===============================================>   ]  107.5MB/113.1MB
+ 74ee42a72ba8 Extracting [=================================================> ]  110.9MB/113.1MB
+ 74ee42a72ba8 Extracting [=================================================> ]  112.5MB/113.1MB
+ 74ee42a72ba8 Extracting [==================================================>]  113.1MB/113.1MB
+ 74ee42a72ba8 Pull complete 
+ 2809b03b8187 Extracting [==================================================>]  10.01kB/10.01kB
+ 2809b03b8187 Extracting [==================================================>]  10.01kB/10.01kB
+ 2809b03b8187 Pull complete 
+ ff1a91754d0b Extracting [==================================================>]     129B/129B
+ ff1a91754d0b Extracting [==================================================>]     129B/129B
+ ff1a91754d0b Pull complete 
+ 5773fb4a9d72 Extracting [==================================================>]     167B/167B
+ 5773fb4a9d72 Extracting [==================================================>]     167B/167B
+ 5773fb4a9d72 Pull complete 
+ 3efabc308a47 Extracting [==================================================>]  5.835kB/5.835kB
+ 3efabc308a47 Extracting [==================================================>]  5.835kB/5.835kB
+ 3efabc308a47 Pull complete 
+ 19a4bd73b5b6 Extracting [==================================================>]     186B/186B
+ 19a4bd73b5b6 Extracting [==================================================>]     186B/186B
+ 19a4bd73b5b6 Pull complete 
+ postgres Pulled 
+ Network platform_default  Creating
+ Network platform_default  Created
+ Volume "platform_platform-volume"  Creating
+ Volume "platform_platform-volume"  Created
+ Container credebl-postgres  Creating
+ Container credebl-postgres  Created
+ Container credebl-postgres  Starting
+ Container credebl-postgres  Started
+time="2026-01-12T21:39:12+03:00" level=warning msg="/home/adam/cdpi/credebl/install/local-deployment/platform/docker-compose.nats.yml: the attribute `version` is obsolete, it will be ignored, please remove it to avoid potential confusion"
+ nats Pulling 
+ 4acd967ddc02 Pulling fs layer 
+ a0103929f5e0 Pulling fs layer 
+ a0103929f5e0 Downloading [==================================================>]     509B/509B
+ a0103929f5e0 Verifying Checksum 
+ a0103929f5e0 Download complete 
+ 4acd967ddc02 Downloading [>                                                  ]   68.4kB/6.591MB
+ 4acd967ddc02 Downloading [===>                                               ]  503.8kB/6.591MB
+ 4acd967ddc02 Downloading [==========>                                        ]  1.405MB/6.591MB
+ 4acd967ddc02 Downloading [===================>                               ]  2.552MB/6.591MB
+ 4acd967ddc02 Downloading [================================>                  ]  4.268MB/6.591MB
+ 4acd967ddc02 Downloading [==========================================>        ]   5.55MB/6.591MB
+ 4acd967ddc02 Verifying Checksum 
+ 4acd967ddc02 Download complete 
+ 4acd967ddc02 Extracting [>                                                  ]   98.3kB/6.591MB
+ 4acd967ddc02 Extracting [==========================================>        ]  5.603MB/6.591MB
+ 4acd967ddc02 Extracting [==================================================>]  6.591MB/6.591MB
+ 4acd967ddc02 Pull complete 
+ a0103929f5e0 Extracting [==================================================>]     509B/509B
+ a0103929f5e0 Extracting [==================================================>]     509B/509B
+ a0103929f5e0 Pull complete 
+ nats Pulled 
+time="2026-01-12T21:39:20+03:00" level=warning msg="Found orphan containers ([credebl-postgres]) for this project. If you removed or renamed this service in your compose file, you can run this command with the --remove-orphans flag to clean it up."
+ Container nats  Creating
+ Container nats  Created
+ Container nats  Starting
+ Container nats  Started
+time="2026-01-12T21:39:20+03:00" level=warning msg="/home/adam/cdpi/credebl/install/local-deployment/platform/docker-compose.redis.yml: the attribute `version` is obsolete, it will be ignored, please remove it to avoid potential confusion"
+ redis Pulling 
+ f637881d1138 Pulling fs layer 
+ 41b37988a695 Pulling fs layer 
+ efaf1875f3f4 Pulling fs layer 
+ d3bc3d49f6e9 Pulling fs layer 
+ 2b47d394d4af Pulling fs layer 
+ 678f417a42e4 Pulling fs layer 
+ 4f4fb700ef54 Pulling fs layer 
+ 016ff0019905 Pulling fs layer 
+ d3bc3d49f6e9 Waiting 
+ 2b47d394d4af Waiting 
+ 678f417a42e4 Waiting 
+ 4f4fb700ef54 Waiting 
+ 016ff0019905 Waiting 
+ f637881d1138 Downloading [>                                                  ]  36.94kB/3.643MB
+ f637881d1138 Downloading [==>                                                ]    185kB/3.643MB
+ 41b37988a695 Downloading [==================================================>]     949B/949B
+ 41b37988a695 Verifying Checksum 
+ 41b37988a695 Download complete 
+ efaf1875f3f4 Downloading [>                                                  ]   2.32kB/173.2kB
+ f637881d1138 Downloading [======>                                            ]  503.8kB/3.643MB
+ efaf1875f3f4 Downloading [=================>                                 ]  59.94kB/173.2kB
+ f637881d1138 Downloading [========================>                          ]  1.782MB/3.643MB
+ efaf1875f3f4 Downloading [============================>                      ]     98kB/173.2kB
+ f637881d1138 Downloading [===============================================>   ]  3.486MB/3.643MB
+ f637881d1138 Download complete 
+ f637881d1138 Extracting [>                                                  ]  65.54kB/3.643MB
+ efaf1875f3f4 Downloading [=================================>                 ]  114.9kB/173.2kB
+ efaf1875f3f4 Verifying Checksum 
+ efaf1875f3f4 Download complete 
+ f637881d1138 Extracting [============>                                      ]  917.5kB/3.643MB
+ f637881d1138 Extracting [=========================>                         ]  1.835MB/3.643MB
+ f637881d1138 Extracting [==================================================>]  3.643MB/3.643MB
+ f637881d1138 Extracting [==================================================>]  3.643MB/3.643MB
+ f637881d1138 Pull complete 
+ 41b37988a695 Extracting [==================================================>]     949B/949B
+ 41b37988a695 Extracting [==================================================>]     949B/949B
+ 41b37988a695 Pull complete 
+ efaf1875f3f4 Extracting [=========>                                         ]  32.77kB/173.2kB
+ efaf1875f3f4 Extracting [==================================================>]  173.2kB/173.2kB
+ efaf1875f3f4 Extracting [==================================================>]  173.2kB/173.2kB
+ efaf1875f3f4 Pull complete 
+ d3bc3d49f6e9 Downloading [>                                                  ]  10.53kB/1.003MB
+ d3bc3d49f6e9 Downloading [===>                                               ]   68.4kB/1.003MB
+ d3bc3d49f6e9 Downloading [=======>                                           ]  155.9kB/1.003MB
+ 678f417a42e4 Downloading [==================================================>]      98B/98B
+ 678f417a42e4 Verifying Checksum 
+ 678f417a42e4 Download complete 
+ d3bc3d49f6e9 Downloading [====================>                              ]  409.1kB/1.003MB
+ 2b47d394d4af Downloading [>                                                  ]  76.86kB/7.6MB
+ d3bc3d49f6e9 Downloading [================================================>  ]  982.5kB/1.003MB
+ d3bc3d49f6e9 Verifying Checksum 
+ d3bc3d49f6e9 Download complete 
+ d3bc3d49f6e9 Extracting [=>                                                 ]  32.77kB/1.003MB
+ d3bc3d49f6e9 Extracting [==================================================>]  1.003MB/1.003MB
+ d3bc3d49f6e9 Extracting [==================================================>]  1.003MB/1.003MB
+ 2b47d394d4af Downloading [=>                                                 ]  235.8kB/7.6MB
+ d3bc3d49f6e9 Pull complete 
+ 2b47d394d4af Downloading [====>                                              ]  655.4kB/7.6MB
+ 2b47d394d4af Downloading [=========>                                         ]  1.393MB/7.6MB
+ 2b47d394d4af Downloading [=================>                                 ]  2.699MB/7.6MB
+ 2b47d394d4af Downloading [=============================>                     ]  4.415MB/7.6MB
+ 2b47d394d4af Downloading [======================================>            ]  5.893MB/7.6MB
+ 2b47d394d4af Downloading [================================================>  ]  7.361MB/7.6MB
+ 2b47d394d4af Verifying Checksum 
+ 2b47d394d4af Download complete 
+ 2b47d394d4af Extracting [>                                                  ]   98.3kB/7.6MB
+ 2b47d394d4af Extracting [=========>                                         ]  1.376MB/7.6MB
+ 2b47d394d4af Extracting [==================================================>]    7.6MB/7.6MB
+ 2b47d394d4af Pull complete 
+ 678f417a42e4 Extracting [==================================================>]      98B/98B
+ 678f417a42e4 Extracting [==================================================>]      98B/98B
+ 678f417a42e4 Pull complete 
+ 4f4fb700ef54 Downloading [==================================================>]      32B/32B
+ 4f4fb700ef54 Verifying Checksum 
+ 4f4fb700ef54 Download complete 
+ 4f4fb700ef54 Extracting [==================================================>]      32B/32B
+ 4f4fb700ef54 Extracting [==================================================>]      32B/32B
+ 4f4fb700ef54 Pull complete 
+ 016ff0019905 Downloading [==================================================>]     579B/579B
+ 016ff0019905 Verifying Checksum 
+ 016ff0019905 Download complete 
+ 016ff0019905 Extracting [==================================================>]     579B/579B
+ 016ff0019905 Extracting [==================================================>]     579B/579B
+ 016ff0019905 Pull complete 
+ redis Pulled 
+ Volume "platform_cache"  Creating
+ Volume "platform_cache"  Created
+time="2026-01-12T21:39:31+03:00" level=warning msg="Found orphan containers ([nats credebl-postgres]) for this project. If you removed or renamed this service in your compose file, you can run this command with the --remove-orphans flag to clean it up."
+ Container platform-redis-1  Creating
+ Container platform-redis-1  Created
+ Container platform-redis-1  Starting
+ Container platform-redis-1  Started
+🔍 Starting new Keycloak container on port 8080...
+Unable to find image 'quay.io/keycloak/keycloak:25.0.6' locally
+25.0.6: Pulling from keycloak/keycloak
+55360c0b72d6: Pulling fs layer
+893ee1952371: Pulling fs layer
+dd8f4a884d62: Pulling fs layer
+6c4423ca13a5: Pulling fs layer
+6c4423ca13a5: Waiting
+55360c0b72d6: Verifying Checksum
+55360c0b72d6: Download complete
+55360c0b72d6: Pull complete
+6c4423ca13a5: Verifying Checksum
+6c4423ca13a5: Download complete
+893ee1952371: Verifying Checksum
+893ee1952371: Download complete
+893ee1952371: Pull complete
+dd8f4a884d62: Verifying Checksum
+dd8f4a884d62: Download complete
+dd8f4a884d62: Pull complete
+6c4423ca13a5: Pull complete
+Digest: sha256:82c5b7a110456dbd42b86ea572e728878549954cc8bd03cd65410d75328095d2
+Status: Downloaded newer image for quay.io/keycloak/keycloak:25.0.6
+6c862dd67d92815098bed3e32308cdf116fd1395eb198316290fa6611cf8ea35
+✅ Keycloak started successfully
+🔍 Setting up Keycloak via Terraform...
+✅ Keycloak root URL set to "http://192.168.1.105:8080" and redirect url set to "http://192.168.1.105:3000"
+[0m[1mInitializing the backend...[0m
+[0m[1mInitializing provider plugins...[0m
+- Finding mrparkers/keycloak versions matching ">= 4.0.0"...
+- Finding latest version of hashicorp/local...
+- Installing mrparkers/keycloak v4.4.0...
+- Installed mrparkers/keycloak v4.4.0 (self-signed, key ID [0m[1mC50867915E116CD2[0m[0m)
+- Installing hashicorp/local v2.6.1...
+- Installed hashicorp/local v2.6.1 (signed by HashiCorp)
+Partner and community providers are signed by their developers.
+If you'd like to know more about provider signing, you can read about it here:
+https://developer.hashicorp.com/terraform/cli/plugins/signing
+Terraform has created a lock file [1m.terraform.lock.hcl[0m to record the provider
+selections it made above. Include this file in your version control repository
+so that Terraform can guarantee to make the same selections by default when
+you run "terraform init" in the future.[0m
+
+[0m[1m[32mTerraform has been successfully initialized![0m[32m[0m
+[0m[32m
+You may now begin working with Terraform. Try running "terraform plan" to see
+any changes that are required for your infrastructure. All Terraform commands
+should now work.
+
+If you ever set or change modules or backend configuration for Terraform,
+rerun this command to reinitialize your working directory. If you forget, other
+commands will detect it and remind you to do so if necessary.[0m
+📁 Waiting 30 seconds for Keycloak to be fully ready...
+
+Terraform used the selected providers to generate the following execution
+plan. Resource actions are indicated with the following symbols:
+  [32m+[0m create[0m
+ [36m<=[0m read (data resources)[0m
+
+Terraform will perform the following actions:
+
+[1m  # data.keycloak_openid_client.admin_client[0m will be read during apply
+  # (config refers to values not yet known)
+[0m [36m<=[0m[0m data "keycloak_openid_client" "admin_client" {
+      [32m+[0m[0m access_token_lifespan                      = (known after apply)
+      [32m+[0m[0m access_type                                = (known after apply)
+      [32m+[0m[0m admin_url                                  = (known after apply)
+      [32m+[0m[0m authentication_flow_binding_overrides      = (known after apply)
+      [32m+[0m[0m authorization                              = (known after apply)
+      [32m+[0m[0m backchannel_logout_revoke_offline_sessions = (known after apply)
+      [32m+[0m[0m backchannel_logout_session_required        = (known after apply)
+      [32m+[0m[0m backchannel_logout_url                     = (known after apply)
+      [32m+[0m[0m base_url                                   = (known after apply)
+      [32m+[0m[0m client_authenticator_type                  = (known after apply)
+      [32m+[0m[0m client_id                                  = "adminClient"
+      [32m+[0m[0m client_offline_session_idle_timeout        = (known after apply)
+      [32m+[0m[0m client_offline_session_max_lifespan        = (known after apply)
+      [32m+[0m[0m client_secret                              = (sensitive value)
+      [32m+[0m[0m client_session_idle_timeout                = (known after apply)
+      [32m+[0m[0m client_session_max_lifespan                = (known after apply)
+      [32m+[0m[0m consent_required                           = (known after apply)
+      [32m+[0m[0m description                                = (known after apply)
+      [32m+[0m[0m direct_access_grants_enabled               = (known after apply)
+      [32m+[0m[0m enabled                                    = (known after apply)
+      [32m+[0m[0m exclude_session_state_from_auth_response   = (known after apply)
+      [32m+[0m[0m extra_config                               = (known after apply)
+      [32m+[0m[0m frontchannel_logout_enabled                = (known after apply)
+      [32m+[0m[0m frontchannel_logout_url                    = (known after apply)
+      [32m+[0m[0m full_scope_allowed                         = (known after apply)
+      [32m+[0m[0m id                                         = (known after apply)
+      [32m+[0m[0m implicit_flow_enabled                      = (known after apply)
+      [32m+[0m[0m login_theme                                = (known after apply)
+      [32m+[0m[0m name                                       = (known after apply)
+      [32m+[0m[0m pkce_code_challenge_method                 = (known after apply)
+      [32m+[0m[0m realm_id                                   = (known after apply)
+      [32m+[0m[0m resource_server_id                         = (known after apply)
+      [32m+[0m[0m root_url                                   = (known after apply)
+      [32m+[0m[0m service_account_user_id                    = (known after apply)
+      [32m+[0m[0m service_accounts_enabled                   = (known after apply)
+      [32m+[0m[0m standard_flow_enabled                      = (known after apply)
+      [32m+[0m[0m use_refresh_tokens                         = (known after apply)
+      [32m+[0m[0m use_refresh_tokens_client_credentials      = (known after apply)
+      [32m+[0m[0m valid_post_logout_redirect_uris            = (known after apply)
+      [32m+[0m[0m valid_redirect_uris                        = (known after apply)
+      [32m+[0m[0m web_origins                                = (known after apply)
+    }
+
+[1m  # data.keycloak_openid_client.realm_management_client[0m will be read during apply
+  # (config refers to values not yet known)
+[0m [36m<=[0m[0m data "keycloak_openid_client" "realm_management_client" {
+      [32m+[0m[0m access_token_lifespan                      = (known after apply)
+      [32m+[0m[0m access_type                                = (known after apply)
+      [32m+[0m[0m admin_url                                  = (known after apply)
+      [32m+[0m[0m authentication_flow_binding_overrides      = (known after apply)
+      [32m+[0m[0m authorization                              = (known after apply)
+      [32m+[0m[0m backchannel_logout_revoke_offline_sessions = (known after apply)
+      [32m+[0m[0m backchannel_logout_session_required        = (known after apply)
+      [32m+[0m[0m backchannel_logout_url                     = (known after apply)
+      [32m+[0m[0m base_url                                   = (known after apply)
+      [32m+[0m[0m client_authenticator_type                  = (known after apply)
+      [32m+[0m[0m client_id                                  = "realm-management"
+      [32m+[0m[0m client_offline_session_idle_timeout        = (known after apply)
+      [32m+[0m[0m client_offline_session_max_lifespan        = (known after apply)
+      [32m+[0m[0m client_secret                              = (sensitive value)
+      [32m+[0m[0m client_session_idle_timeout                = (known after apply)
+      [32m+[0m[0m client_session_max_lifespan                = (known after apply)
+      [32m+[0m[0m consent_required                           = (known after apply)
+      [32m+[0m[0m description                                = (known after apply)
+      [32m+[0m[0m direct_access_grants_enabled               = (known after apply)
+      [32m+[0m[0m enabled                                    = (known after apply)
+      [32m+[0m[0m exclude_session_state_from_auth_response   = (known after apply)
+      [32m+[0m[0m extra_config                               = (known after apply)
+      [32m+[0m[0m frontchannel_logout_enabled                = (known after apply)
+      [32m+[0m[0m frontchannel_logout_url                    = (known after apply)
+      [32m+[0m[0m full_scope_allowed                         = (known after apply)
+      [32m+[0m[0m id                                         = (known after apply)
+      [32m+[0m[0m implicit_flow_enabled                      = (known after apply)
+      [32m+[0m[0m login_theme                                = (known after apply)
+      [32m+[0m[0m name                                       = (known after apply)
+      [32m+[0m[0m pkce_code_challenge_method                 = (known after apply)
+      [32m+[0m[0m realm_id                                   = (known after apply)
+      [32m+[0m[0m resource_server_id                         = (known after apply)
+      [32m+[0m[0m root_url                                   = (known after apply)
+      [32m+[0m[0m service_account_user_id                    = (known after apply)
+      [32m+[0m[0m service_accounts_enabled                   = (known after apply)
+      [32m+[0m[0m standard_flow_enabled                      = (known after apply)
+      [32m+[0m[0m use_refresh_tokens                         = (known after apply)
+      [32m+[0m[0m use_refresh_tokens_client_credentials      = (known after apply)
+      [32m+[0m[0m valid_post_logout_redirect_uris            = (known after apply)
+      [32m+[0m[0m valid_redirect_uris                        = (known after apply)
+      [32m+[0m[0m web_origins                                = (known after apply)
+    }
+
+[1m  # keycloak_openid_client.my_client[0m will be created
+[0m  [32m+[0m[0m resource "keycloak_openid_client" "my_client" {
+      [32m+[0m[0m access_token_lifespan                     = (known after apply)
+      [32m+[0m[0m access_type                               = "CONFIDENTIAL"
+      [32m+[0m[0m admin_url                                 = (known after apply)
+      [32m+[0m[0m backchannel_logout_session_required       = true
+      [32m+[0m[0m base_url                                  = (known after apply)
+      [32m+[0m[0m client_authenticator_type                 = "client-secret"
+      [32m+[0m[0m client_id                                 = "adminClient"
+      [32m+[0m[0m client_offline_session_idle_timeout       = (known after apply)
+      [32m+[0m[0m client_offline_session_max_lifespan       = (known after apply)
+      [32m+[0m[0m client_secret                             = (sensitive value)
+      [32m+[0m[0m client_session_idle_timeout               = (known after apply)
+      [32m+[0m[0m client_session_max_lifespan               = (known after apply)
+      [32m+[0m[0m consent_required                          = (known after apply)
+      [32m+[0m[0m consent_screen_text                       = (known after apply)
+      [32m+[0m[0m description                               = (known after apply)
+      [32m+[0m[0m direct_access_grants_enabled              = true
+      [32m+[0m[0m display_on_consent_screen                 = (known after apply)
+      [32m+[0m[0m enabled                                   = true
+      [32m+[0m[0m exclude_session_state_from_auth_response  = (known after apply)
+      [32m+[0m[0m frontchannel_logout_enabled               = (known after apply)
+      [32m+[0m[0m full_scope_allowed                        = true
+      [32m+[0m[0m id                                        = (known after apply)
+      [32m+[0m[0m implicit_flow_enabled                     = (known after apply)
+      [32m+[0m[0m import                                    = false
+      [32m+[0m[0m name                                      = (known after apply)
+      [32m+[0m[0m oauth2_device_authorization_grant_enabled = false
+      [32m+[0m[0m realm_id                                  = (known after apply)
+      [32m+[0m[0m resource_server_id                        = (known after apply)
+      [32m+[0m[0m root_url                                  = "http://192.168.1.105:8080"
+      [32m+[0m[0m service_account_user_id                   = (known after apply)
+      [32m+[0m[0m service_accounts_enabled                  = true
+      [32m+[0m[0m standard_flow_enabled                     = true
+      [32m+[0m[0m use_refresh_tokens                        = true
+      [32m+[0m[0m use_refresh_tokens_client_credentials     = false
+      [32m+[0m[0m valid_post_logout_redirect_uris           = (known after apply)
+      [32m+[0m[0m valid_redirect_uris                       = [
+          [32m+[0m[0m "http://192.168.1.105:3000",
+        ]
+      [32m+[0m[0m web_origins                               = [
+          [32m+[0m[0m "http://192.168.1.105:8080",
+        ]
+    }
+
+[1m  # keycloak_openid_client_service_account_role.create_client_role[0m will be created
+[0m  [32m+[0m[0m resource "keycloak_openid_client_service_account_role" "create_client_role" {
+      [32m+[0m[0m client_id               = (known after apply)
+      [32m+[0m[0m id                      = (known after apply)
+      [32m+[0m[0m realm_id                = (known after apply)
+      [32m+[0m[0m role                    = "create-client"
+      [32m+[0m[0m service_account_user_id = (known after apply)
+    }
+
+[1m  # keycloak_openid_client_service_account_role.manage_clients_role[0m will be created
+[0m  [32m+[0m[0m resource "keycloak_openid_client_service_account_role" "manage_clients_role" {
+      [32m+[0m[0m client_id               = (known after apply)
+      [32m+[0m[0m id                      = (known after apply)
+      [32m+[0m[0m realm_id                = (known after apply)
+      [32m+[0m[0m role                    = "manage-clients"
+      [32m+[0m[0m service_account_user_id = (known after apply)
+    }
+
+[1m  # keycloak_openid_client_service_account_role.manage_users_role[0m will be created
+[0m  [32m+[0m[0m resource "keycloak_openid_client_service_account_role" "manage_users_role" {
+      [32m+[0m[0m client_id               = (known after apply)
+      [32m+[0m[0m id                      = (known after apply)
+      [32m+[0m[0m realm_id                = (known after apply)
+      [32m+[0m[0m role                    = "manage-users"
+      [32m+[0m[0m service_account_user_id = (known after apply)
+    }
+
+[1m  # keycloak_openid_client_service_account_role.query_clients_role[0m will be created
+[0m  [32m+[0m[0m resource "keycloak_openid_client_service_account_role" "query_clients_role" {
+      [32m+[0m[0m client_id               = (known after apply)
+      [32m+[0m[0m id                      = (known after apply)
+      [32m+[0m[0m realm_id                = (known after apply)
+      [32m+[0m[0m role                    = "query-clients"
+      [32m+[0m[0m service_account_user_id = (known after apply)
+    }
+
+[1m  # keycloak_openid_client_service_account_role.query_users_role[0m will be created
+[0m  [32m+[0m[0m resource "keycloak_openid_client_service_account_role" "query_users_role" {
+      [32m+[0m[0m client_id               = (known after apply)
+      [32m+[0m[0m id                      = (known after apply)
+      [32m+[0m[0m realm_id                = (known after apply)
+      [32m+[0m[0m role                    = "query-users"
+      [32m+[0m[0m service_account_user_id = (known after apply)
+    }
+
+[1m  # keycloak_openid_client_service_account_role.view_clients_role[0m will be created
+[0m  [32m+[0m[0m resource "keycloak_openid_client_service_account_role" "view_clients_role" {
+      [32m+[0m[0m client_id               = (known after apply)
+      [32m+[0m[0m id                      = (known after apply)
+      [32m+[0m[0m realm_id                = (known after apply)
+      [32m+[0m[0m role                    = "view-clients"
+      [32m+[0m[0m service_account_user_id = (known after apply)
+    }
+
+[1m  # keycloak_openid_client_service_account_role.view_users_role[0m will be created
+[0m  [32m+[0m[0m resource "keycloak_openid_client_service_account_role" "view_users_role" {
+      [32m+[0m[0m client_id               = (known after apply)
+      [32m+[0m[0m id                      = (known after apply)
+      [32m+[0m[0m realm_id                = (known after apply)
+      [32m+[0m[0m role                    = "view-users"
+      [32m+[0m[0m service_account_user_id = (known after apply)
+    }
+
+[1m  # keycloak_realm.my_realm[0m will be created
+[0m  [32m+[0m[0m resource "keycloak_realm" "my_realm" {
+      [32m+[0m[0m access_code_lifespan                     = (known after apply)
+      [32m+[0m[0m access_code_lifespan_login               = (known after apply)
+      [32m+[0m[0m access_code_lifespan_user_action         = (known after apply)
+      [32m+[0m[0m access_token_lifespan                    = "48h"
+      [32m+[0m[0m access_token_lifespan_for_implicit_flow  = (known after apply)
+      [32m+[0m[0m action_token_generated_by_admin_lifespan = (known after apply)
+      [32m+[0m[0m action_token_generated_by_user_lifespan  = (known after apply)
+      [32m+[0m[0m browser_flow                             = (known after apply)
+      [32m+[0m[0m client_authentication_flow               = (known after apply)
+      [32m+[0m[0m client_session_idle_timeout              = (known after apply)
+      [32m+[0m[0m client_session_max_lifespan              = (known after apply)
+      [32m+[0m[0m direct_grant_flow                        = (known after apply)
+      [32m+[0m[0m docker_authentication_flow               = (known after apply)
+      [32m+[0m[0m duplicate_emails_allowed                 = (known after apply)
+      [32m+[0m[0m edit_username_allowed                    = (known after apply)
+      [32m+[0m[0m enabled                                  = true
+      [32m+[0m[0m id                                       = (known after apply)
+      [32m+[0m[0m internal_id                              = (known after apply)
+      [32m+[0m[0m login_with_email_allowed                 = (known after apply)
+      [32m+[0m[0m oauth2_device_code_lifespan              = (known after apply)
+      [32m+[0m[0m oauth2_device_polling_interval           = (known after apply)
+      [32m+[0m[0m offline_session_idle_timeout             = (known after apply)
+      [32m+[0m[0m offline_session_max_lifespan             = (known after apply)
+      [32m+[0m[0m offline_session_max_lifespan_enabled     = false
+      [32m+[0m[0m realm                                    = "credebl-platform"
+      [32m+[0m[0m refresh_token_max_reuse                  = 10
+      [32m+[0m[0m registration_allowed                     = (known after apply)
+      [32m+[0m[0m registration_email_as_username           = (known after apply)
+      [32m+[0m[0m registration_flow                        = (known after apply)
+      [32m+[0m[0m remember_me                              = (known after apply)
+      [32m+[0m[0m reset_credentials_flow                   = (known after apply)
+      [32m+[0m[0m reset_password_allowed                   = (known after apply)
+      [32m+[0m[0m revoke_refresh_token                     = true
+      [32m+[0m[0m ssl_required                             = "external"
+      [32m+[0m[0m sso_session_idle_timeout                 = "48h"
+      [32m+[0m[0m sso_session_idle_timeout_remember_me     = (known after apply)
+      [32m+[0m[0m sso_session_max_lifespan                 = (known after apply)
+      [32m+[0m[0m sso_session_max_lifespan_remember_me     = (known after apply)
+      [32m+[0m[0m user_managed_access                      = false
+      [32m+[0m[0m verify_email                             = (known after apply)
+
+      [32m+[0m[0m otp_policy (known after apply)
+
+      [32m+[0m[0m web_authn_passwordless_policy (known after apply)
+
+      [32m+[0m[0m web_authn_policy (known after apply)
+    }
+
+[1m  # keycloak_role.holder_role[0m will be created
+[0m  [32m+[0m[0m resource "keycloak_role" "holder_role" {
+      [32m+[0m[0m id       = (known after apply)
+      [32m+[0m[0m name     = "holder"
+      [32m+[0m[0m realm_id = (known after apply)
+    }
+
+[1m  # local_file.env_file[0m will be created
+[0m  [32m+[0m[0m resource "local_file" "env_file" {
+      [32m+[0m[0m content              = (sensitive value)
+      [32m+[0m[0m content_base64sha256 = (known after apply)
+      [32m+[0m[0m content_base64sha512 = (known after apply)
+      [32m+[0m[0m content_md5          = (known after apply)
+      [32m+[0m[0m content_sha1         = (known after apply)
+      [32m+[0m[0m content_sha256       = (known after apply)
+      [32m+[0m[0m content_sha512       = (known after apply)
+      [32m+[0m[0m directory_permission = "0777"
+      [32m+[0m[0m file_permission      = "0777"
+      [32m+[0m[0m filename             = "secret.env"
+      [32m+[0m[0m id                   = (known after apply)
+    }
+
+[1mPlan:[0m [0m11 to add, 0 to change, 0 to destroy.
+
+Changes to Outputs:
+  [32m+[0m[0m admin_client_secret = (sensitive value)
+[0m[1mkeycloak_realm.my_realm: Creating...[0m[0m
+[0m[1mkeycloak_realm.my_realm: Creation complete after 1s [id=credebl-platform][0m
+[0m[1mdata.keycloak_openid_client.realm_management_client: Reading...[0m[0m
+[0m[1mkeycloak_role.holder_role: Creating...[0m[0m
+[0m[1mkeycloak_openid_client.my_client: Creating...[0m[0m
+[0m[1mkeycloak_role.holder_role: Creation complete after 0s [id=a861359d-ac8e-44f3-b7ed-be4c2cfcee83][0m
+[0m[1mdata.keycloak_openid_client.realm_management_client: Read complete after 0s [id=3fadb522-2a48-483d-af63-cb502d039480][0m
+[0m[1mkeycloak_openid_client.my_client: Creation complete after 0s [id=f0232bf6-26a4-4937-95c5-9df05c13191f][0m
+[0m[1mdata.keycloak_openid_client.admin_client: Reading...[0m[0m
+[0m[1mkeycloak_openid_client_service_account_role.manage_clients_role: Creating...[0m[0m
+[0m[1mkeycloak_openid_client_service_account_role.create_client_role: Creating...[0m[0m
+[0m[1mkeycloak_openid_client_service_account_role.view_clients_role: Creating...[0m[0m
+[0m[1mkeycloak_openid_client_service_account_role.manage_users_role: Creating...[0m[0m
+[0m[1mkeycloak_openid_client_service_account_role.query_clients_role: Creating...[0m[0m
+[0m[1mkeycloak_openid_client_service_account_role.query_users_role: Creating...[0m[0m
+[0m[1mkeycloak_openid_client_service_account_role.view_users_role: Creating...[0m[0m
+[0m[1mdata.keycloak_openid_client.admin_client: Read complete after 1s [id=f0232bf6-26a4-4937-95c5-9df05c13191f][0m
+[0m[1mlocal_file.env_file: Creating...[0m[0m
+[0m[1mlocal_file.env_file: Creation complete after 0s [id=e5b997feb42368a3bf3c30d0201d2a5d2c24d666][0m
+[0m[1mkeycloak_openid_client_service_account_role.manage_clients_role: Creation complete after 1s [id=d9566424-1acc-40af-bd75-67d17a424d40/722ec516-2471-4122-9537-874c7e748881][0m
+[0m[1mkeycloak_openid_client_service_account_role.view_users_role: Creation complete after 1s [id=d9566424-1acc-40af-bd75-67d17a424d40/f4b268a7-b1ab-49d7-b7db-e16980f2b86e][0m
+[0m[1mkeycloak_openid_client_service_account_role.create_client_role: Creation complete after 1s [id=d9566424-1acc-40af-bd75-67d17a424d40/f39855b8-33cd-4413-9006-6664108d4750][0m
+[0m[1mkeycloak_openid_client_service_account_role.query_users_role: Creation complete after 1s [id=d9566424-1acc-40af-bd75-67d17a424d40/4bca4725-376c-4a1f-a291-039c46310c00][0m
+[0m[1mkeycloak_openid_client_service_account_role.query_clients_role: Creation complete after 1s [id=d9566424-1acc-40af-bd75-67d17a424d40/81305ce0-f010-4949-84c0-a25b9c0b448b][0m
+[0m[1mkeycloak_openid_client_service_account_role.view_clients_role: Creation complete after 1s [id=d9566424-1acc-40af-bd75-67d17a424d40/891519a0-7bb4-460f-857b-40199b4555f4][0m
+[0m[1mkeycloak_openid_client_service_account_role.manage_users_role: Creation complete after 1s [id=d9566424-1acc-40af-bd75-67d17a424d40/2fe9d92c-23cd-477d-ace9-fc9c7ada650c][0m
+[0m[1m[32m
+Apply complete! Resources: 11 added, 0 changed, 0 destroyed.[0m
+[0m[1m[32m
+Outputs:
+
+[0madmin_client_secret = <sensitive>
+✅ Keycloak setup completed via Terraform.
+🔍 Updating environment with Keycloak secret...
+✅ Keycloak secret updated in .env successfully.
+🔍 Generating JWT secret...
+✅ Node.js already installed
+✅ JWT secret generated and stored successfully
+🔍 Pulling credo-controller image...
+latest: Pulling from credebl/credo-controller
+e1caac4eb9d2: Pulling fs layer
+6e4d260b7fd8: Pulling fs layer
+ad187b81fff1: Pulling fs layer
+dfed3ab37066: Pulling fs layer
+99dca333a429: Pulling fs layer
+e1e07855e9f4: Pulling fs layer
+7c63dac3bcaf: Pulling fs layer
+e041265ad306: Pulling fs layer
+9dbd1bbef088: Pulling fs layer
+886a5217b18a: Pulling fs layer
+6186ce957960: Pulling fs layer
+e1e07855e9f4: Waiting
+e041265ad306: Waiting
+7c63dac3bcaf: Waiting
+9dbd1bbef088: Waiting
+886a5217b18a: Waiting
+dfed3ab37066: Waiting
+6186ce957960: Waiting
+99dca333a429: Waiting
+6e4d260b7fd8: Verifying Checksum
+6e4d260b7fd8: Download complete
+dfed3ab37066: Verifying Checksum
+dfed3ab37066: Download complete
+99dca333a429: Verifying Checksum
+99dca333a429: Download complete
+e1e07855e9f4: Verifying Checksum
+7c63dac3bcaf: Verifying Checksum
+7c63dac3bcaf: Download complete
+e041265ad306: Verifying Checksum
+e041265ad306: Download complete
+9dbd1bbef088: Download complete
+e1caac4eb9d2: Verifying Checksum
+e1caac4eb9d2: Download complete
+e1caac4eb9d2: Pull complete
+6e4d260b7fd8: Pull complete
+6186ce957960: Verifying Checksum
+6186ce957960: Download complete
+ad187b81fff1: Verifying Checksum
+ad187b81fff1: Download complete
+ad187b81fff1: Pull complete
+dfed3ab37066: Pull complete
+99dca333a429: Pull complete
+e1e07855e9f4: Pull complete
+7c63dac3bcaf: Pull complete
+e041265ad306: Pull complete
+9dbd1bbef088: Pull complete
+886a5217b18a: Verifying Checksum
+886a5217b18a: Download complete
+886a5217b18a: Pull complete
+6186ce957960: Pull complete
+Digest: sha256:ccaa35b3d43b9f509f1eacb66545ed3b3d1271164323744f3d397f4e0c07aa50
+Status: Downloaded newer image for ghcr.io/credebl/credo-controller:latest
+ghcr.io/credebl/credo-controller:latest
+✅ credo-controller image pulled successfully.
+🔍 Updating master table configuration...
+
+added 1 package in 2s
+
+1 package is looking for funding
+  run `npm fund` for details
+Scope: all 3 workspace projects
+Lockfile is up to date, resolution step is skipped
+Progress: resolved 1, reused 0, downloaded 0, added 0
+Packages: +1470
+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+Progress: resolved 1470, reused 0, downloaded 4, added 4
+Progress: resolved 1470, reused 0, downloaded 35, added 35
+Progress: resolved 1470, reused 0, downloaded 62, added 62
+Progress: resolved 1470, reused 0, downloaded 104, added 104
+Progress: resolved 1470, reused 0, downloaded 171, added 171
+Progress: resolved 1470, reused 0, downloaded 254, added 254
+Progress: resolved 1470, reused 0, downloaded 312, added 312
+Progress: resolved 1470, reused 0, downloaded 377, added 377
+Progress: resolved 1470, reused 0, downloaded 417, added 417
+Progress: resolved 1470, reused 0, downloaded 460, added 459
+Progress: resolved 1470, reused 0, downloaded 548, added 548
+Progress: resolved 1470, reused 0, downloaded 620, added 620
+Progress: resolved 1470, reused 0, downloaded 678, added 678
+Progress: resolved 1470, reused 0, downloaded 722, added 721
+Progress: resolved 1470, reused 0, downloaded 780, added 780
+Progress: resolved 1470, reused 0, downloaded 841, added 841
+Progress: resolved 1470, reused 0, downloaded 896, added 895
+Progress: resolved 1470, reused 0, downloaded 940, added 940
+Progress: resolved 1470, reused 0, downloaded 994, added 994
+Progress: resolved 1470, reused 0, downloaded 1056, added 1056
+Progress: resolved 1470, reused 0, downloaded 1106, added 1106
+Progress: resolved 1470, reused 0, downloaded 1152, added 1152
+Progress: resolved 1470, reused 0, downloaded 1215, added 1215
+Progress: resolved 1470, reused 0, downloaded 1285, added 1285
+Progress: resolved 1470, reused 0, downloaded 1362, added 1362
+Progress: resolved 1470, reused 0, downloaded 1421, added 1421
+Progress: resolved 1470, reused 0, downloaded 1466, added 1467
+Progress: resolved 1470, reused 0, downloaded 1467, added 1468
+Progress: resolved 1470, reused 0, downloaded 1468, added 1469
+Progress: resolved 1470, reused 0, downloaded 1469, added 1470, done
+.../node_modules/@prisma/engines postinstall$ node scripts/postinstall.js
+.../node_modules/protobufjs postinstall$ node scripts/postinstall
+.../node_modules/@scarf/scarf postinstall$ node ./report.js
+.../node_modules/msgpackr-extract install$ node-gyp-build-optional-packages
+.../node_modules/aws-sdk postinstall$ node scripts/warn-maintenance-mode.js
+.../node_modules/protobufjs postinstall: Done
+.../node_modules/aws-sdk postinstall: ╔═════════════════════════════════════════════════╗
+.../node_modules/aws-sdk postinstall: ║ The AWS SDK for JavaScript (v2) will reach      ║
+.../node_modules/aws-sdk postinstall: ║ -> maintenance mode on September 8, 2024.       ║
+.../node_modules/aws-sdk postinstall: ║ -> end-of-support on September 8, 2025.         ║
+.../node_modules/aws-sdk postinstall: ║                                                 ║
+.../node_modules/aws-sdk postinstall: ║ To continue receiving updates to AWS services,  ║
+.../node_modules/aws-sdk postinstall: ║ bug fixes, and security updates please upgrade  ║
+.../node_modules/aws-sdk postinstall: ║ to AWS SDK for JavaScript (v3).                 ║
+.../node_modules/aws-sdk postinstall: ║                                                 ║
+.../node_modules/aws-sdk postinstall: ║ More info: https://a.co/cUPnyil                 ║
+.../node_modules/aws-sdk postinstall: ╚═════════════════════════════════════════════════╝
+.../node_modules/aws-sdk postinstall: Done
+.../bcrypt@5.1.1/node_modules/bcrypt install$ node-pre-gyp install --fallback-to-build
+.../node_modules/msgpackr-extract install: Done
+.../node_modules/phantomjs-prebuilt install$ node install.js
+.../bcrypt@5.1.1/node_modules/bcrypt install: node-pre-gyp info it worked if it ends with ok
+.../bcrypt@5.1.1/node_modules/bcrypt install: node-pre-gyp info using node-pre-gyp@1.0.11
+.../bcrypt@5.1.1/node_modules/bcrypt install: node-pre-gyp info using node@24.11.1 | linux | x64
+.../bcrypt@5.1.1/node_modules/bcrypt install: node-pre-gyp info check checked for "/home/adam/cdpi/credebl/install/local-deployment/platform/node_modules/.pnpm/bcrypt@5.1.1/node_modules/bcrypt/lib/binding/napi-v3/bcrypt_lib.node" (not found)
+.../bcrypt@5.1.1/node_modules/bcrypt install: node-pre-gyp http GET https://github.com/kelektiv/node.bcrypt.js/releases/download/v5.1.1/bcrypt_lib-v5.1.1-napi-v3-linux-x64-glibc.tar.gz
+.../node_modules/phantomjs-prebuilt install: Considering PhantomJS found at /home/adam/cdpi/credebl/install/local-deployment/platform/node_modules/.pnpm/phantomjs-prebuilt@2.1.16/node_modules/phantomjs-prebuilt/node_modules/.bin/phantomjs
+.../node_modules/phantomjs-prebuilt install: Looks like an `npm install -g` on windows; skipping installed version.
+.../node_modules/phantomjs-prebuilt install: Downloading https://github.com/Medium/phantomjs/releases/download/v2.1.1/phantomjs-2.1.1-linux-x86_64.tar.bz2
+.../node_modules/phantomjs-prebuilt install: Saving to /tmp/phantomjs/phantomjs-2.1.1-linux-x86_64.tar.bz2
+.../node_modules/phantomjs-prebuilt install: Receiving...
+.../node_modules/puppeteer postinstall$ node install.js
+.../bcrypt@5.1.1/node_modules/bcrypt install: node-pre-gyp info install unpacking napi-v3/bcrypt_lib.node
+.../bcrypt@5.1.1/node_modules/bcrypt install: node-pre-gyp info extracted file count: 1 
+.../bcrypt@5.1.1/node_modules/bcrypt install: node-pre-gyp info ok 
+.../bcrypt@5.1.1/node_modules/bcrypt install: [bcrypt] Success: "/home/adam/cdpi/credebl/install/local-deployment/platform/node_modules/.pnpm/bcrypt@5.1.1/node_modules/bcrypt/lib/binding/napi-v3/bcrypt_lib.node" is installed via remote
+.../bcrypt@5.1.1/node_modules/bcrypt install: Done
+.../node_modules/puppeteer postinstall$ node install.mjs
+.../node_modules/@scarf/scarf postinstall: Done
+.../node_modules/@prisma/engines postinstall: Done
+.../node_modules/puppeteer postinstall: chrome-headless-shell (121.0.6167.85) downloaded to /home/adam/.cache/puppeteer/chrome-headless-shell/linux-121.0.6167.85
+.../node_modules/phantomjs-prebuilt install: Received 22866K total.
+.../node_modules/phantomjs-prebuilt install: Extracting tar contents (via spawned process)
+.../node_modules/phantomjs-prebuilt install: Removing /home/adam/cdpi/credebl/install/local-deployment/platform/node_modules/.pnpm/phantomjs-prebuilt@2.1.16/node_modules/phantomjs-prebuilt/lib/phantom
+.../node_modules/phantomjs-prebuilt install: Copying extracted folder /tmp/phantomjs/phantomjs-2.1.1-linux-x86_64.tar.bz2-extract-1768243387627/phantomjs-2.1.1-linux-x86_64 -> /home/adam/cdpi/credebl/install/local-deployment/platform/node_modules/.pnpm/phantomjs-prebuilt@2.1.16/node_modules/phantomjs-prebuilt/lib/phantom
+.../node_modules/phantomjs-prebuilt install: Writing location.js file
+.../node_modules/phantomjs-prebuilt install: Done. Phantomjs binary available at /home/adam/cdpi/credebl/install/local-deployment/platform/node_modules/.pnpm/phantomjs-prebuilt@2.1.16/node_modules/phantomjs-prebuilt/lib/phantom/bin/phantomjs
+.../node_modules/phantomjs-prebuilt install: Done
+.../node_modules/puppeteer postinstall: Chrome (115.0.5790.102) downloaded to /home/adam/.cache/puppeteer/chrome/linux-115.0.5790.102
+.../node_modules/puppeteer postinstall: Chrome (121.0.6167.85) downloaded to /home/adam/.cache/puppeteer/chrome/linux-121.0.6167.85
+.../node_modules/puppeteer postinstall: Done
+.../node_modules/puppeteer postinstall: Done
+.../prisma@5.22.0/node_modules/prisma preinstall$ node scripts/preinstall-entry.js
+.../prisma@5.22.0/node_modules/prisma preinstall: Done
+.../node_modules/@prisma/client postinstall$ node scripts/postinstall.js
+.../node_modules/@prisma/client postinstall: Environment variables loaded from .env
+.../node_modules/@prisma/client postinstall: prisma:warn We could not find your Prisma schema in the default locations (see: https://pris.ly/d/prisma-schema-location).
+.../node_modules/@prisma/client postinstall: If you have a Prisma schema file in a custom path, you will need to run
+.../node_modules/@prisma/client postinstall: `prisma generate --schema=./path/to/your/schema.prisma` to generate Prisma Client.
+.../node_modules/@prisma/client postinstall: If you do not have a Prisma schema file yet, you can ignore this message.
+.../node_modules/@prisma/client postinstall: Done
+.../node_modules/@nestjs/core postinstall$ opencollective || exit 0
+.../node_modules/@nestjs/core postinstall:                            Thanks for installing nest 
+.../node_modules/@nestjs/core postinstall:                  Please consider donating to our open collective
+.../node_modules/@nestjs/core postinstall:                         to help us maintain this package.
+.../node_modules/@nestjs/core postinstall:                                          
+.../node_modules/@nestjs/core postinstall:                             Number of contributors: 0
+.../node_modules/@nestjs/core postinstall:                              Number of backers: 1162
+.../node_modules/@nestjs/core postinstall:                              Annual budget: $130,038
+.../node_modules/@nestjs/core postinstall:                              Current balance: $6,432
+.../node_modules/@nestjs/core postinstall:                                          
+.../node_modules/@nestjs/core postinstall:              Become a partner: https://opencollective.com/nest/donate
+.../node_modules/@nestjs/core postinstall:                                          
+.../node_modules/@nestjs/core postinstall: Done
+
+dependencies:
++ @aws-sdk/client-ses 3.929.0
++ @elastic/ecs-winston-format 1.5.3
++ @nestjs/axios 4.0.1
++ @nestjs/bull 11.0.3
++ @nestjs/cache-manager 3.0.1
++ @nestjs/common 11.1.6
++ @nestjs/config 4.0.2
++ @nestjs/core 11.1.6
++ @nestjs/jwt 11.0.0
++ @nestjs/microservices 11.1.6
++ @nestjs/passport 11.0.5
++ @nestjs/platform-express 11.1.6
++ @nestjs/platform-socket.io 11.1.6
++ @nestjs/schedule 6.0.1
++ @nestjs/swagger 11.2.0
++ @nestjs/typeorm 11.0.0
++ @nestjs/websockets 11.1.6
++ @opentelemetry/api 1.9.0
++ @opentelemetry/exporter-logs-otlp-http 0.202.0
++ @opentelemetry/exporter-trace-otlp-http 0.202.0
++ @opentelemetry/instrumentation-express 0.51.1
++ @opentelemetry/instrumentation-http 0.202.0
++ @opentelemetry/instrumentation-nestjs-core 0.48.1
++ @opentelemetry/resources 2.1.0
++ @opentelemetry/sdk-logs 0.202.0
++ @opentelemetry/sdk-node 0.202.0
++ @opentelemetry/semantic-conventions 1.37.0
++ @prisma/client 5.22.0
++ @sendgrid/mail 7.7.0
++ @supabase/supabase-js 2.57.4
++ @types/async-retry 1.4.9
++ @types/crypto-js 4.2.2
++ @types/json2csv 5.0.7
++ @types/pdfkit 0.12.12
++ async-retry 1.3.3
++ auth0-js 9.28.0
++ aws-sdk 2.1692.0
++ bcrypt 5.1.1
++ blob-stream 0.1.3
++ body-parser 1.20.3
++ buffer 6.0.3
++ bull 4.16.5
++ cache-manager 5.7.6
++ cache-manager-ioredis-yet 2.1.2
++ class-transformer 0.5.1
++ class-validator 0.14.2
++ cookie-parser 1.4.7
++ crypto-js 4.2.0
++ crypto-random-string 5.0.0
++ dotenv 16.6.1
++ express 4.21.2
++ express-useragent 1.0.15
++ fs 0.0.1-security
++ generate-password 1.7.1
++ helmet 7.2.0
++ html-pdf 3.0.1
++ html-to-image 1.11.13
++ json2csv 5.0.7
++ jsonwebtoken 9.0.2
++ jwks-rsa 3.2.0
++ linebyline 1.3.0
++ moment 2.30.1
++ morgan 1.10.1
++ multer 1.4.5-lts.1
++ nanoid 4.0.2
++ nats 2.29.3
++ nestjs-cls 6.0.1
++ nestjs-rate-limiter 3.1.0
++ nestjs-supabase-auth 1.0.9
++ nestjs-typeorm-paginate 4.1.0
++ node-html-to-image 4.0.0
++ node-qpdf2 2.0.0
++ nodemailer 7.0.10
++ p-limit 3.1.0
++ papaparse 5.5.3
++ passport 0.6.0
++ passport-jwt 4.0.1
++ passport-local 1.0.0
++ path 0.12.7
++ pdfkit 0.13.0
++ pg 8.16.3
++ puppeteer 21.11.0
++ qrcode 1.5.4
++ qs 6.14.0
++ reflect-metadata 0.1.14
++ resend 6.4.2
++ rimraf 3.0.2
++ rsync 0.6.1
++ rxjs 7.8.2
++ socket.io-client 4.8.1
++ swagger-ui-express 5.0.1
++ typeorm 0.3.27
++ unzipper 0.10.14
++ uuid 9.0.1
++ validator 13.15.15
++ web-push 3.6.7
++ winston 3.4.0
++ winston-daily-rotate-file 5.0.0
++ winston-elasticsearch 0.16.0
++ xml-js 1.6.11
+
+devDependencies:
++ @nestjs/cli 11.0.10
++ @nestjs/schematics 11.0.7
++ @nestjs/testing 11.1.6
++ @types/express 4.17.23
++ @types/jest 29.5.14
++ @types/multer 1.4.13
++ @types/node 20.19.17
++ @types/passport-jwt 3.0.9
++ @types/passport-local 1.0.38
++ @types/supertest 2.0.16
++ @typescript-eslint/eslint-plugin 6.21.0
++ @typescript-eslint/parser 6.21.0
++ eslint 8.57.1
++ eslint-config-prettier 8.10.2
++ eslint-config-standard-with-typescript 37.0.0
++ eslint-plugin-import 2.32.0
++ eslint-plugin-n 15.7.0
++ eslint-plugin-prettier 4.2.5
++ eslint-plugin-promise 6.6.0
++ husky 8.0.3
++ jest 29.7.0
++ lint-staged 13.3.0
++ prettier 3.6.2
++ prisma 5.22.0
++ supertest 6.3.4
++ ts-jest 29.4.4
++ ts-loader 9.5.4
++ ts-node 10.9.2
++ tsconfig-paths 4.2.0
++ typescript 5.9.2
+
+. prepare$ husky install
+. prepare: husky - Git hooks installed
+. prepare: Done
+Done in 10m 44.8s
+✅ Master table configuration updated successfully.
+Environment variables loaded from ../../.env
+Prisma schema loaded from prisma/schema.prisma
+
+✔ Generated Prisma Client (v5.22.0) to ./../../node_modules/.pnpm/@prisma+client@5.22.0_prisma@5.22.0/node_modules/@prisma/client in 287ms
+
+Start by importing your Prisma Client (See: https://pris.ly/d/importing-client)
+
+Tip: Want real-time updates to your database without manual polling? Discover how with Pulse: https://pris.ly/tip-0-pulse
+
+Environment variables loaded from ../../.env
+Prisma schema loaded from prisma/schema.prisma
+Datasource "db": PostgreSQL database "credebl", schema "public" at "192.168.1.105:5432"
+
+104 migrations found in prisma/migrations
+
+Applying migration `20230825075815_init`
+Applying migration `20230831142029_user_device_password`
+Applying migration `20230905103154_password_user`
+Applying migration `20230928140558_ledgers_indy_namespace`
+Applying migration `20231002114401_ecosystem_setup`
+Applying migration `20231003080927_ecosystem_flag`
+Applying migration `20231003114625_ecosystem_logo`
+Applying migration `20231006120455_endorsement_transaction`
+Applying migration `20231007125030_endorse_transaction_type_date`
+Applying migration `20231010055923_endorsement_transaction_schema_body`
+Applying migration `20231010065246_ecosystem_config`
+Applying migration `20231011095332_ecosystem_orgs_did`
+Applying migration `20231012093420_ecosystem_config_key_value`
+Applying migration `20231025105518_db_ids_uuid_7`
+Applying migration `20231030133838_endorsement_transaction_resource_id`
+Applying migration `20231101102151_auto_endorse_ecosystem_flag`
+Applying migration `20231102080224_bulk_issuance_tables`
+Applying migration `20231102101537_bulk_issuance_change_file_data_is_error`
+Applying migration `20231107112313_conversion_id_to_uuid`
+Applying migration `20231108071153_org_agent_optional_record`
+Applying migration `20231109044921_user_credentials`
+Applying migration `20231110061832_credentials_credentials_attribute_type_change`
+Applying migration `20231116112146_status_file_data`
+Applying migration `20231116114452_credentials_file_data`
+Applying migration `20231120132943_credential_id_unique`
+Applying migration `20231123100506_id_to_uuid_data_type`
+Applying migration `20231123154918_uuid_createdby_upadatedby`
+Applying migration `20231123161550_removed_createdby_ecosystem_roles`
+Applying migration `20231123162120_removed_createdby_user`
+Applying migration `20231123180959_removed_createdby_user_credentials`
+Applying migration `20231124163136_ledger_network_url`
+Applying migration `20231127132350_map_ecosystem_orgs`
+Applying migration `20231204142322_connection_their_label_credentials_schema_id`
+Applying migration `20231211112032_ecosystem_ledgers_column`
+Applying migration `20231214142349_presentation_id_map`
+Applying migration `20231227105815_org_id_unique_org_agent`
+Applying migration `20240105143603_register_webhook_url`
+Applying migration `20240112134257_ecosystem_tags_optional`
+Applying migration `20240118103405_shortening_url`
+Applying migration `20240205133803_keycloak_orgs_credentials`
+Applying migration `20240206071023_inbound_ip_platform_config`
+Applying migration `20240207073538_user_expire_token`
+Applying migration `20240219142237_notification`
+Applying migration `20240220121359_user_org_idproleid`
+Applying migration `20240223140032_ledger_config`
+Applying migration `20240312064123_agent_invitation_add_recipient_key`
+Applying migration `20240315121444_org_agents_did_document`
+Applying migration `20240405065246_multi_dids`
+Applying migration `20240415080746_ledgers_removed_register_did_payload_replace_register_did_endpoint_to_nym_txn_endpoint`
+Applying migration `20240416130239_changed_column_name_and_added_size`
+Applying migration `20240430114046_add_invitation_did`
+Applying migration `20240514051441_added_type_in_schema`
+Applying migration `20240527080234_added_credential_type_for_bulk_issuance`
+Applying migration `20240607113034_user_org_delete_activity`
+Applying migration `20240610111750_added_email_user_org_delete_activity`
+Applying migration `20240610133418_added_field_in_org_table`
+Applying migration `20240610142316_remove_unique_user_id_user_org_delete_activity`
+Applying migration `20240611134959_added_null_user_org_delete_activity`
+Applying migration `20240618122212_added_geolocation_and_refactored_organisation_table`
+Applying migration `20240619102525_add_cascade_delete`
+Applying migration `20240619103315_allow_null_organization_id`
+Applying migration `20240621065854_refactored_geo_location_table`
+Applying migration `20240712132737_added_template_id_file_upload`
+Applying migration `20240717074318_cloud_wallet_tables`
+Applying migration `20240717092122_added_agnet_url_and_apikey_in_cloud_wallet_table`
+Applying migration `20240717102514_added_key_in_cloud_wallet_table`
+Applying migration `20240717104549_added_connection_image_in_cloud_wallet_table`
+Applying migration `20240718102835_cloud_wallet_info_user_option`
+Applying migration `20240731082811_added_schema_id_in_presentations`
+Applying migration `20240731134502_added_email_in_presentations`
+Applying migration `20240919070123_delete_ecosystem_module`
+Applying migration `20241111070256_remove_user_credentials_table`
+Applying migration `20241114081928_added_is_schema_archived_flag_schema`
+Applying migration `20241218132640_added_column_in_proof_webhook`
+Applying migration `20250305061413_add_column_alias_in_schema_table`
+Applying migration `20250701025741_added_client_alias`
+Applying migration `20250721132721_added_relation_for_presentation_with_connection_table`
+Applying migration `20250724130424_added_session_account`
+Applying migration `20250724161232_added_connection_for_credentials_with_connection_table`
+Applying migration `20250729083628_reltion_between_account_and_session`
+Applying migration `20250729090416_removed_userid_unique_constraint`
+Applying migration `20250730104449_remove_unique_constraint_for_acoountid`
+Applying migration `20250731092810_account_session_table_column_name_changes`
+Applying migration `20250822104325_oidc_issuer_templates`
+Applying migration `20250822115351_account_session_table_modification`
+Applying migration `20250822145801_fix_issuer_relation`
+Applying migration `20250829091021_add_expiresat_in_session_table`
+Applying migration `20250902082321_add_org_agent_id_to_oidc_issuer`
+Applying migration `20250904181430_added_fields_in_oidc_issuer`
+Applying migration `20250911102632_added_field_signer_option_in_credential_templates`
+Applying migration `20250911122855_add_client_info_column_for_sessions_table`
+Applying migration `20250925060521_added_app_launch_details_column_in_organization`
+Applying migration `20251013125236_added_x509_certificate_table`
+Applying migration `20251016105943_added_new_oid4vp_verifier_table`
+Applying migration `20251017081348_changed_signer_options_values`
+Applying migration `20251023120134_added_authorization_server_url`
+Applying migration `20251029164125_updated_table_oid4vc_credentials`
+Applying migration `20251103071640_updated_table_oid4vp_verifier_to_remove_unnecessary_column_deleted_at`
+Applying migration `20251105180717_created_table_oid4vp_presentation`
+Applying migration `20251108070604_added_public_issuer_id_and_public_verifier_id_in_wehook_data_tables`
+Applying migration `20251125062851_add_ledger_null_trigger`
+Applying migration `20251218061025_added_table_for_verification_templates`
+Applying migration `20251223061418_add_intent_templates_unique_indexes`
+Applying migration `20260112075514_added_holder_notification_table`
+
+The following migration(s) have been applied:
+
+migrations/
+  └─ 20230825075815_init/
+    └─ migration.sql
+  └─ 20230831142029_user_device_password/
+    └─ migration.sql
+  └─ 20230905103154_password_user/
+    └─ migration.sql
+  └─ 20230928140558_ledgers_indy_namespace/
+    └─ migration.sql
+  └─ 20231002114401_ecosystem_setup/
+    └─ migration.sql
+  └─ 20231003080927_ecosystem_flag/
+    └─ migration.sql
+  └─ 20231003114625_ecosystem_logo/
+    └─ migration.sql
+  └─ 20231006120455_endorsement_transaction/
+    └─ migration.sql
+  └─ 20231007125030_endorse_transaction_type_date/
+    └─ migration.sql
+  └─ 20231010055923_endorsement_transaction_schema_body/
+    └─ migration.sql
+  └─ 20231010065246_ecosystem_config/
+    └─ migration.sql
+  └─ 20231011095332_ecosystem_orgs_did/
+    └─ migration.sql
+  └─ 20231012093420_ecosystem_config_key_value/
+    └─ migration.sql
+  └─ 20231025105518_db_ids_uuid_7/
+    └─ migration.sql
+  └─ 20231030133838_endorsement_transaction_resource_id/
+    └─ migration.sql
+  └─ 20231101102151_auto_endorse_ecosystem_flag/
+    └─ migration.sql
+  └─ 20231102080224_bulk_issuance_tables/
+    └─ migration.sql
+  └─ 20231102101537_bulk_issuance_change_file_data_is_error/
+    └─ migration.sql
+  └─ 20231107112313_conversion_id_to_uuid/
+    └─ migration.sql
+  └─ 20231108071153_org_agent_optional_record/
+    └─ migration.sql
+  └─ 20231109044921_user_credentials/
+    └─ migration.sql
+  └─ 20231110061832_credentials_credentials_attribute_type_change/
+    └─ migration.sql
+  └─ 20231116112146_status_file_data/
+    └─ migration.sql
+  └─ 20231116114452_credentials_file_data/
+    └─ migration.sql
+  └─ 20231120132943_credential_id_unique/
+    └─ migration.sql
+  └─ 20231123100506_id_to_uuid_data_type/
+    └─ migration.sql
+  └─ 20231123154918_uuid_createdby_upadatedby/
+    └─ migration.sql
+  └─ 20231123161550_removed_createdby_ecosystem_roles/
+    └─ migration.sql
+  └─ 20231123162120_removed_createdby_user/
+    └─ migration.sql
+  └─ 20231123180959_removed_createdby_user_credentials/
+    └─ migration.sql
+  └─ 20231124163136_ledger_network_url/
+    └─ migration.sql
+  └─ 20231127132350_map_ecosystem_orgs/
+    └─ migration.sql
+  └─ 20231204142322_connection_their_label_credentials_schema_id/
+    └─ migration.sql
+  └─ 20231211112032_ecosystem_ledgers_column/
+    └─ migration.sql
+  └─ 20231214142349_presentation_id_map/
+    └─ migration.sql
+  └─ 20231227105815_org_id_unique_org_agent/
+    └─ migration.sql
+  └─ 20240105143603_register_webhook_url/
+    └─ migration.sql
+  └─ 20240112134257_ecosystem_tags_optional/
+    └─ migration.sql
+  └─ 20240118103405_shortening_url/
+    └─ migration.sql
+  └─ 20240205133803_keycloak_orgs_credentials/
+    └─ migration.sql
+  └─ 20240206071023_inbound_ip_platform_config/
+    └─ migration.sql
+  └─ 20240207073538_user_expire_token/
+    └─ migration.sql
+  └─ 20240219142237_notification/
+    └─ migration.sql
+  └─ 20240220121359_user_org_idproleid/
+    └─ migration.sql
+  └─ 20240223140032_ledger_config/
+    └─ migration.sql
+  └─ 20240312064123_agent_invitation_add_recipient_key/
+    └─ migration.sql
+  └─ 20240315121444_org_agents_did_document/
+    └─ migration.sql
+  └─ 20240405065246_multi_dids/
+    └─ migration.sql
+  └─ 20240415080746_ledgers_removed_register_did_payload_replace_register_did_endpoint_to_nym_txn_endpoint/
+    └─ migration.sql
+  └─ 20240416130239_changed_column_name_and_added_size/
+    └─ migration.sql
+  └─ 20240430114046_add_invitation_did/
+    └─ migration.sql
+  └─ 20240514051441_added_type_in_schema/
+    └─ migration.sql
+  └─ 20240527080234_added_credential_type_for_bulk_issuance/
+    └─ migration.sql
+  └─ 20240607113034_user_org_delete_activity/
+    └─ migration.sql
+  └─ 20240610111750_added_email_user_org_delete_activity/
+    └─ migration.sql
+  └─ 20240610133418_added_field_in_org_table/
+    └─ migration.sql
+  └─ 20240610142316_remove_unique_user_id_user_org_delete_activity/
+    └─ migration.sql
+  └─ 20240611134959_added_null_user_org_delete_activity/
+    └─ migration.sql
+  └─ 20240618122212_added_geolocation_and_refactored_organisation_table/
+    └─ migration.sql
+  └─ 20240619102525_add_cascade_delete/
+    └─ migration.sql
+  └─ 20240619103315_allow_null_organization_id/
+    └─ migration.sql
+  └─ 20240621065854_refactored_geo_location_table/
+    └─ migration.sql
+  └─ 20240712132737_added_template_id_file_upload/
+    └─ migration.sql
+  └─ 20240717074318_cloud_wallet_tables/
+    └─ migration.sql
+  └─ 20240717092122_added_agnet_url_and_apikey_in_cloud_wallet_table/
+    └─ migration.sql
+  └─ 20240717102514_added_key_in_cloud_wallet_table/
+    └─ migration.sql
+  └─ 20240717104549_added_connection_image_in_cloud_wallet_table/
+    └─ migration.sql
+  └─ 20240718102835_cloud_wallet_info_user_option/
+    └─ migration.sql
+  └─ 20240731082811_added_schema_id_in_presentations/
+    └─ migration.sql
+  └─ 20240731134502_added_email_in_presentations/
+    └─ migration.sql
+  └─ 20240919070123_delete_ecosystem_module/
+    └─ migration.sql
+  └─ 20241111070256_remove_user_credentials_table/
+    └─ migration.sql
+  └─ 20241114081928_added_is_schema_archived_flag_schema/
+    └─ migration.sql
+  └─ 20241218132640_added_column_in_proof_webhook/
+    └─ migration.sql
+  └─ 20250305061413_add_column_alias_in_schema_table/
+    └─ migration.sql
+  └─ 20250701025741_added_client_alias/
+    └─ migration.sql
+  └─ 20250721132721_added_relation_for_presentation_with_connection_table/
+    └─ migration.sql
+  └─ 20250724130424_added_session_account/
+    └─ migration.sql
+  └─ 20250724161232_added_connection_for_credentials_with_connection_table/
+    └─ migration.sql
+  └─ 20250729083628_reltion_between_account_and_session/
+    └─ migration.sql
+  └─ 20250729090416_removed_userid_unique_constraint/
+    └─ migration.sql
+  └─ 20250730104449_remove_unique_constraint_for_acoountid/
+    └─ migration.sql
+  └─ 20250731092810_account_session_table_column_name_changes/
+    └─ migration.sql
+  └─ 20250822104325_oidc_issuer_templates/
+    └─ migration.sql
+  └─ 20250822115351_account_session_table_modification/
+    └─ migration.sql
+  └─ 20250822145801_fix_issuer_relation/
+    └─ migration.sql
+  └─ 20250829091021_add_expiresat_in_session_table/
+    └─ migration.sql
+  └─ 20250902082321_add_org_agent_id_to_oidc_issuer/
+    └─ migration.sql
+  └─ 20250904181430_added_fields_in_oidc_issuer/
+    └─ migration.sql
+  └─ 20250911102632_added_field_signer_option_in_credential_templates/
+    └─ migration.sql
+  └─ 20250911122855_add_client_info_column_for_sessions_table/
+    └─ migration.sql
+  └─ 20250925060521_added_app_launch_details_column_in_organization/
+    └─ migration.sql
+  └─ 20251013125236_added_x509_certificate_table/
+    └─ migration.sql
+  └─ 20251016105943_added_new_oid4vp_verifier_table/
+    └─ migration.sql
+  └─ 20251017081348_changed_signer_options_values/
+    └─ migration.sql
+  └─ 20251023120134_added_authorization_server_url/
+    └─ migration.sql
+  └─ 20251029164125_updated_table_oid4vc_credentials/
+    └─ migration.sql
+  └─ 20251103071640_updated_table_oid4vp_verifier_to_remove_unnecessary_column_deleted_at/
+    └─ migration.sql
+  └─ 20251105180717_created_table_oid4vp_presentation/
+    └─ migration.sql
+  └─ 20251108070604_added_public_issuer_id_and_public_verifier_id_in_wehook_data_tables/
+    └─ migration.sql
+  └─ 20251125062851_add_ledger_null_trigger/
+    └─ migration.sql
+  └─ 20251218061025_added_table_for_verification_templates/
+    └─ migration.sql
+  └─ 20251223061418_add_intent_templates_unique_indexes/
+    └─ migration.sql
+  └─ 20260112075514_added_holder_notification_table/
+    └─ migration.sql
+      
+All migrations have been successfully applied.
+┌─────────────────────────────────────────────────────────┐
+│  Update available 5.22.0 -> 7.2.0                       │
+│                                                         │
+│  This is a major update - please follow the guide at    │
+│  https://pris.ly/d/major-version-upgrade                │
+│                                                         │
+│  Run the following to update                            │
+│    npm i --save-dev prisma@latest                       │
+│    npm i @prisma/client@latest                          │
+└─────────────────────────────────────────────────────────┘
+Environment variables loaded from ../../.env
+Running seed command `ts-node prisma/seed.ts` ...
+prisma:info Starting a postgresql pool with 17 connections.
+[32m[Nest] 17475  - [39m01/12/2026, 9:53:12 PM [32m    LOG[39m [38;5;3m[Init seed DB] [39mObject(13) {
+  id: [32m'91037374-b3b7-472c-b3c6-ad3ba1ae5c69'[39m,
+  externalIp: [32m'192.168.1.105'[39m,
+  inboundEndpoint: [32m'192.168.1.105'[39m,
+  username: [32m'credebl'[39m,
+  sgApiKey: [32m'YOUR_SENDGRID_API_KEY_HERE'[39m,
+  emailFrom: [32m'adam@mwaniki.dev'[39m,
+  apiEndpoint: [32m'http://192.168.1.105:5000'[39m,
+  tailsFileServer: [32m'http://192.168.1.105:5000'[39m,
+  createDateTime: [35m2026-01-12T18:53:12.443Z[39m,
+  createdBy: [32m'1'[39m,
+  lastChangedDateTime: [35m2026-01-12T18:53:12.443Z[39m,
+  lastChangedBy: [32m'1'[39m,
+  deletedAt: [1mnull[22m
+}
+[32m[Nest] 17475  - [39m01/12/2026, 9:53:12 PM [32m    LOG[39m [38;5;3m[Init seed DB] [39mObject(1) {
+  count: [33m7[39m
+}
+[32m[Nest] 17475  - [39m01/12/2026, 9:53:12 PM [32m    LOG[39m [38;5;3m[Init seed DB] [39mObject(1) {
+  count: [33m2[39m
+}
+[32m[Nest] 17475  - [39m01/12/2026, 9:53:12 PM [32m    LOG[39m [38;5;3m[Init seed DB] [39mObject(18) {
+  id: [32m'61d7d9f9-ffcf-4a61-b409-8c1d4648e9e6'[39m,
+  createDateTime: [35m2026-01-12T18:53:12.460Z[39m,
+  lastChangedDateTime: [35m2026-01-12T18:53:12.460Z[39m,
+  firstName: [32m'CREDEBL'[39m,
+  lastName: [32m'CREDEBL'[39m,
+  email: [32m'platform.admin@yopmail.com'[39m,
+  username: [32m'platform.admin@yopmail.com'[39m,
+  verificationCode: [32m''[39m,
+  isEmailVerified: [33mtrue[39m,
+  supabaseUserId: [32m'96cef763-e106-46c1-ac78-fadf2803b11f'[39m,
+  keycloakUserId: [1mnull[22m,
+  clientId: [1mnull[22m,
+  clientSecret: [1mnull[22m,
+  profileImg: [1mnull[22m,
+  fidoUserId: [1mnull[22m,
+  isFidoVerified: [33mfalse[39m,
+  publicProfile: [33mfalse[39m,
+  password: [32m'####Please provide encrypted password using crypto-js###'[39m
+}
+[32m[Nest] 17475  - [39m01/12/2026, 9:53:12 PM [32m    LOG[39m [38;5;3m[Init seed DB] [39mObject(19) {
+  id: [32m'0c2516f6-8478-4f45-9dce-761aeb3370b9'[39m,
+  createDateTime: [35m2026-01-12T18:53:12.464Z[39m,
+  createdBy: [32m'61d7d9f9-ffcf-4a61-b409-8c1d4648e9e6'[39m,
+  lastChangedDateTime: [35m2026-01-12T18:53:12.464Z[39m,
+  lastChangedBy: [32m'61d7d9f9-ffcf-4a61-b409-8c1d4648e9e6'[39m,
+  name: [32m'Platform-admin'[39m,
+  description: [32m'Platform-admin'[39m,
+  orgSlug: [1mnull[22m,
+  logoUrl: [32m''[39m,
+  website: [32m''[39m,
+  publicProfile: [33mfalse[39m,
+  idpId: [1mnull[22m,
+  clientId: [1mnull[22m,
+  clientSecret: [1mnull[22m,
+  registrationNumber: [1mnull[22m,
+  appLaunchDetails: [1mnull[22m,
+  countryId: [1mnull[22m,
+  stateId: [1mnull[22m,
+  cityId: [1mnull[22m
+}
+[32m[Nest] 17475  - [39m01/12/2026, 9:53:12 PM [32m    LOG[39m [38;5;3m[Init seed DB] [39m[32mAlready seeding in org_roles[39m
+[32m[Nest] 17475  - [39m01/12/2026, 9:53:12 PM [32m    LOG[39m [38;5;3m[Init seed DB] [39mObject(1) {
+  count: [33m2[39m
+}
+[32m[Nest] 17475  - [39m01/12/2026, 9:53:12 PM [32m    LOG[39m [38;5;3m[Init seed DB] [39m[32mAll ledgers inserted:[39m
+[32m[Nest] 17475  - [39m01/12/2026, 9:53:12 PM [32m    LOG[39m [38;5;3m[Init seed DB] [39mObject(1) {
+  count: [33m7[39m
+}
+[32m[Nest] 17475  - [39m01/12/2026, 9:53:12 PM [32m    LOG[39m [38;5;3m[Init seed DB] [39m[32mLedger config created:[39m
+[32m[Nest] 17475  - [39m01/12/2026, 9:53:12 PM [32m    LOG[39m [38;5;3m[Init seed DB] [39mObject(1) {
+  count: [33m3[39m
+}
+[32m[Nest] 17475  - [39m01/12/2026, 9:53:12 PM [32m    LOG[39m [38;5;3m[Init seed DB] [39mObject(1) {
+  count: [33m2[39m
+}
+[32m[Nest] 17475  - [39m01/12/2026, 9:53:12 PM [32m    LOG[39m [38;5;3m[Init seed DB] [39m[32mNo new DIDs to migrate in migrateOrgAgentDids[39m
+[32m[Nest] 17475  - [39m01/12/2026, 9:53:12 PM [32m    LOG[39m [38;5;3m[Init seed DB] [39m[32mNo schemas to update[39m
+[32m[Nest] 17475  - [39m01/12/2026, 9:53:14 PM [32m    LOG[39m [38;5;3m[Init seed DB] [39m[32mShell script output: /home/adam/cdpi/credebl/install/local-deployment/platform/libs/prisma-service
+Checking if countries contains data...
+countries is empty. Importing /home/adam/cdpi/credebl/install/local-deployment/platform/libs/prisma-service/prisma/data/geo-location-master-data/countries.csv...
+Successfully imported /home/adam/cdpi/credebl/install/local-deployment/platform/libs/prisma-service/prisma/data/geo-location-master-data/countries.csv into countries. Imported 250 rows.
+Checking if states contains data...
+states is empty. Importing /home/adam/cdpi/credebl/install/local-deployment/platform/libs/prisma-service/prisma/data/geo-location-master-data/states.csv...
+Successfully imported /home/adam/cdpi/credebl/install/local-deployment/platform/libs/prisma-service/prisma/data/geo-location-master-data/states.csv into states. Imported 5091 rows.
+Checking if cities contains data...
+cities is empty. Importing /home/adam/cdpi/credebl/install/local-deployment/platform/libs/prisma-service/prisma/data/geo-location-master-data/cities.csv...
+Successfully imported /home/adam/cdpi/credebl/install/local-deployment/platform/libs/prisma-service/prisma/data/geo-location-master-data/cities.csv into cities. Imported 150661 rows.
+CSV import process completed.
+[39m
+[32m[Nest] 17475  - [39m01/12/2026, 9:53:14 PM [32m    LOG[39m [38;5;3m[Init seed DB] [39m[32mShell script output: Updating clientId and clientSecret where they are NULL...
+UPDATE 1
+Successfully updated clientId and clientSecret.
+Client Id and Client Secret updated successfully.
+[39m
+
+🌱  The seed command has been executed.
+🔍 Setting up Schema Service...
+Error response from daemon: No such container: schema-file-server
+docker: invalid env file (.env): variable 'PRISMA_LOGS ' contains whitespaces
+
+Run 'docker run --help' for more information
+❌ Failed to start schema file service
+
+
+=== Deployment started at Mon Jan 12 10:07:33 PM EAT 2026 ===
+🔍 
+ Setting up CREDEBL Platform...
+Provide branch name you want to work on: You entered branch: main
+📁 Platform directory exists, pulling latest changes...
+Already on 'main'
+M	agent.env
+M	docker-compose.redis.yml
+M	libs/prisma-service/prisma/data/credebl-master-table/credebl-master-table.json
+Your branch is up to date with 'origin/main'.
+From https://github.com/credebl/platform
+ * branch              main       -> FETCH_HEAD
+Already up to date.
+✅ .env already exists. Skipping copy and checking existing values...
+Assigned ports:
+PostgreSQL: 5433
+API Gateway: 5000
+Redis: 6381
+Keycloak: 8081
+Schema Server: 4000
+Studio: 3000
+✅ Updated .env file and docker-compose available ports
+📁 Preparing environment files...
+
+ Host IP fetched 192.168.1.105
+Found existing SENDGRID_API_KEY (hidden). Continue with this value? (yes/no): ✅ Using existing SENDGRID_API_KEY
+Enter SendGrid sender email: 
+# Provide S3 credentials, required for storing connection URLs
+Found existing AWS_S3_STOREOBJECT_ACCESS_KEY (hidden). Continue with this value? (yes/no): ✅ Using existing AWS_S3_STOREOBJECT_ACCESS_KEY
+Found existing AWS_S3_STOREOBJECT_SECRET_KEY (hidden). Continue with this value? (yes/no): ✅ Using existing AWS_S3_STOREOBJECT_SECRET_KEY
+Found existing AWS_S3_STOREOBJECT_REGION=us-east-2. Continue with this value? (yes/no): ✅ Using existing AWS_S3_STOREOBJECT_REGION
+Found existing AWS_S3_STOREOBJECT_BUCKET=amzn-credebl-inji-bucket. Continue with this value? (yes/no): ✅ Using existing AWS_S3_STOREOBJECT_BUCKET
+Do you want to use bulk issuance? (yes/no): Do you want to upload org logos? (yes/no): Do you want to use an existing PostgreSQL server? (yes/no): ✅ Environment file configured successfully.
+Do you want to use an existing PostgreSQL server for Keycloak? (yes/no): 📁 Keycloak DB will be created in credebl-postgres.
+✅ Keycloak database initialization SQL created.
+🔍 Detected Ubuntu. Checking Docker installation...
+✅ Docker and Docker Compose are already installed.
+🔍 Checking Terraform installation...
+✅ Terraform is already installed.
+🛡️ Setting up Keycloak...
+time="2026-01-12T22:08:00+03:00" level=warning msg="/home/adam/cdpi/credebl/install/local-deployment/platform/docker-compose.postgres.yml: the attribute `version` is obsolete, it will be ignored, please remove it to avoid potential confusion"
+time="2026-01-12T22:08:00+03:00" level=warning msg="Found orphan containers ([platform-redis-1 nats]) for this project. If you removed or renamed this service in your compose file, you can run this command with the --remove-orphans flag to clean it up."
+ Container credebl-postgres  Recreate
+ Container credebl-postgres  Recreated
+ Container credebl-postgres  Starting
+ Container credebl-postgres  Started
+time="2026-01-12T22:08:01+03:00" level=warning msg="/home/adam/cdpi/credebl/install/local-deployment/platform/docker-compose.nats.yml: the attribute `version` is obsolete, it will be ignored, please remove it to avoid potential confusion"
+time="2026-01-12T22:08:01+03:00" level=warning msg="Found orphan containers ([credebl-postgres platform-redis-1]) for this project. If you removed or renamed this service in your compose file, you can run this command with the --remove-orphans flag to clean it up."
+ Container nats  Running
+time="2026-01-12T22:08:01+03:00" level=warning msg="/home/adam/cdpi/credebl/install/local-deployment/platform/docker-compose.redis.yml: the attribute `version` is obsolete, it will be ignored, please remove it to avoid potential confusion"
+time="2026-01-12T22:08:01+03:00" level=warning msg="Found orphan containers ([credebl-postgres nats]) for this project. If you removed or renamed this service in your compose file, you can run this command with the --remove-orphans flag to clean it up."
+ Container platform-redis-1  Recreate
+ Container platform-redis-1  Recreated
+ Container platform-redis-1  Starting
+ Container platform-redis-1  Started
+📁 Found existing Keycloak container (credebl-keycloak) with matching version
+📁 Port mismatch (current: 0.0.0.0
+[, desired: 8081). Recreating container...
+credebl-keycloak
+🔍 Starting new Keycloak container on port 8081...
+4de6ed22dc1f3306cb8627e892570b48f5153f47fdff0ecdbf0d901ff34357b8
+✅ Keycloak started successfully
+🔍 Setting up Keycloak via Terraform...
+✅ Keycloak root URL set to "http://192.168.1.105:8081" and redirect url set to "http://192.168.1.105:3000"
+[0m[1mInitializing the backend...[0m
+[0m[1mInitializing provider plugins...[0m
+- Reusing previous version of mrparkers/keycloak from the dependency lock file
+- Reusing previous version of hashicorp/local from the dependency lock file
+- Using previously-installed mrparkers/keycloak v4.4.0
+- Using previously-installed hashicorp/local v2.6.1
+
+[0m[1m[32mTerraform has been successfully initialized![0m[32m[0m
+[0m[32m
+You may now begin working with Terraform. Try running "terraform plan" to see
+any changes that are required for your infrastructure. All Terraform commands
+should now work.
+
+If you ever set or change modules or backend configuration for Terraform,
+rerun this command to reinitialize your working directory. If you forget, other
+commands will detect it and remind you to do so if necessary.[0m
+📁 Waiting 30 seconds for Keycloak to be fully ready...
+[0m[1mkeycloak_realm.my_realm: Refreshing state... [id=credebl-platform][0m
+[0m[1mkeycloak_role.holder_role: Refreshing state... [id=a861359d-ac8e-44f3-b7ed-be4c2cfcee83][0m
+[0m[1mdata.keycloak_openid_client.realm_management_client: Reading...[0m[0m
+[0m[1mkeycloak_openid_client.my_client: Refreshing state... [id=f0232bf6-26a4-4937-95c5-9df05c13191f][0m
+[0m[1mdata.keycloak_openid_client.realm_management_client: Read complete after 0s [id=3fadb522-2a48-483d-af63-cb502d039480][0m
+[0m[1mkeycloak_openid_client_service_account_role.view_users_role: Refreshing state... [id=d9566424-1acc-40af-bd75-67d17a424d40/f4b268a7-b1ab-49d7-b7db-e16980f2b86e][0m
+[0m[1mkeycloak_openid_client_service_account_role.manage_users_role: Refreshing state... [id=d9566424-1acc-40af-bd75-67d17a424d40/2fe9d92c-23cd-477d-ace9-fc9c7ada650c][0m
+[0m[1mkeycloak_openid_client_service_account_role.manage_clients_role: Refreshing state... [id=d9566424-1acc-40af-bd75-67d17a424d40/722ec516-2471-4122-9537-874c7e748881][0m
+[0m[1mkeycloak_openid_client_service_account_role.query_clients_role: Refreshing state... [id=d9566424-1acc-40af-bd75-67d17a424d40/81305ce0-f010-4949-84c0-a25b9c0b448b][0m
+[0m[1mkeycloak_openid_client_service_account_role.view_clients_role: Refreshing state... [id=d9566424-1acc-40af-bd75-67d17a424d40/891519a0-7bb4-460f-857b-40199b4555f4][0m
+[0m[1mkeycloak_openid_client_service_account_role.create_client_role: Refreshing state... [id=d9566424-1acc-40af-bd75-67d17a424d40/f39855b8-33cd-4413-9006-6664108d4750][0m
+[0m[1mkeycloak_openid_client_service_account_role.query_users_role: Refreshing state... [id=d9566424-1acc-40af-bd75-67d17a424d40/4bca4725-376c-4a1f-a291-039c46310c00][0m
+[0m[1mlocal_file.env_file: Refreshing state... [id=e5b997feb42368a3bf3c30d0201d2a5d2c24d666][0m
+
+Terraform used the selected providers to generate the following execution
+plan. Resource actions are indicated with the following symbols:
+  [33m~[0m update in-place[0m
+[31m-[0m/[32m+[0m destroy and then create replacement[0m
+ [36m<=[0m read (data resources)[0m
+
+Terraform will perform the following actions:
+
+[1m  # data.keycloak_openid_client.admin_client[0m will be read during apply
+  # (depends on a resource or a module with changes pending)
+[0m [36m<=[0m[0m data "keycloak_openid_client" "admin_client" {
+      [32m+[0m[0m access_token_lifespan                      = (known after apply)
+      [32m+[0m[0m access_type                                = (known after apply)
+      [32m+[0m[0m admin_url                                  = (known after apply)
+      [32m+[0m[0m authentication_flow_binding_overrides      = (known after apply)
+      [32m+[0m[0m authorization                              = (known after apply)
+      [32m+[0m[0m backchannel_logout_revoke_offline_sessions = (known after apply)
+      [32m+[0m[0m backchannel_logout_session_required        = (known after apply)
+      [32m+[0m[0m backchannel_logout_url                     = (known after apply)
+      [32m+[0m[0m base_url                                   = (known after apply)
+      [32m+[0m[0m client_authenticator_type                  = (known after apply)
+      [32m+[0m[0m client_id                                  = "adminClient"
+      [32m+[0m[0m client_offline_session_idle_timeout        = (known after apply)
+      [32m+[0m[0m client_offline_session_max_lifespan        = (known after apply)
+      [32m+[0m[0m client_secret                              = (sensitive value)
+      [32m+[0m[0m client_session_idle_timeout                = (known after apply)
+      [32m+[0m[0m client_session_max_lifespan                = (known after apply)
+      [32m+[0m[0m consent_required                           = (known after apply)
+      [32m+[0m[0m description                                = (known after apply)
+      [32m+[0m[0m direct_access_grants_enabled               = (known after apply)
+      [32m+[0m[0m enabled                                    = (known after apply)
+      [32m+[0m[0m exclude_session_state_from_auth_response   = (known after apply)
+      [32m+[0m[0m extra_config                               = (known after apply)
+      [32m+[0m[0m frontchannel_logout_enabled                = (known after apply)
+      [32m+[0m[0m frontchannel_logout_url                    = (known after apply)
+      [32m+[0m[0m full_scope_allowed                         = (known after apply)
+      [32m+[0m[0m id                                         = (known after apply)
+      [32m+[0m[0m implicit_flow_enabled                      = (known after apply)
+      [32m+[0m[0m login_theme                                = (known after apply)
+      [32m+[0m[0m name                                       = (known after apply)
+      [32m+[0m[0m pkce_code_challenge_method                 = (known after apply)
+      [32m+[0m[0m realm_id                                   = "credebl-platform"
+      [32m+[0m[0m resource_server_id                         = (known after apply)
+      [32m+[0m[0m root_url                                   = (known after apply)
+      [32m+[0m[0m service_account_user_id                    = (known after apply)
+      [32m+[0m[0m service_accounts_enabled                   = (known after apply)
+      [32m+[0m[0m standard_flow_enabled                      = (known after apply)
+      [32m+[0m[0m use_refresh_tokens                         = (known after apply)
+      [32m+[0m[0m use_refresh_tokens_client_credentials      = (known after apply)
+      [32m+[0m[0m valid_post_logout_redirect_uris            = (known after apply)
+      [32m+[0m[0m valid_redirect_uris                        = (known after apply)
+      [32m+[0m[0m web_origins                                = (known after apply)
+    }
+
+[1m  # keycloak_openid_client.my_client[0m will be updated in-place
+[0m  [33m~[0m[0m resource "keycloak_openid_client" "my_client" {
+        id                                         = "f0232bf6-26a4-4937-95c5-9df05c13191f"
+        name                                       = [90mnull[0m[0m
+      [33m~[0m[0m root_url                                   = "http://192.168.1.105:8080" [33m->[0m[0m "http://192.168.1.105:8081"
+      [33m~[0m[0m web_origins                                = [
+          [31m-[0m[0m "http://192.168.1.105:8080",
+          [32m+[0m[0m "http://192.168.1.105:8081",
+        ]
+        [90m# (38 unchanged attributes hidden)[0m[0m
+    }
+
+[1m  # local_file.env_file[0m must be [1m[31mreplaced[0m
+[0m[31m-[0m/[32m+[0m[0m resource "local_file" "env_file" {
+      [33m~[0m[0m content              = (sensitive value) [31m# forces replacement[0m[0m
+      [33m~[0m[0m content_base64sha256 = "Z4naA/77Ssq/Oa8Q+W8kpeiRy6BY96+5wPJ37NF8Pl4=" -> (known after apply)
+      [33m~[0m[0m content_base64sha512 = "IBjnZSFuogoGepuoCNOAuBVqoE6ASPzgWGjvMbaDUCpy9A54sRifBEufyKTXaZFeAOlHCnAtKSt7uplkyNtRcw==" -> (known after apply)
+      [33m~[0m[0m content_md5          = "eecde00918d385fb30a446010309dd5d" -> (known after apply)
+      [33m~[0m[0m content_sha1         = "e5b997feb42368a3bf3c30d0201d2a5d2c24d666" -> (known after apply)
+      [33m~[0m[0m content_sha256       = "6789da03fefb4acabf39af10f96f24a5e891cba058f7afb9c0f277ecd17c3e5e" -> (known after apply)
+      [33m~[0m[0m content_sha512       = "2018e765216ea20a067a9ba808d380b8156aa04e8048fce05868ef31b683502a72f40e78b1189f044b9fc8a4d769915e00e9470a702d292b7bba9964c8db5173" -> (known after apply)
+      [33m~[0m[0m id                   = "e5b997feb42368a3bf3c30d0201d2a5d2c24d666" -> (known after apply)
+        [90m# (3 unchanged attributes hidden)[0m[0m
+    }
+
+[1mPlan:[0m [0m1 to add, 1 to change, 1 to destroy.
+
+Changes to Outputs:
+  [33m~[0m[0m admin_client_secret = (sensitive value)
+[0m[1mlocal_file.env_file: Destroying... [id=e5b997feb42368a3bf3c30d0201d2a5d2c24d666][0m[0m
+[0m[1mlocal_file.env_file: Destruction complete after 0s[0m
+[0m[1mkeycloak_openid_client.my_client: Modifying... [id=f0232bf6-26a4-4937-95c5-9df05c13191f][0m[0m
+[0m[1mkeycloak_openid_client.my_client: Modifications complete after 0s [id=f0232bf6-26a4-4937-95c5-9df05c13191f][0m
+[0m[1mdata.keycloak_openid_client.admin_client: Reading...[0m[0m
+[0m[1mdata.keycloak_openid_client.admin_client: Read complete after 0s [id=f0232bf6-26a4-4937-95c5-9df05c13191f][0m
+[0m[1mlocal_file.env_file: Creating...[0m[0m
+[0m[1mlocal_file.env_file: Creation complete after 0s [id=e5b997feb42368a3bf3c30d0201d2a5d2c24d666][0m
+[0m[1m[32m
+Apply complete! Resources: 1 added, 1 changed, 1 destroyed.[0m
+[0m[1m[32m
+Outputs:
+
+[0madmin_client_secret = <sensitive>
+✅ Keycloak setup completed via Terraform.
+🔍 Updating environment with Keycloak secret...
+✅ Keycloak secret updated in .env successfully.
+🔍 Generating JWT secret...
+✅ Node.js already installed
+✅ JWT secret generated and stored successfully
+🔍 Pulling credo-controller image...
+latest: Pulling from credebl/credo-controller
+Digest: sha256:ccaa35b3d43b9f509f1eacb66545ed3b3d1271164323744f3d397f4e0c07aa50
+Status: Image is up to date for ghcr.io/credebl/credo-controller:latest
+ghcr.io/credebl/credo-controller:latest
+✅ credo-controller image pulled successfully.
+🔍 Updating master table configuration...
+
+changed 1 package in 1s
+
+1 package is looking for funding
+  run `npm fund` for details
+Scope: all 3 workspace projects
+Lockfile is up to date, resolution step is skipped
+Already up to date
+
+. prepare$ husky install
+. prepare: husky - Git hooks installed
+. prepare: Done
+Done in 1s
+✅ Master table configuration updated successfully.
+Environment variables loaded from ../../.env
+Prisma schema loaded from prisma/schema.prisma
+
+✔ Generated Prisma Client (v5.22.0) to ./../../node_modules/.pnpm/@prisma+client@5.22.0_prisma@5.22.0/node_modules/@prisma/client in 293ms
+
+Start by importing your Prisma Client (See: https://pris.ly/d/importing-client)
+
+Tip: Want real-time updates to your database without manual polling? Discover how with Pulse: https://pris.ly/tip-0-pulse
+
+Environment variables loaded from ../../.env
+Prisma schema loaded from prisma/schema.prisma
+Datasource "db": PostgreSQL database "credebl", schema "public" at "192.168.1.105:5433"
+
+104 migrations found in prisma/migrations
+
+
+No pending migrations to apply.
+Environment variables loaded from ../../.env
+Running seed command `ts-node prisma/seed.ts` ...
+prisma:info Starting a postgresql pool with 17 connections.
+[32m[Nest] 28203  - [39m01/12/2026, 10:09:32 PM [32m    LOG[39m [38;5;3m[Init seed DB] [39m[32mAlready seeding in platform config[39m
+[32m[Nest] 28203  - [39m01/12/2026, 10:09:32 PM [32m    LOG[39m [38;5;3m[Init seed DB] [39m[32mAlready seeding in org role[39m
+[32m[Nest] 28203  - [39m01/12/2026, 10:09:32 PM [32m    LOG[39m [38;5;3m[Init seed DB] [39m[32mAlready seeding in agent type[39m
+[32m[Nest] 28203  - [39m01/12/2026, 10:09:32 PM [32m    LOG[39m [38;5;3m[Init seed DB] [39m[32mAlready seeding in user[39m
+[32m[Nest] 28203  - [39m01/12/2026, 10:09:32 PM [32m    LOG[39m [38;5;3m[Init seed DB] [39m[32mAlready seeding in organization[39m
+[32m[Nest] 28203  - [39m01/12/2026, 10:09:32 PM [32m    LOG[39m [38;5;3m[Init seed DB] [39m[32mAlready seeding in org_roles[39m
+[32m[Nest] 28203  - [39m01/12/2026, 10:09:32 PM [32m    LOG[39m [38;5;3m[Init seed DB] [39m[32mAlready seeding in org agent type[39m
+[32m[Nest] 28203  - [39m01/12/2026, 10:09:32 PM [32m    LOG[39m [38;5;3m[Init seed DB] [39m[32mNo changes in ledger data[39m
+[32m[Nest] 28203  - [39m01/12/2026, 10:09:32 PM [32m    LOG[39m [38;5;3m[Init seed DB] [39m[32mAlready seeding in ledger config[39m
+[32m[Nest] 28203  - [39m01/12/2026, 10:09:32 PM [32m    LOG[39m [38;5;3m[Init seed DB] [39m[32mAlready seeding in user role[39m
+[32m[Nest] 28203  - [39m01/12/2026, 10:09:32 PM [32m    LOG[39m [38;5;3m[Init seed DB] [39m[32mNo new DIDs to migrate in migrateOrgAgentDids[39m
+[32m[Nest] 28203  - [39m01/12/2026, 10:09:32 PM [32m    LOG[39m [38;5;3m[Init seed DB] [39m[32mNo schemas to update[39m
+[32m[Nest] 28203  - [39m01/12/2026, 10:09:32 PM [32m    LOG[39m [38;5;3m[Init seed DB] [39m[32mShell script output: /home/adam/cdpi/credebl/install/local-deployment/platform/libs/prisma-service
+Checking if countries contains data...
+countries contains 250 rows. Skipping import.
+Checking if states contains data...
+states contains 5091 rows. Skipping import.
+Checking if cities contains data...
+cities contains 150661 rows. Skipping import.
+CSV import process completed.
+[39m
+[32m[Nest] 28203  - [39m01/12/2026, 10:09:32 PM [32m    LOG[39m [38;5;3m[Init seed DB] [39m[32mShell script output: Updating clientId and clientSecret where they are NULL...
+UPDATE 0
+There is nothing to update for the clientId and clientSecret.
+[39m
+
+🌱  The seed command has been executed.
+🔍 Setting up Schema Service...
+Error response from daemon: No such container: schema-file-server
+Unable to find image 'ghcr.io/credebl/schema-file-server:latest' locally
+latest: Pulling from credebl/schema-file-server
+74ad5d951fe7: Pulling fs layer
+7b6e7ff585ab: Pulling fs layer
+77f97a43f5a0: Pulling fs layer
+00c9ee06b7ac: Pulling fs layer
+27c19583ca9d: Pulling fs layer
+b9b1da7afb8a: Pulling fs layer
+74581f1d5c77: Pulling fs layer
+61b556856fb2: Pulling fs layer
+b9b1da7afb8a: Waiting
+00c9ee06b7ac: Waiting
+27c19583ca9d: Waiting
+74581f1d5c77: Waiting
+61b556856fb2: Waiting
+7b6e7ff585ab: Verifying Checksum
+7b6e7ff585ab: Download complete
+00c9ee06b7ac: Verifying Checksum
+00c9ee06b7ac: Download complete
+27c19583ca9d: Download complete
+b9b1da7afb8a: Download complete
+74581f1d5c77: Verifying Checksum
+74581f1d5c77: Download complete
+61b556856fb2: Download complete
+77f97a43f5a0: Verifying Checksum
+77f97a43f5a0: Download complete
+74ad5d951fe7: Verifying Checksum
+74ad5d951fe7: Download complete
+74ad5d951fe7: Pull complete
+7b6e7ff585ab: Pull complete
+77f97a43f5a0: Pull complete
+00c9ee06b7ac: Pull complete
+27c19583ca9d: Pull complete
+b9b1da7afb8a: Pull complete
+74581f1d5c77: Pull complete
+61b556856fb2: Pull complete
+Digest: sha256:40a071da35ab17530e9fc1b5de88c46b3ae41bcd79c5c5c28661a0195792435a
+Status: Downloaded newer image for ghcr.io/credebl/schema-file-server:latest
+cf4c4cb8c83871aab80d5d224f14f61c7e27d0c0a781fd5ce91f16ea336a5bfa
+✅ Schema file server started successfully
+🔍 Updating environment with Schema File Server details...
+Enter password to grant execute permission for saving schemas...
+✅ Schema File Server configuration updated successfully
+Configured .env file for local execution
+
+
+=== Deployment started at Mon Jan 12 11:18:48 PM EAT 2026 ===
+🔍 
+ Setting up CREDEBL Platform...
+Provide branch name you want to work on: You entered branch: main
+📁 Platform directory exists, pulling latest changes...
+Already on 'main'
+M	agent.env
+M	apps/agent-provisioning/AFJ/port-file/last-admin-port.txt
+M	apps/agent-provisioning/AFJ/port-file/last-inbound-port.txt
+M	docker-compose.redis.yml
+M	libs/prisma-service/prisma/data/credebl-master-table/credebl-master-table.json
+Your branch is up to date with 'origin/main'.
+From https://github.com/credebl/platform
+ * branch              main       -> FETCH_HEAD
+Already up to date.
+✅ .env already exists. Skipping copy and checking existing values...
+Assigned ports:
+PostgreSQL: 5432
+API Gateway: 5000
+Redis: 6380
+Keycloak: 8080
+Schema Server: 4001
+Studio: 3001
+✅ Updated .env file and docker-compose available ports
+📁 Preparing environment files...
+
+ Host IP fetched 192.168.1.105
+Found existing SENDGRID_API_KEY (hidden). Continue with this value? (yes/no): ✅ Using existing SENDGRID_API_KEY
+Enter SendGrid sender email: 
+# Provide S3 credentials, required for storing connection URLs
+Found existing AWS_S3_STOREOBJECT_ACCESS_KEY (hidden). Continue with this value? (yes/no): ✅ Using existing AWS_S3_STOREOBJECT_ACCESS_KEY
+Found existing AWS_S3_STOREOBJECT_SECRET_KEY (hidden). Continue with this value? (yes/no): ✅ Using existing AWS_S3_STOREOBJECT_SECRET_KEY
+Found existing AWS_S3_STOREOBJECT_REGION=us-east-2. Continue with this value? (yes/no): ✅ Using existing AWS_S3_STOREOBJECT_REGION
+Found existing AWS_S3_STOREOBJECT_BUCKET=amzn-credebl-inji-bucket. Continue with this value? (yes/no): ✅ Using existing AWS_S3_STOREOBJECT_BUCKET
+Do you want to use bulk issuance? (yes/no): Do you want to upload org logos? (yes/no): Do you want to use an existing PostgreSQL server? (yes/no): ✅ Environment file configured successfully.
+Do you want to use an existing PostgreSQL server for Keycloak? (yes/no): 📁 Keycloak DB will be created in credebl-postgres.
+✅ Keycloak database initialization SQL created.
+🔍 Detected Ubuntu. Checking Docker installation...
+✅ Docker and Docker Compose are already installed.
+🔍 Checking Terraform installation...
+✅ Terraform is already installed.
+🛡️ Setting up Keycloak...
+time="2026-01-12T23:19:14+03:00" level=warning msg="/home/adam/cdpi/credebl/install/local-deployment/platform/docker-compose.postgres.yml: the attribute `version` is obsolete, it will be ignored, please remove it to avoid potential confusion"
+ Container credebl-postgres  Recreate
+ Container credebl-postgres  Recreated
+ Container credebl-postgres  Starting
+ Container credebl-postgres  Started
+time="2026-01-12T23:19:15+03:00" level=warning msg="/home/adam/cdpi/credebl/install/local-deployment/platform/docker-compose.nats.yml: the attribute `version` is obsolete, it will be ignored, please remove it to avoid potential confusion"
+time="2026-01-12T23:19:15+03:00" level=warning msg="Found orphan containers ([credebl-postgres]) for this project. If you removed or renamed this service in your compose file, you can run this command with the --remove-orphans flag to clean it up."
+ Container nats  Creating
+ Container nats  Created
+ Container nats  Starting
+ Container nats  Started
+time="2026-01-12T23:19:15+03:00" level=warning msg="/home/adam/cdpi/credebl/install/local-deployment/platform/docker-compose.redis.yml: the attribute `version` is obsolete, it will be ignored, please remove it to avoid potential confusion"
+time="2026-01-12T23:19:15+03:00" level=warning msg="Found orphan containers ([nats credebl-postgres]) for this project. If you removed or renamed this service in your compose file, you can run this command with the --remove-orphans flag to clean it up."
+ Container platform-redis-1  Creating
+ Container platform-redis-1  Created
+ Container platform-redis-1  Starting
+ Container platform-redis-1  Started
+📁 Found existing Keycloak container (credebl-keycloak) with matching version
+📁 Port mismatch (current: 0.0.0.0
+[, desired: 8080). Recreating container...
+credebl-keycloak
+🔍 Starting new Keycloak container on port 8080...
+59b9a729686bbadce2c45037938ca7dc0121b009776da35dc528b69cd24bcb41
+✅ Keycloak started successfully
+🔍 Setting up Keycloak via Terraform...
+✅ Keycloak root URL set to "http://192.168.1.105:8080" and redirect url set to "http://192.168.1.105:3001"
+[0m[1mInitializing the backend...[0m
+[0m[1mInitializing provider plugins...[0m
+- Reusing previous version of mrparkers/keycloak from the dependency lock file
+- Reusing previous version of hashicorp/local from the dependency lock file
+- Using previously-installed mrparkers/keycloak v4.4.0
+- Using previously-installed hashicorp/local v2.6.1
+
+[0m[1m[32mTerraform has been successfully initialized![0m[32m[0m
+[0m[32m
+You may now begin working with Terraform. Try running "terraform plan" to see
+any changes that are required for your infrastructure. All Terraform commands
+should now work.
+
+If you ever set or change modules or backend configuration for Terraform,
+rerun this command to reinitialize your working directory. If you forget, other
+commands will detect it and remind you to do so if necessary.[0m
+📁 Waiting 30 seconds for Keycloak to be fully ready...
+[0m[1mkeycloak_realm.my_realm: Refreshing state... [id=credebl-platform][0m
+[0m[1mkeycloak_role.holder_role: Refreshing state... [id=a861359d-ac8e-44f3-b7ed-be4c2cfcee83][0m
+[0m[1mkeycloak_openid_client.my_client: Refreshing state... [id=f0232bf6-26a4-4937-95c5-9df05c13191f][0m
+[0m[1mdata.keycloak_openid_client.realm_management_client: Reading...[0m[0m
+[0m[1mdata.keycloak_openid_client.realm_management_client: Read complete after 0s [id=3fadb522-2a48-483d-af63-cb502d039480][0m
+[0m[1mkeycloak_openid_client_service_account_role.create_client_role: Refreshing state... [id=d9566424-1acc-40af-bd75-67d17a424d40/f39855b8-33cd-4413-9006-6664108d4750][0m
+[0m[1mkeycloak_openid_client_service_account_role.manage_users_role: Refreshing state... [id=d9566424-1acc-40af-bd75-67d17a424d40/2fe9d92c-23cd-477d-ace9-fc9c7ada650c][0m
+[0m[1mkeycloak_openid_client_service_account_role.view_clients_role: Refreshing state... [id=d9566424-1acc-40af-bd75-67d17a424d40/891519a0-7bb4-460f-857b-40199b4555f4][0m
+[0m[1mkeycloak_openid_client_service_account_role.query_clients_role: Refreshing state... [id=d9566424-1acc-40af-bd75-67d17a424d40/81305ce0-f010-4949-84c0-a25b9c0b448b][0m
+[0m[1mkeycloak_openid_client_service_account_role.manage_clients_role: Refreshing state... [id=d9566424-1acc-40af-bd75-67d17a424d40/722ec516-2471-4122-9537-874c7e748881][0m
+[0m[1mkeycloak_openid_client_service_account_role.view_users_role: Refreshing state... [id=d9566424-1acc-40af-bd75-67d17a424d40/f4b268a7-b1ab-49d7-b7db-e16980f2b86e][0m
+[0m[1mkeycloak_openid_client_service_account_role.query_users_role: Refreshing state... [id=d9566424-1acc-40af-bd75-67d17a424d40/4bca4725-376c-4a1f-a291-039c46310c00][0m
+[0m[1mlocal_file.env_file: Refreshing state... [id=e5b997feb42368a3bf3c30d0201d2a5d2c24d666][0m
+
+Terraform used the selected providers to generate the following execution
+plan. Resource actions are indicated with the following symbols:
+  [33m~[0m update in-place[0m
+[31m-[0m/[32m+[0m destroy and then create replacement[0m
+ [36m<=[0m read (data resources)[0m
+
+Terraform will perform the following actions:
+
+[1m  # data.keycloak_openid_client.admin_client[0m will be read during apply
+  # (depends on a resource or a module with changes pending)
+[0m [36m<=[0m[0m data "keycloak_openid_client" "admin_client" {
+      [32m+[0m[0m access_token_lifespan                      = (known after apply)
+      [32m+[0m[0m access_type                                = (known after apply)
+      [32m+[0m[0m admin_url                                  = (known after apply)
+      [32m+[0m[0m authentication_flow_binding_overrides      = (known after apply)
+      [32m+[0m[0m authorization                              = (known after apply)
+      [32m+[0m[0m backchannel_logout_revoke_offline_sessions = (known after apply)
+      [32m+[0m[0m backchannel_logout_session_required        = (known after apply)
+      [32m+[0m[0m backchannel_logout_url                     = (known after apply)
+      [32m+[0m[0m base_url                                   = (known after apply)
+      [32m+[0m[0m client_authenticator_type                  = (known after apply)
+      [32m+[0m[0m client_id                                  = "adminClient"
+      [32m+[0m[0m client_offline_session_idle_timeout        = (known after apply)
+      [32m+[0m[0m client_offline_session_max_lifespan        = (known after apply)
+      [32m+[0m[0m client_secret                              = (sensitive value)
+      [32m+[0m[0m client_session_idle_timeout                = (known after apply)
+      [32m+[0m[0m client_session_max_lifespan                = (known after apply)
+      [32m+[0m[0m consent_required                           = (known after apply)
+      [32m+[0m[0m description                                = (known after apply)
+      [32m+[0m[0m direct_access_grants_enabled               = (known after apply)
+      [32m+[0m[0m enabled                                    = (known after apply)
+      [32m+[0m[0m exclude_session_state_from_auth_response   = (known after apply)
+      [32m+[0m[0m extra_config                               = (known after apply)
+      [32m+[0m[0m frontchannel_logout_enabled                = (known after apply)
+      [32m+[0m[0m frontchannel_logout_url                    = (known after apply)
+      [32m+[0m[0m full_scope_allowed                         = (known after apply)
+      [32m+[0m[0m id                                         = (known after apply)
+      [32m+[0m[0m implicit_flow_enabled                      = (known after apply)
+      [32m+[0m[0m login_theme                                = (known after apply)
+      [32m+[0m[0m name                                       = (known after apply)
+      [32m+[0m[0m pkce_code_challenge_method                 = (known after apply)
+      [32m+[0m[0m realm_id                                   = "credebl-platform"
+      [32m+[0m[0m resource_server_id                         = (known after apply)
+      [32m+[0m[0m root_url                                   = (known after apply)
+      [32m+[0m[0m service_account_user_id                    = (known after apply)
+      [32m+[0m[0m service_accounts_enabled                   = (known after apply)
+      [32m+[0m[0m standard_flow_enabled                      = (known after apply)
+      [32m+[0m[0m use_refresh_tokens                         = (known after apply)
+      [32m+[0m[0m use_refresh_tokens_client_credentials      = (known after apply)
+      [32m+[0m[0m valid_post_logout_redirect_uris            = (known after apply)
+      [32m+[0m[0m valid_redirect_uris                        = (known after apply)
+      [32m+[0m[0m web_origins                                = (known after apply)
+    }
+
+[1m  # keycloak_openid_client.my_client[0m will be updated in-place
+[0m  [33m~[0m[0m resource "keycloak_openid_client" "my_client" {
+        id                                         = "f0232bf6-26a4-4937-95c5-9df05c13191f"
+        name                                       = [90mnull[0m[0m
+      [33m~[0m[0m root_url                                   = "http://192.168.1.105:8081" [33m->[0m[0m "http://192.168.1.105:8080"
+      [33m~[0m[0m valid_redirect_uris                        = [
+          [31m-[0m[0m "http://192.168.1.105:3000",
+          [32m+[0m[0m "http://192.168.1.105:3001",
+        ]
+      [33m~[0m[0m web_origins                                = [
+          [31m-[0m[0m "http://192.168.1.105:8081",
+          [32m+[0m[0m "http://192.168.1.105:8080",
+        ]
+        [90m# (37 unchanged attributes hidden)[0m[0m
+    }
+
+[1m  # local_file.env_file[0m must be [1m[31mreplaced[0m
+[0m[31m-[0m/[32m+[0m[0m resource "local_file" "env_file" {
+      [33m~[0m[0m content              = (sensitive value) [31m# forces replacement[0m[0m
+      [33m~[0m[0m content_base64sha256 = "Z4naA/77Ssq/Oa8Q+W8kpeiRy6BY96+5wPJ37NF8Pl4=" -> (known after apply)
+      [33m~[0m[0m content_base64sha512 = "IBjnZSFuogoGepuoCNOAuBVqoE6ASPzgWGjvMbaDUCpy9A54sRifBEufyKTXaZFeAOlHCnAtKSt7uplkyNtRcw==" -> (known after apply)
+      [33m~[0m[0m content_md5          = "eecde00918d385fb30a446010309dd5d" -> (known after apply)
+      [33m~[0m[0m content_sha1         = "e5b997feb42368a3bf3c30d0201d2a5d2c24d666" -> (known after apply)
+      [33m~[0m[0m content_sha256       = "6789da03fefb4acabf39af10f96f24a5e891cba058f7afb9c0f277ecd17c3e5e" -> (known after apply)
+      [33m~[0m[0m content_sha512       = "2018e765216ea20a067a9ba808d380b8156aa04e8048fce05868ef31b683502a72f40e78b1189f044b9fc8a4d769915e00e9470a702d292b7bba9964c8db5173" -> (known after apply)
+      [33m~[0m[0m id                   = "e5b997feb42368a3bf3c30d0201d2a5d2c24d666" -> (known after apply)
+        [90m# (3 unchanged attributes hidden)[0m[0m
+    }
+
+[1mPlan:[0m [0m1 to add, 1 to change, 1 to destroy.
+
+Changes to Outputs:
+  [33m~[0m[0m admin_client_secret = (sensitive value)
+[0m[1mlocal_file.env_file: Destroying... [id=e5b997feb42368a3bf3c30d0201d2a5d2c24d666][0m[0m
+[0m[1mlocal_file.env_file: Destruction complete after 0s[0m
+[0m[1mkeycloak_openid_client.my_client: Modifying... [id=f0232bf6-26a4-4937-95c5-9df05c13191f][0m[0m
+[0m[1mkeycloak_openid_client.my_client: Modifications complete after 0s [id=f0232bf6-26a4-4937-95c5-9df05c13191f][0m
+[0m[1mdata.keycloak_openid_client.admin_client: Reading...[0m[0m
+[0m[1mdata.keycloak_openid_client.admin_client: Read complete after 0s [id=f0232bf6-26a4-4937-95c5-9df05c13191f][0m
+[0m[1mlocal_file.env_file: Creating...[0m[0m
+[0m[1mlocal_file.env_file: Creation complete after 0s [id=e5b997feb42368a3bf3c30d0201d2a5d2c24d666][0m
+[0m[1m[32m
+Apply complete! Resources: 1 added, 1 changed, 1 destroyed.[0m
+[0m[1m[32m
+Outputs:
+
+[0madmin_client_secret = <sensitive>
+✅ Keycloak setup completed via Terraform.
+🔍 Updating environment with Keycloak secret...
+✅ Keycloak secret updated in .env successfully.
+🔍 Generating JWT secret...
+✅ Node.js already installed
+✅ JWT secret generated and stored successfully
+🔍 Pulling credo-controller image...
+latest: Pulling from credebl/credo-controller
+Digest: sha256:ccaa35b3d43b9f509f1eacb66545ed3b3d1271164323744f3d397f4e0c07aa50
+Status: Image is up to date for ghcr.io/credebl/credo-controller:latest
+ghcr.io/credebl/credo-controller:latest
+✅ credo-controller image pulled successfully.
+🔍 Updating master table configuration...
+
+changed 1 package in 1s
+
+1 package is looking for funding
+  run `npm fund` for details
+Scope: all 3 workspace projects
+Lockfile is up to date, resolution step is skipped
+Already up to date
+
+. prepare$ husky install
+. prepare: husky - Git hooks installed
+. prepare: Done
+Done in 1s
+✅ Master table configuration updated successfully.
+Environment variables loaded from ../../.env
+Prisma schema loaded from prisma/schema.prisma
+
+✔ Generated Prisma Client (v5.22.0) to ./../../node_modules/.pnpm/@prisma+client@5.22.0_prisma@5.22.0/node_modules/@prisma/client in 291ms
+
+Start by importing your Prisma Client (See: https://pris.ly/d/importing-client)
+
+Tip: Want real-time updates to your database without manual polling? Discover how with Pulse: https://pris.ly/tip-0-pulse
+
+Environment variables loaded from ../../.env
+Prisma schema loaded from prisma/schema.prisma
+Datasource "db": PostgreSQL database "credebl", schema "public" at "192.168.1.105:5432"
+
+104 migrations found in prisma/migrations
+
+
+No pending migrations to apply.
+Environment variables loaded from ../../.env
+Running seed command `ts-node prisma/seed.ts` ...
+prisma:info Starting a postgresql pool with 17 connections.
+[32m[Nest] 69646  - [39m01/12/2026, 11:20:46 PM [32m    LOG[39m [38;5;3m[Init seed DB] [39m[32mAlready seeding in platform config[39m
+[32m[Nest] 69646  - [39m01/12/2026, 11:20:46 PM [32m    LOG[39m [38;5;3m[Init seed DB] [39m[32mAlready seeding in org role[39m
+[32m[Nest] 69646  - [39m01/12/2026, 11:20:46 PM [32m    LOG[39m [38;5;3m[Init seed DB] [39m[32mAlready seeding in agent type[39m
+[32m[Nest] 69646  - [39m01/12/2026, 11:20:46 PM [32m    LOG[39m [38;5;3m[Init seed DB] [39m[32mAlready seeding in user[39m
+[32m[Nest] 69646  - [39m01/12/2026, 11:20:46 PM [32m    LOG[39m [38;5;3m[Init seed DB] [39m[32mAlready seeding in organization[39m
+[32m[Nest] 69646  - [39m01/12/2026, 11:20:46 PM [32m    LOG[39m [38;5;3m[Init seed DB] [39m[32mAlready seeding in org_roles[39m
+[32m[Nest] 69646  - [39m01/12/2026, 11:20:46 PM [32m    LOG[39m [38;5;3m[Init seed DB] [39m[32mAlready seeding in org agent type[39m
+[32m[Nest] 69646  - [39m01/12/2026, 11:20:46 PM [32m    LOG[39m [38;5;3m[Init seed DB] [39m[32mNo changes in ledger data[39m
+[32m[Nest] 69646  - [39m01/12/2026, 11:20:46 PM [32m    LOG[39m [38;5;3m[Init seed DB] [39m[32mAlready seeding in ledger config[39m
+[32m[Nest] 69646  - [39m01/12/2026, 11:20:46 PM [32m    LOG[39m [38;5;3m[Init seed DB] [39m[32mAlready seeding in user role[39m
+[32m[Nest] 69646  - [39m01/12/2026, 11:20:46 PM [32m    LOG[39m [38;5;3m[Init seed DB] [39m[32mNo new DIDs to migrate in migrateOrgAgentDids[39m
+[32m[Nest] 69646  - [39m01/12/2026, 11:20:46 PM [32m    LOG[39m [38;5;3m[Init seed DB] [39m[32mNo schemas to update[39m
+[32m[Nest] 69646  - [39m01/12/2026, 11:20:47 PM [32m    LOG[39m [38;5;3m[Init seed DB] [39m[32mShell script output: /home/adam/cdpi/credebl/install/local-deployment/platform/libs/prisma-service
+Checking if countries contains data...
+countries contains 250 rows. Skipping import.
+Checking if states contains data...
+states contains 5091 rows. Skipping import.
+Checking if cities contains data...
+cities contains 150661 rows. Skipping import.
+CSV import process completed.
+[39m
+[32m[Nest] 69646  - [39m01/12/2026, 11:20:47 PM [32m    LOG[39m [38;5;3m[Init seed DB] [39m[32mShell script output: Updating clientId and clientSecret where they are NULL...
+UPDATE 0
+There is nothing to update for the clientId and clientSecret.
+[39m
+
+🌱  The seed command has been executed.
+🔍 Setting up Schema Service...
+schema-file-server
+894b4042420c96116139e2af079cf87008c1ec39534b04da828634814c22e1e7
+✅ Schema file server started successfully
+🔍 Updating environment with Schema File Server details...
+Enter password to grant execute permission for saving schemas...
+✅ Schema File Server configuration updated successfully
+Configured .env file for local execution
+
+
+=== Deployment started at Mon Jan 12 11:36:04 PM EAT 2026 ===
+🔍 
+ Setting up CREDEBL Platform...
+Provide branch name you want to work on: You entered branch: main
+📁 Platform directory exists, pulling latest changes...
+Already on 'main'
+M	agent.env
+M	apps/agent-provisioning/AFJ/port-file/last-admin-port.txt
+M	apps/agent-provisioning/AFJ/port-file/last-inbound-port.txt
+M	docker-compose.redis.yml
+M	libs/prisma-service/prisma/data/credebl-master-table/credebl-master-table.json
+Your branch is up to date with 'origin/main'.
+From https://github.com/credebl/platform
+ * branch              main       -> FETCH_HEAD
+Already up to date.
+✅ .env already exists. Skipping copy and checking existing values...
+Assigned ports:
+PostgreSQL: 5433
+API Gateway: 5000
+Redis: 6381
+Keycloak: 8081
+Schema Server: 4000
+Studio: 3001
+✅ Updated .env file and docker-compose available ports
+📁 Preparing environment files...
+
+ Host IP fetched 192.168.1.105
+Found existing SENDGRID_API_KEY (hidden). Continue with this value? (yes/no): ✅ Using existing SENDGRID_API_KEY
+Enter SendGrid sender email: 
+# Provide S3 credentials, required for storing connection URLs
+Found existing AWS_S3_STOREOBJECT_ACCESS_KEY (hidden). Continue with this value? (yes/no): ✅ Using existing AWS_S3_STOREOBJECT_ACCESS_KEY
+Found existing AWS_S3_STOREOBJECT_SECRET_KEY (hidden). Continue with this value? (yes/no): ✅ Using existing AWS_S3_STOREOBJECT_SECRET_KEY
+Found existing AWS_S3_STOREOBJECT_REGION=us-east-2. Continue with this value? (yes/no): ✅ Using existing AWS_S3_STOREOBJECT_REGION
+Found existing AWS_S3_STOREOBJECT_BUCKET=amzn-credebl-inji-bucket. Continue with this value? (yes/no): ✅ Using existing AWS_S3_STOREOBJECT_BUCKET
+Do you want to use bulk issuance? (yes/no): Do you want to upload org logos? (yes/no): Do you want to use an existing PostgreSQL server? (yes/no): ✅ Environment file configured successfully.
+Do you want to use an existing PostgreSQL server for Keycloak? (yes/no): 📁 Keycloak DB will be created in credebl-postgres.
+✅ Keycloak database initialization SQL created.
+🔍 Detected Ubuntu. Checking Docker installation...
+✅ Docker and Docker Compose are already installed.
+🔍 Checking Terraform installation...
+✅ Terraform is already installed.
+🛡️ Setting up Keycloak...
+time="2026-01-12T23:36:37+03:00" level=warning msg="/home/adam/cdpi/credebl/install/local-deployment/platform/docker-compose.postgres.yml: the attribute `version` is obsolete, it will be ignored, please remove it to avoid potential confusion"
+time="2026-01-12T23:36:37+03:00" level=warning msg="Found orphan containers ([platform-redis-1 nats]) for this project. If you removed or renamed this service in your compose file, you can run this command with the --remove-orphans flag to clean it up."
+ Container credebl-postgres  Recreate
+ Container credebl-postgres  Recreated
+ Container credebl-postgres  Starting
+ Container credebl-postgres  Started
+time="2026-01-12T23:36:38+03:00" level=warning msg="/home/adam/cdpi/credebl/install/local-deployment/platform/docker-compose.nats.yml: the attribute `version` is obsolete, it will be ignored, please remove it to avoid potential confusion"
+time="2026-01-12T23:36:38+03:00" level=warning msg="Found orphan containers ([credebl-postgres platform-redis-1]) for this project. If you removed or renamed this service in your compose file, you can run this command with the --remove-orphans flag to clean it up."
+ Container nats  Running
+time="2026-01-12T23:36:38+03:00" level=warning msg="/home/adam/cdpi/credebl/install/local-deployment/platform/docker-compose.redis.yml: the attribute `version` is obsolete, it will be ignored, please remove it to avoid potential confusion"
+time="2026-01-12T23:36:38+03:00" level=warning msg="Found orphan containers ([credebl-postgres nats]) for this project. If you removed or renamed this service in your compose file, you can run this command with the --remove-orphans flag to clean it up."
+ Container platform-redis-1  Recreate
+ Container platform-redis-1  Recreated
+ Container platform-redis-1  Starting
+ Container platform-redis-1  Started
+📁 Found existing Keycloak container (credebl-keycloak) with matching version
+📁 Port mismatch (current: 0.0.0.0
+[, desired: 8081). Recreating container...
+credebl-keycloak
+🔍 Starting new Keycloak container on port 8081...
+71762d8f47e34e0c1da97ca1d565316c390dcbba2f036742b62e775960a9391e
+✅ Keycloak started successfully
+🔍 Setting up Keycloak via Terraform...
+✅ Keycloak root URL set to "http://192.168.1.105:8081" and redirect url set to "http://192.168.1.105:3001"
+[0m[1mInitializing the backend...[0m
+[0m[1mInitializing provider plugins...[0m
+- Reusing previous version of mrparkers/keycloak from the dependency lock file
+- Reusing previous version of hashicorp/local from the dependency lock file
+- Using previously-installed hashicorp/local v2.6.1
+- Using previously-installed mrparkers/keycloak v4.4.0
+
+[0m[1m[32mTerraform has been successfully initialized![0m[32m[0m
+[0m[32m
+You may now begin working with Terraform. Try running "terraform plan" to see
+any changes that are required for your infrastructure. All Terraform commands
+should now work.
+
+If you ever set or change modules or backend configuration for Terraform,
+rerun this command to reinitialize your working directory. If you forget, other
+commands will detect it and remind you to do so if necessary.[0m
+📁 Waiting 30 seconds for Keycloak to be fully ready...
+[0m[1mkeycloak_realm.my_realm: Refreshing state... [id=credebl-platform][0m
+[0m[1mkeycloak_role.holder_role: Refreshing state... [id=a861359d-ac8e-44f3-b7ed-be4c2cfcee83][0m
+[0m[1mdata.keycloak_openid_client.realm_management_client: Reading...[0m[0m
+[0m[1mkeycloak_openid_client.my_client: Refreshing state... [id=f0232bf6-26a4-4937-95c5-9df05c13191f][0m
+[0m[1mdata.keycloak_openid_client.realm_management_client: Read complete after 0s [id=3fadb522-2a48-483d-af63-cb502d039480][0m
+[0m[1mkeycloak_openid_client_service_account_role.manage_users_role: Refreshing state... [id=d9566424-1acc-40af-bd75-67d17a424d40/2fe9d92c-23cd-477d-ace9-fc9c7ada650c][0m
+[0m[1mkeycloak_openid_client_service_account_role.create_client_role: Refreshing state... [id=d9566424-1acc-40af-bd75-67d17a424d40/f39855b8-33cd-4413-9006-6664108d4750][0m
+[0m[1mkeycloak_openid_client_service_account_role.manage_clients_role: Refreshing state... [id=d9566424-1acc-40af-bd75-67d17a424d40/722ec516-2471-4122-9537-874c7e748881][0m
+[0m[1mkeycloak_openid_client_service_account_role.view_clients_role: Refreshing state... [id=d9566424-1acc-40af-bd75-67d17a424d40/891519a0-7bb4-460f-857b-40199b4555f4][0m
+[0m[1mkeycloak_openid_client_service_account_role.view_users_role: Refreshing state... [id=d9566424-1acc-40af-bd75-67d17a424d40/f4b268a7-b1ab-49d7-b7db-e16980f2b86e][0m
+[0m[1mkeycloak_openid_client_service_account_role.query_users_role: Refreshing state... [id=d9566424-1acc-40af-bd75-67d17a424d40/4bca4725-376c-4a1f-a291-039c46310c00][0m
+[0m[1mkeycloak_openid_client_service_account_role.query_clients_role: Refreshing state... [id=d9566424-1acc-40af-bd75-67d17a424d40/81305ce0-f010-4949-84c0-a25b9c0b448b][0m
+[0m[1mlocal_file.env_file: Refreshing state... [id=e5b997feb42368a3bf3c30d0201d2a5d2c24d666][0m
+
+Terraform used the selected providers to generate the following execution
+plan. Resource actions are indicated with the following symbols:
+  [33m~[0m update in-place[0m
+[31m-[0m/[32m+[0m destroy and then create replacement[0m
+ [36m<=[0m read (data resources)[0m
+
+Terraform will perform the following actions:
+
+[1m  # data.keycloak_openid_client.admin_client[0m will be read during apply
+  # (depends on a resource or a module with changes pending)
+[0m [36m<=[0m[0m data "keycloak_openid_client" "admin_client" {
+      [32m+[0m[0m access_token_lifespan                      = (known after apply)
+      [32m+[0m[0m access_type                                = (known after apply)
+      [32m+[0m[0m admin_url                                  = (known after apply)
+      [32m+[0m[0m authentication_flow_binding_overrides      = (known after apply)
+      [32m+[0m[0m authorization                              = (known after apply)
+      [32m+[0m[0m backchannel_logout_revoke_offline_sessions = (known after apply)
+      [32m+[0m[0m backchannel_logout_session_required        = (known after apply)
+      [32m+[0m[0m backchannel_logout_url                     = (known after apply)
+      [32m+[0m[0m base_url                                   = (known after apply)
+      [32m+[0m[0m client_authenticator_type                  = (known after apply)
+      [32m+[0m[0m client_id                                  = "adminClient"
+      [32m+[0m[0m client_offline_session_idle_timeout        = (known after apply)
+      [32m+[0m[0m client_offline_session_max_lifespan        = (known after apply)
+      [32m+[0m[0m client_secret                              = (sensitive value)
+      [32m+[0m[0m client_session_idle_timeout                = (known after apply)
+      [32m+[0m[0m client_session_max_lifespan                = (known after apply)
+      [32m+[0m[0m consent_required                           = (known after apply)
+      [32m+[0m[0m description                                = (known after apply)
+      [32m+[0m[0m direct_access_grants_enabled               = (known after apply)
+      [32m+[0m[0m enabled                                    = (known after apply)
+      [32m+[0m[0m exclude_session_state_from_auth_response   = (known after apply)
+      [32m+[0m[0m extra_config                               = (known after apply)
+      [32m+[0m[0m frontchannel_logout_enabled                = (known after apply)
+      [32m+[0m[0m frontchannel_logout_url                    = (known after apply)
+      [32m+[0m[0m full_scope_allowed                         = (known after apply)
+      [32m+[0m[0m id                                         = (known after apply)
+      [32m+[0m[0m implicit_flow_enabled                      = (known after apply)
+      [32m+[0m[0m login_theme                                = (known after apply)
+      [32m+[0m[0m name                                       = (known after apply)
+      [32m+[0m[0m pkce_code_challenge_method                 = (known after apply)
+      [32m+[0m[0m realm_id                                   = "credebl-platform"
+      [32m+[0m[0m resource_server_id                         = (known after apply)
+      [32m+[0m[0m root_url                                   = (known after apply)
+      [32m+[0m[0m service_account_user_id                    = (known after apply)
+      [32m+[0m[0m service_accounts_enabled                   = (known after apply)
+      [32m+[0m[0m standard_flow_enabled                      = (known after apply)
+      [32m+[0m[0m use_refresh_tokens                         = (known after apply)
+      [32m+[0m[0m use_refresh_tokens_client_credentials      = (known after apply)
+      [32m+[0m[0m valid_post_logout_redirect_uris            = (known after apply)
+      [32m+[0m[0m valid_redirect_uris                        = (known after apply)
+      [32m+[0m[0m web_origins                                = (known after apply)
+    }
+
+[1m  # keycloak_openid_client.my_client[0m will be updated in-place
+[0m  [33m~[0m[0m resource "keycloak_openid_client" "my_client" {
+        id                                         = "f0232bf6-26a4-4937-95c5-9df05c13191f"
+        name                                       = [90mnull[0m[0m
+      [33m~[0m[0m root_url                                   = "http://192.168.1.105:8080" [33m->[0m[0m "http://192.168.1.105:8081"
+      [33m~[0m[0m web_origins                                = [
+          [31m-[0m[0m "http://192.168.1.105:8080",
+          [32m+[0m[0m "http://192.168.1.105:8081",
+        ]
+        [90m# (38 unchanged attributes hidden)[0m[0m
+    }
+
+[1m  # local_file.env_file[0m must be [1m[31mreplaced[0m
+[0m[31m-[0m/[32m+[0m[0m resource "local_file" "env_file" {
+      [33m~[0m[0m content              = (sensitive value) [31m# forces replacement[0m[0m
+      [33m~[0m[0m content_base64sha256 = "Z4naA/77Ssq/Oa8Q+W8kpeiRy6BY96+5wPJ37NF8Pl4=" -> (known after apply)
+      [33m~[0m[0m content_base64sha512 = "IBjnZSFuogoGepuoCNOAuBVqoE6ASPzgWGjvMbaDUCpy9A54sRifBEufyKTXaZFeAOlHCnAtKSt7uplkyNtRcw==" -> (known after apply)
+      [33m~[0m[0m content_md5          = "eecde00918d385fb30a446010309dd5d" -> (known after apply)
+      [33m~[0m[0m content_sha1         = "e5b997feb42368a3bf3c30d0201d2a5d2c24d666" -> (known after apply)
+      [33m~[0m[0m content_sha256       = "6789da03fefb4acabf39af10f96f24a5e891cba058f7afb9c0f277ecd17c3e5e" -> (known after apply)
+      [33m~[0m[0m content_sha512       = "2018e765216ea20a067a9ba808d380b8156aa04e8048fce05868ef31b683502a72f40e78b1189f044b9fc8a4d769915e00e9470a702d292b7bba9964c8db5173" -> (known after apply)
+      [33m~[0m[0m id                   = "e5b997feb42368a3bf3c30d0201d2a5d2c24d666" -> (known after apply)
+        [90m# (3 unchanged attributes hidden)[0m[0m
+    }
+
+[1mPlan:[0m [0m1 to add, 1 to change, 1 to destroy.
+
+Changes to Outputs:
+  [33m~[0m[0m admin_client_secret = (sensitive value)
+[0m[1mlocal_file.env_file: Destroying... [id=e5b997feb42368a3bf3c30d0201d2a5d2c24d666][0m[0m
+[0m[1mlocal_file.env_file: Destruction complete after 0s[0m
+[0m[1mkeycloak_openid_client.my_client: Modifying... [id=f0232bf6-26a4-4937-95c5-9df05c13191f][0m[0m
+[0m[1mkeycloak_openid_client.my_client: Modifications complete after 0s [id=f0232bf6-26a4-4937-95c5-9df05c13191f][0m
+[0m[1mdata.keycloak_openid_client.admin_client: Reading...[0m[0m
+[0m[1mdata.keycloak_openid_client.admin_client: Read complete after 0s [id=f0232bf6-26a4-4937-95c5-9df05c13191f][0m
+[0m[1mlocal_file.env_file: Creating...[0m[0m
+[0m[1mlocal_file.env_file: Creation complete after 0s [id=e5b997feb42368a3bf3c30d0201d2a5d2c24d666][0m
+[0m[1m[32m
+Apply complete! Resources: 1 added, 1 changed, 1 destroyed.[0m
+[0m[1m[32m
+Outputs:
+
+[0madmin_client_secret = <sensitive>
+✅ Keycloak setup completed via Terraform.
+🔍 Updating environment with Keycloak secret...
+✅ Keycloak secret updated in .env successfully.
+🔍 Generating JWT secret...
+✅ Node.js already installed
+✅ JWT secret generated and stored successfully
+🔍 Pulling credo-controller image...
+latest: Pulling from credebl/credo-controller
+Digest: sha256:ccaa35b3d43b9f509f1eacb66545ed3b3d1271164323744f3d397f4e0c07aa50
+Status: Image is up to date for ghcr.io/credebl/credo-controller:latest
+ghcr.io/credebl/credo-controller:latest
+✅ credo-controller image pulled successfully.
+🔍 Updating master table configuration...
+
+changed 1 package in 1s
+
+1 package is looking for funding
+  run `npm fund` for details
+Scope: all 3 workspace projects
+Lockfile is up to date, resolution step is skipped
+Already up to date
+
+. prepare$ husky install
+. prepare: husky - Git hooks installed
+. prepare: Done
+Done in 1s
+✅ Master table configuration updated successfully.
+Environment variables loaded from ../../.env
+Prisma schema loaded from prisma/schema.prisma
+
+✔ Generated Prisma Client (v5.22.0) to ./../../node_modules/.pnpm/@prisma+client@5.22.0_prisma@5.22.0/node_modules/@prisma/client in 289ms
+
+Start by importing your Prisma Client (See: https://pris.ly/d/importing-client)
+
+Tip: Want to react to database changes in your app as they happen? Discover how with Pulse: https://pris.ly/tip-1-pulse
+
+Environment variables loaded from ../../.env
+Prisma schema loaded from prisma/schema.prisma
+Datasource "db": PostgreSQL database "credebl", schema "public" at "192.168.1.105:5433"
+
+104 migrations found in prisma/migrations
+
+
+No pending migrations to apply.
+Environment variables loaded from ../../.env
+Running seed command `ts-node prisma/seed.ts` ...
+prisma:info Starting a postgresql pool with 17 connections.
+[32m[Nest] 82663  - [39m01/12/2026, 11:38:08 PM [32m    LOG[39m [38;5;3m[Init seed DB] [39m[32mAlready seeding in platform config[39m
+[32m[Nest] 82663  - [39m01/12/2026, 11:38:08 PM [32m    LOG[39m [38;5;3m[Init seed DB] [39m[32mAlready seeding in org role[39m
+[32m[Nest] 82663  - [39m01/12/2026, 11:38:08 PM [32m    LOG[39m [38;5;3m[Init seed DB] [39m[32mAlready seeding in agent type[39m
+[32m[Nest] 82663  - [39m01/12/2026, 11:38:08 PM [32m    LOG[39m [38;5;3m[Init seed DB] [39m[32mAlready seeding in user[39m
+[32m[Nest] 82663  - [39m01/12/2026, 11:38:08 PM [32m    LOG[39m [38;5;3m[Init seed DB] [39m[32mAlready seeding in organization[39m
+[32m[Nest] 82663  - [39m01/12/2026, 11:38:08 PM [32m    LOG[39m [38;5;3m[Init seed DB] [39m[32mAlready seeding in org_roles[39m
+[32m[Nest] 82663  - [39m01/12/2026, 11:38:08 PM [32m    LOG[39m [38;5;3m[Init seed DB] [39m[32mAlready seeding in org agent type[39m
+[32m[Nest] 82663  - [39m01/12/2026, 11:38:08 PM [32m    LOG[39m [38;5;3m[Init seed DB] [39m[32mNo changes in ledger data[39m
+[32m[Nest] 82663  - [39m01/12/2026, 11:38:08 PM [32m    LOG[39m [38;5;3m[Init seed DB] [39m[32mAlready seeding in ledger config[39m
+[32m[Nest] 82663  - [39m01/12/2026, 11:38:08 PM [32m    LOG[39m [38;5;3m[Init seed DB] [39m[32mAlready seeding in user role[39m
+[32m[Nest] 82663  - [39m01/12/2026, 11:38:08 PM [32m    LOG[39m [38;5;3m[Init seed DB] [39m[32mNo new DIDs to migrate in migrateOrgAgentDids[39m
+[32m[Nest] 82663  - [39m01/12/2026, 11:38:08 PM [32m    LOG[39m [38;5;3m[Init seed DB] [39m[32mNo schemas to update[39m
+[32m[Nest] 82663  - [39m01/12/2026, 11:38:08 PM [32m    LOG[39m [38;5;3m[Init seed DB] [39m[32mShell script output: /home/adam/cdpi/credebl/install/local-deployment/platform/libs/prisma-service
+Checking if countries contains data...
+countries contains 250 rows. Skipping import.
+Checking if states contains data...
+states contains 5091 rows. Skipping import.
+Checking if cities contains data...
+cities contains 150661 rows. Skipping import.
+CSV import process completed.
+[39m
+[32m[Nest] 82663  - [39m01/12/2026, 11:38:08 PM [32m    LOG[39m [38;5;3m[Init seed DB] [39m[32mShell script output: Updating clientId and clientSecret where they are NULL...
+UPDATE 0
+There is nothing to update for the clientId and clientSecret.
+[39m
+
+🌱  The seed command has been executed.
+🔍 Setting up Schema Service...
+schema-file-server
+b2c818f69b20e63bdae1d170700ebdb42fde7edeb5cafb97a3a75affa0aba6bf
+✅ Schema file server started successfully
+🔍 Updating environment with Schema File Server details...
+Enter password to grant execute permission for saving schemas...
+✅ Schema File Server configuration updated successfully
+Configured .env file for local execution
+
+
+=== Deployment started at Mon Jan 12 11:56:32 PM EAT 2026 ===
+🔍 
+ Setting up CREDEBL Platform...
+Provide branch name you want to work on: You entered branch: main
+📁 Platform directory exists, pulling latest changes...
+Already on 'main'
+M	agent.env
+M	apps/agent-provisioning/AFJ/port-file/last-admin-port.txt
+M	apps/agent-provisioning/AFJ/port-file/last-inbound-port.txt
+M	docker-compose.redis.yml
+M	libs/prisma-service/prisma/data/credebl-master-table/credebl-master-table.json
+Your branch is up to date with 'origin/main'.
+From https://github.com/credebl/platform
+ * branch              main       -> FETCH_HEAD
+Already up to date.
+✅ .env already exists. Skipping copy and checking existing values...
+Assigned ports:
+PostgreSQL: 5432
+API Gateway: 5000
+Redis: 6380
+Keycloak: 8080
+Schema Server: 4001
+Studio: 3000
+✅ Updated .env file and docker-compose available ports
+📁 Preparing environment files...
+
+ Host IP fetched 192.168.1.105
+Found existing SENDGRID_API_KEY (hidden). Continue with this value? (yes/no): ✅ Using existing SENDGRID_API_KEY
+Enter SendGrid sender email: 
+# Provide S3 credentials, required for storing connection URLs
+Found existing AWS_S3_STOREOBJECT_ACCESS_KEY (hidden). Continue with this value? (yes/no): ✅ Using existing AWS_S3_STOREOBJECT_ACCESS_KEY
+Found existing AWS_S3_STOREOBJECT_SECRET_KEY (hidden). Continue with this value? (yes/no): ✅ Using existing AWS_S3_STOREOBJECT_SECRET_KEY
+Found existing AWS_S3_STOREOBJECT_REGION=us-east-2. Continue with this value? (yes/no): ✅ Using existing AWS_S3_STOREOBJECT_REGION
+Found existing AWS_S3_STOREOBJECT_BUCKET=amzn-credebl-inji-bucket. Continue with this value? (yes/no): Please enter only 'yes' or 'no'.
+Found existing AWS_S3_STOREOBJECT_BUCKET=amzn-credebl-inji-bucket. Continue with this value? (yes/no): ✅ Using existing AWS_S3_STOREOBJECT_BUCKET
+Do you want to use bulk issuance? (yes/no): Do you want to upload org logos? (yes/no): Do you want to use an existing PostgreSQL server? (yes/no): ✅ Environment file configured successfully.
+Do you want to use an existing PostgreSQL server for Keycloak? (yes/no): 📁 Keycloak DB will be created in credebl-postgres.
+✅ Keycloak database initialization SQL created.
+🔍 Detected Ubuntu. Checking Docker installation...
+✅ Docker and Docker Compose are already installed.
+🔍 Checking Terraform installation...
+✅ Terraform is already installed.
+🛡️ Setting up Keycloak...
+time="2026-01-12T23:57:42+03:00" level=warning msg="/home/adam/cdpi/credebl/install/local-deployment/platform/docker-compose.postgres.yml: the attribute `version` is obsolete, it will be ignored, please remove it to avoid potential confusion"
+time="2026-01-12T23:57:42+03:00" level=warning msg="Found orphan containers ([platform-redis-1 nats]) for this project. If you removed or renamed this service in your compose file, you can run this command with the --remove-orphans flag to clean it up."
+ Container credebl-postgres  Recreate
+ Container credebl-postgres  Recreated
+ Container credebl-postgres  Starting
+ Container credebl-postgres  Started
+time="2026-01-12T23:57:42+03:00" level=warning msg="/home/adam/cdpi/credebl/install/local-deployment/platform/docker-compose.nats.yml: the attribute `version` is obsolete, it will be ignored, please remove it to avoid potential confusion"
+time="2026-01-12T23:57:42+03:00" level=warning msg="Found orphan containers ([credebl-postgres platform-redis-1]) for this project. If you removed or renamed this service in your compose file, you can run this command with the --remove-orphans flag to clean it up."
+ Container nats  Running
+time="2026-01-12T23:57:42+03:00" level=warning msg="/home/adam/cdpi/credebl/install/local-deployment/platform/docker-compose.redis.yml: the attribute `version` is obsolete, it will be ignored, please remove it to avoid potential confusion"
+time="2026-01-12T23:57:42+03:00" level=warning msg="Found orphan containers ([credebl-postgres nats]) for this project. If you removed or renamed this service in your compose file, you can run this command with the --remove-orphans flag to clean it up."
+ Container platform-redis-1  Recreate
+ Container platform-redis-1  Recreated
+ Container platform-redis-1  Starting
+ Container platform-redis-1  Started
+📁 Found existing Keycloak container (credebl-keycloak) with matching version
+📁 Port mismatch (current: 0.0.0.0
+[, desired: 8080). Recreating container...
+credebl-keycloak
+🔍 Starting new Keycloak container on port 8080...
+5b6cd75358c6432649642e7741fdde3c5c9f1117d72bc983fcfba340c6505f67
+✅ Keycloak started successfully
+🔍 Setting up Keycloak via Terraform...
+✅ Keycloak root URL set to "http://192.168.1.105:8080" and redirect url set to "http://192.168.1.105:3000"
+[0m[1mInitializing the backend...[0m
+[0m[1mInitializing provider plugins...[0m
+- Reusing previous version of mrparkers/keycloak from the dependency lock file
+- Reusing previous version of hashicorp/local from the dependency lock file
+- Using previously-installed mrparkers/keycloak v4.4.0
+- Using previously-installed hashicorp/local v2.6.1
+
+[0m[1m[32mTerraform has been successfully initialized![0m[32m[0m
+[0m[32m
+You may now begin working with Terraform. Try running "terraform plan" to see
+any changes that are required for your infrastructure. All Terraform commands
+should now work.
+
+If you ever set or change modules or backend configuration for Terraform,
+rerun this command to reinitialize your working directory. If you forget, other
+commands will detect it and remind you to do so if necessary.[0m
+📁 Waiting 30 seconds for Keycloak to be fully ready...
+[0m[1mkeycloak_realm.my_realm: Refreshing state... [id=credebl-platform][0m
+[0m[1mkeycloak_role.holder_role: Refreshing state... [id=a861359d-ac8e-44f3-b7ed-be4c2cfcee83][0m
+[0m[1mdata.keycloak_openid_client.realm_management_client: Reading...[0m[0m
+[0m[1mkeycloak_openid_client.my_client: Refreshing state... [id=f0232bf6-26a4-4937-95c5-9df05c13191f][0m
+[0m[1mdata.keycloak_openid_client.realm_management_client: Read complete after 0s [id=3fadb522-2a48-483d-af63-cb502d039480][0m
+[0m[1mkeycloak_openid_client_service_account_role.create_client_role: Refreshing state... [id=d9566424-1acc-40af-bd75-67d17a424d40/f39855b8-33cd-4413-9006-6664108d4750][0m
+[0m[1mkeycloak_openid_client_service_account_role.query_users_role: Refreshing state... [id=d9566424-1acc-40af-bd75-67d17a424d40/4bca4725-376c-4a1f-a291-039c46310c00][0m
+[0m[1mkeycloak_openid_client_service_account_role.query_clients_role: Refreshing state... [id=d9566424-1acc-40af-bd75-67d17a424d40/81305ce0-f010-4949-84c0-a25b9c0b448b][0m
+[0m[1mkeycloak_openid_client_service_account_role.manage_clients_role: Refreshing state... [id=d9566424-1acc-40af-bd75-67d17a424d40/722ec516-2471-4122-9537-874c7e748881][0m
+[0m[1mkeycloak_openid_client_service_account_role.view_users_role: Refreshing state... [id=d9566424-1acc-40af-bd75-67d17a424d40/f4b268a7-b1ab-49d7-b7db-e16980f2b86e][0m
+[0m[1mkeycloak_openid_client_service_account_role.view_clients_role: Refreshing state... [id=d9566424-1acc-40af-bd75-67d17a424d40/891519a0-7bb4-460f-857b-40199b4555f4][0m
+[0m[1mkeycloak_openid_client_service_account_role.manage_users_role: Refreshing state... [id=d9566424-1acc-40af-bd75-67d17a424d40/2fe9d92c-23cd-477d-ace9-fc9c7ada650c][0m
+[0m[1mlocal_file.env_file: Refreshing state... [id=e5b997feb42368a3bf3c30d0201d2a5d2c24d666][0m
+
+Terraform used the selected providers to generate the following execution
+plan. Resource actions are indicated with the following symbols:
+  [33m~[0m update in-place[0m
+[31m-[0m/[32m+[0m destroy and then create replacement[0m
+ [36m<=[0m read (data resources)[0m
+
+Terraform will perform the following actions:
+
+[1m  # data.keycloak_openid_client.admin_client[0m will be read during apply
+  # (depends on a resource or a module with changes pending)
+[0m [36m<=[0m[0m data "keycloak_openid_client" "admin_client" {
+      [32m+[0m[0m access_token_lifespan                      = (known after apply)
+      [32m+[0m[0m access_type                                = (known after apply)
+      [32m+[0m[0m admin_url                                  = (known after apply)
+      [32m+[0m[0m authentication_flow_binding_overrides      = (known after apply)
+      [32m+[0m[0m authorization                              = (known after apply)
+      [32m+[0m[0m backchannel_logout_revoke_offline_sessions = (known after apply)
+      [32m+[0m[0m backchannel_logout_session_required        = (known after apply)
+      [32m+[0m[0m backchannel_logout_url                     = (known after apply)
+      [32m+[0m[0m base_url                                   = (known after apply)
+      [32m+[0m[0m client_authenticator_type                  = (known after apply)
+      [32m+[0m[0m client_id                                  = "adminClient"
+      [32m+[0m[0m client_offline_session_idle_timeout        = (known after apply)
+      [32m+[0m[0m client_offline_session_max_lifespan        = (known after apply)
+      [32m+[0m[0m client_secret                              = (sensitive value)
+      [32m+[0m[0m client_session_idle_timeout                = (known after apply)
+      [32m+[0m[0m client_session_max_lifespan                = (known after apply)
+      [32m+[0m[0m consent_required                           = (known after apply)
+      [32m+[0m[0m description                                = (known after apply)
+      [32m+[0m[0m direct_access_grants_enabled               = (known after apply)
+      [32m+[0m[0m enabled                                    = (known after apply)
+      [32m+[0m[0m exclude_session_state_from_auth_response   = (known after apply)
+      [32m+[0m[0m extra_config                               = (known after apply)
+      [32m+[0m[0m frontchannel_logout_enabled                = (known after apply)
+      [32m+[0m[0m frontchannel_logout_url                    = (known after apply)
+      [32m+[0m[0m full_scope_allowed                         = (known after apply)
+      [32m+[0m[0m id                                         = (known after apply)
+      [32m+[0m[0m implicit_flow_enabled                      = (known after apply)
+      [32m+[0m[0m login_theme                                = (known after apply)
+      [32m+[0m[0m name                                       = (known after apply)
+      [32m+[0m[0m pkce_code_challenge_method                 = (known after apply)
+      [32m+[0m[0m realm_id                                   = "credebl-platform"
+      [32m+[0m[0m resource_server_id                         = (known after apply)
+      [32m+[0m[0m root_url                                   = (known after apply)
+      [32m+[0m[0m service_account_user_id                    = (known after apply)
+      [32m+[0m[0m service_accounts_enabled                   = (known after apply)
+      [32m+[0m[0m standard_flow_enabled                      = (known after apply)
+      [32m+[0m[0m use_refresh_tokens                         = (known after apply)
+      [32m+[0m[0m use_refresh_tokens_client_credentials      = (known after apply)
+      [32m+[0m[0m valid_post_logout_redirect_uris            = (known after apply)
+      [32m+[0m[0m valid_redirect_uris                        = (known after apply)
+      [32m+[0m[0m web_origins                                = (known after apply)
+    }
+
+[1m  # keycloak_openid_client.my_client[0m will be updated in-place
+[0m  [33m~[0m[0m resource "keycloak_openid_client" "my_client" {
+        id                                         = "f0232bf6-26a4-4937-95c5-9df05c13191f"
+        name                                       = [90mnull[0m[0m
+      [33m~[0m[0m root_url                                   = "http://192.168.1.105:8081" [33m->[0m[0m "http://192.168.1.105:8080"
+      [33m~[0m[0m valid_redirect_uris                        = [
+          [31m-[0m[0m "http://192.168.1.105:3001",
+          [32m+[0m[0m "http://192.168.1.105:3000",
+        ]
+      [33m~[0m[0m web_origins                                = [
+          [31m-[0m[0m "http://192.168.1.105:8081",
+          [32m+[0m[0m "http://192.168.1.105:8080",
+        ]
+        [90m# (37 unchanged attributes hidden)[0m[0m
+    }
+
+[1m  # local_file.env_file[0m must be [1m[31mreplaced[0m
+[0m[31m-[0m/[32m+[0m[0m resource "local_file" "env_file" {
+      [33m~[0m[0m content              = (sensitive value) [31m# forces replacement[0m[0m
+      [33m~[0m[0m content_base64sha256 = "Z4naA/77Ssq/Oa8Q+W8kpeiRy6BY96+5wPJ37NF8Pl4=" -> (known after apply)
+      [33m~[0m[0m content_base64sha512 = "IBjnZSFuogoGepuoCNOAuBVqoE6ASPzgWGjvMbaDUCpy9A54sRifBEufyKTXaZFeAOlHCnAtKSt7uplkyNtRcw==" -> (known after apply)
+      [33m~[0m[0m content_md5          = "eecde00918d385fb30a446010309dd5d" -> (known after apply)
+      [33m~[0m[0m content_sha1         = "e5b997feb42368a3bf3c30d0201d2a5d2c24d666" -> (known after apply)
+      [33m~[0m[0m content_sha256       = "6789da03fefb4acabf39af10f96f24a5e891cba058f7afb9c0f277ecd17c3e5e" -> (known after apply)
+      [33m~[0m[0m content_sha512       = "2018e765216ea20a067a9ba808d380b8156aa04e8048fce05868ef31b683502a72f40e78b1189f044b9fc8a4d769915e00e9470a702d292b7bba9964c8db5173" -> (known after apply)
+      [33m~[0m[0m id                   = "e5b997feb42368a3bf3c30d0201d2a5d2c24d666" -> (known after apply)
+        [90m# (3 unchanged attributes hidden)[0m[0m
+    }
+
+[1mPlan:[0m [0m1 to add, 1 to change, 1 to destroy.
+
+Changes to Outputs:
+  [33m~[0m[0m admin_client_secret = (sensitive value)
+[0m[1mlocal_file.env_file: Destroying... [id=e5b997feb42368a3bf3c30d0201d2a5d2c24d666][0m[0m
+[0m[1mlocal_file.env_file: Destruction complete after 0s[0m
+[0m[1mkeycloak_openid_client.my_client: Modifying... [id=f0232bf6-26a4-4937-95c5-9df05c13191f][0m[0m
+[0m[1mkeycloak_openid_client.my_client: Modifications complete after 0s [id=f0232bf6-26a4-4937-95c5-9df05c13191f][0m
+[0m[1mdata.keycloak_openid_client.admin_client: Reading...[0m[0m
+[0m[1mdata.keycloak_openid_client.admin_client: Read complete after 0s [id=f0232bf6-26a4-4937-95c5-9df05c13191f][0m
+[0m[1mlocal_file.env_file: Creating...[0m[0m
+[0m[1mlocal_file.env_file: Creation complete after 0s [id=e5b997feb42368a3bf3c30d0201d2a5d2c24d666][0m
+[0m[1m[32m
+Apply complete! Resources: 1 added, 1 changed, 1 destroyed.[0m
+[0m[1m[32m
+Outputs:
+
+[0madmin_client_secret = <sensitive>
+✅ Keycloak setup completed via Terraform.
+🔍 Updating environment with Keycloak secret...
+✅ Keycloak secret updated in .env successfully.
+🔍 Generating JWT secret...
+✅ Node.js already installed
+✅ JWT secret generated and stored successfully
+🔍 Pulling credo-controller image...
+latest: Pulling from credebl/credo-controller
+Digest: sha256:ccaa35b3d43b9f509f1eacb66545ed3b3d1271164323744f3d397f4e0c07aa50
+Status: Image is up to date for ghcr.io/credebl/credo-controller:latest
+ghcr.io/credebl/credo-controller:latest
+✅ credo-controller image pulled successfully.
+🔍 Updating master table configuration...
+
+changed 1 package in 952ms
+
+1 package is looking for funding
+  run `npm fund` for details
+Scope: all 3 workspace projects
+Lockfile is up to date, resolution step is skipped
+Already up to date
+
+. prepare$ husky install
+. prepare: husky - Git hooks installed
+. prepare: Done
+Done in 989ms
+✅ Master table configuration updated successfully.
+Environment variables loaded from ../../.env
+Prisma schema loaded from prisma/schema.prisma
+
+✔ Generated Prisma Client (v5.22.0) to ./../../node_modules/.pnpm/@prisma+client@5.22.0_prisma@5.22.0/node_modules/@prisma/client in 299ms
+
+Start by importing your Prisma Client (See: https://pris.ly/d/importing-client)
+
+Help us improve the Prisma ORM for everyone. Share your feedback in a short 2-min survey: https://pris.ly/orm/survey/release-5-22
+
+Environment variables loaded from ../../.env
+Prisma schema loaded from prisma/schema.prisma
+Datasource "db": PostgreSQL database "credebl", schema "public" at "192.168.1.105:5432"
+
+104 migrations found in prisma/migrations
+
+
+No pending migrations to apply.
+Environment variables loaded from ../../.env
+Running seed command `ts-node prisma/seed.ts` ...
+prisma:info Starting a postgresql pool with 17 connections.
+[32m[Nest] 101055  - [39m01/12/2026, 11:59:27 PM [32m    LOG[39m [38;5;3m[Init seed DB] [39m[32mAlready seeding in platform config[39m
+[32m[Nest] 101055  - [39m01/12/2026, 11:59:27 PM [32m    LOG[39m [38;5;3m[Init seed DB] [39m[32mAlready seeding in org role[39m
+[32m[Nest] 101055  - [39m01/12/2026, 11:59:27 PM [32m    LOG[39m [38;5;3m[Init seed DB] [39m[32mAlready seeding in agent type[39m
+[32m[Nest] 101055  - [39m01/12/2026, 11:59:27 PM [32m    LOG[39m [38;5;3m[Init seed DB] [39m[32mAlready seeding in user[39m
+[32m[Nest] 101055  - [39m01/12/2026, 11:59:27 PM [32m    LOG[39m [38;5;3m[Init seed DB] [39m[32mAlready seeding in organization[39m
+[32m[Nest] 101055  - [39m01/12/2026, 11:59:27 PM [32m    LOG[39m [38;5;3m[Init seed DB] [39m[32mAlready seeding in org_roles[39m
+[32m[Nest] 101055  - [39m01/12/2026, 11:59:27 PM [32m    LOG[39m [38;5;3m[Init seed DB] [39m[32mAlready seeding in org agent type[39m
+[32m[Nest] 101055  - [39m01/12/2026, 11:59:27 PM [32m    LOG[39m [38;5;3m[Init seed DB] [39m[32mNo changes in ledger data[39m
+[32m[Nest] 101055  - [39m01/12/2026, 11:59:27 PM [32m    LOG[39m [38;5;3m[Init seed DB] [39m[32mAlready seeding in ledger config[39m
+[32m[Nest] 101055  - [39m01/12/2026, 11:59:27 PM [32m    LOG[39m [38;5;3m[Init seed DB] [39m[32mAlready seeding in user role[39m
+[32m[Nest] 101055  - [39m01/12/2026, 11:59:27 PM [32m    LOG[39m [38;5;3m[Init seed DB] [39m[32mNo new DIDs to migrate in migrateOrgAgentDids[39m
+[32m[Nest] 101055  - [39m01/12/2026, 11:59:27 PM [32m    LOG[39m [38;5;3m[Init seed DB] [39m[32mNo schemas to update[39m
+[32m[Nest] 101055  - [39m01/12/2026, 11:59:27 PM [32m    LOG[39m [38;5;3m[Init seed DB] [39m[32mShell script output: /home/adam/cdpi/credebl/install/local-deployment/platform/libs/prisma-service
+Checking if countries contains data...
+countries contains 250 rows. Skipping import.
+Checking if states contains data...
+states contains 5091 rows. Skipping import.
+Checking if cities contains data...
+cities contains 150661 rows. Skipping import.
+CSV import process completed.
+[39m
+[32m[Nest] 101055  - [39m01/12/2026, 11:59:27 PM [32m    LOG[39m [38;5;3m[Init seed DB] [39m[32mShell script output: Updating clientId and clientSecret where they are NULL...
+UPDATE 0
+There is nothing to update for the clientId and clientSecret.
+[39m
+
+🌱  The seed command has been executed.
+🔍 Setting up Schema Service...
+schema-file-server
+1a3aa2c1b6aa7cf528160ca32e23731a3763a277bdfca62375ea2169f77e50ae
+✅ Schema file server started successfully
+🔍 Updating environment with Schema File Server details...
+Enter password to grant execute permission for saving schemas...
+✅ Schema File Server configuration updated successfully
+Configured .env file for local execution
