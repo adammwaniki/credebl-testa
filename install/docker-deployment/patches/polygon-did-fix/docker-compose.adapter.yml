@@ -1,0 +1,34 @@
+version: '3.8'
+
+services:
+  credebl-inji-adapter:
+    build:
+      context: ./adapter
+      dockerfile: Dockerfile
+    image: credebl-inji-adapter:latest
+    container_name: credebl-inji-adapter
+    restart: unless-stopped
+    ports:
+      - "8085:8085"
+    environment:
+      - ADAPTER_PORT=8085
+      - CREDEBL_AGENT_URL=${CREDEBL_AGENT_URL:-http://host.docker.internal:8004}
+      - CREDEBL_API_KEY=${CREDEBL_API_KEY}
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    healthcheck:
+      test: ["CMD", "node", "-e", "const http = require('http'); http.get('http://localhost:8085/health', (r) => process.exit(r.statusCode === 200 ? 0 : 1)).on('error', () => process.exit(1))"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 5s
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
+
+networks:
+  default:
+    name: credebl-network
+    external: true

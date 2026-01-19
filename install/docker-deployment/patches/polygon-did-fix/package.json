@@ -1,0 +1,14 @@
+{
+  "name": "polygon-did-fix",
+  "version": "1.0.0",
+  "description": "Scripts for updating polygon DID documents",
+  "scripts": {
+    "update-did": "node update-did-document.js"
+  },
+  "dependencies": {
+    "@injistack/pixelpass": "^0.8.0-RC2",
+    "@mosip/pixelpass": "^0.6.0",
+    "ethers": "^5.7.2",
+    "qrcode": "^1.5.4"
+  }
+}
