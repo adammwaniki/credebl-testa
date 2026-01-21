@@ -97,9 +97,13 @@ echo -e "  ${GREEN}Copied: docker-compose.yml${NC}"
 cp start.sh stop.sh "$PACKAGE_DIR/" 2>/dev/null || true
 echo -e "  ${GREEN}Copied: start.sh, stop.sh${NC}"
 
-# Patches directory (adapter, inji-verify configs)
-cp -r patches "$PACKAGE_DIR/" 2>/dev/null || true
-echo -e "  ${GREEN}Copied: patches/${NC}"
+# Patches directory (only the necessary parts)
+mkdir -p "$PACKAGE_DIR/patches/polygon-did-fix"
+mkdir -p "$PACKAGE_DIR/patches/inji-verify-official"
+cp -r patches/polygon-did-fix/adapter "$PACKAGE_DIR/patches/polygon-did-fix/"
+cp -r patches/inji-verify-official/docker-compose "$PACKAGE_DIR/patches/inji-verify-official/"
+echo -e "  ${GREEN}Copied: patches/polygon-did-fix/adapter/${NC}"
+echo -e "  ${GREEN}Copied: patches/inji-verify-official/docker-compose/${NC}"
 
 # Copy master table
 cp credebl-master-table.json "$PACKAGE_DIR/" 2>/dev/null || true
