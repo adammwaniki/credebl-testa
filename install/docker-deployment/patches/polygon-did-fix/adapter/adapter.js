@@ -22,27 +22,129 @@ const UPSTREAM_VERIFY_SERVICE = process.env.UPSTREAM_VERIFY_SERVICE || 'http://v
 // ============================================================================
 
 /**
- * Check if we should handle this credential (did:polygon with EcdsaSecp256k1Signature2019)
- * Returns true if this adapter should handle verification, false if should forward upstream
+ * DID methods that CREDEBL agent (credo-ts) can handle for verification
  */
-function shouldHandleCredential(credential) {
-    if (!credential) return false;
+const CREDEBL_SUPPORTED_DID_METHODS = [
+    'did:polygon',  // via @ayanworks/credo-polygon-w3c-module
+    'did:key',      // built-in credo-ts
+    'did:web',      // built-in credo-ts
+    'did:jwk',      // built-in credo-ts
+    'did:peer',     // built-in credo-ts
+    'did:indy',     // via @credo-ts/indy-vdr
+    'did:sov',      // via @credo-ts/indy-vdr
+];
 
-    // Check issuer is did:polygon
+/**
+ * Proof types that Inji verify-service supports
+ * If proof type is NOT in this list, we should use CREDEBL agent
+ */
+const INJI_SUPPORTED_PROOF_TYPES = [
+    'Ed25519Signature2018',
+    'Ed25519Signature2020',
+    'RsaSignature2018',
+    'JsonWebSignature2020',
+];
+
+/**
+ * DID methods that Inji verify-service can handle
+ */
+const INJI_SUPPORTED_DID_METHODS = [
+    'did:web',
+    'did:key',
+    'did:jwk',
+];
+
+/**
+ * Extract DID method from a DID string
+ * e.g., "did:polygon:0x123" -> "did:polygon"
+ */
+function extractDidMethod(did) {
+    if (!did || typeof did !== 'string') return null;
+    const parts = did.split(':');
+    if (parts.length >= 2 && parts[0] === 'did') {
+        return `did:${parts[1]}`;
+    }
+    return null;
+}
+
+/**
+ * Determine routing strategy for a credential
+ * Returns: { handler: 'credebl' | 'upstream' | 'unknown', reason: string }
+ */
+function determineRoutingStrategy(credential) {
+    if (!credential) {
+        return { handler: 'unknown', reason: 'No credential provided' };
+    }
+
+    // Extract issuer DID
     const issuer = typeof credential.issuer === 'string'
         ? credential.issuer
         : credential.issuer?.id;
 
-    const isPolygonDid = issuer && issuer.startsWith('did:polygon:');
-
-    // Check proof type is EcdsaSecp256k1Signature2019
+    const didMethod = extractDidMethod(issuer);
     const proofType = credential.proof?.type;
-    const isSecp256k1Proof = proofType === 'EcdsaSecp256k1Signature2019';
 
-    console.log('[ADAPTER] Credential detection - issuer:', issuer, 'proofType:', proofType);
-    console.log('[ADAPTER] isPolygonDid:', isPolygonDid, 'isSecp256k1Proof:', isSecp256k1Proof);
+    console.log('[ADAPTER] Routing analysis - issuer:', issuer, 'didMethod:', didMethod, 'proofType:', proofType);
 
-    return isPolygonDid && isSecp256k1Proof;
+    // Strategy 1: If proof type is not supported by Inji, use CREDEBL
+    if (proofType && !INJI_SUPPORTED_PROOF_TYPES.includes(proofType)) {
+        // Check if CREDEBL can handle this DID method
+        if (didMethod && CREDEBL_SUPPORTED_DID_METHODS.includes(didMethod)) {
+            return {
+                handler: 'credebl',
+                reason: `Proof type '${proofType}' not supported by upstream, using CREDEBL agent`
+            };
+        }
+        return {
+            handler: 'unknown',
+            reason: `Proof type '${proofType}' not supported by either service`
+        };
+    }
+
+    // Strategy 2: DID method based routing
+    if (didMethod) {
+        // DID methods only CREDEBL handles (not Inji)
+        const credeblOnlyMethods = ['did:polygon', 'did:indy', 'did:sov', 'did:peer'];
+        if (credeblOnlyMethods.includes(didMethod)) {
+            return {
+                handler: 'credebl',
+                reason: `DID method '${didMethod}' handled by CREDEBL agent`
+            };
+        }
+
+        // DID methods both can handle - prefer upstream for standard proofs
+        if (INJI_SUPPORTED_DID_METHODS.includes(didMethod) &&
+            INJI_SUPPORTED_PROOF_TYPES.includes(proofType)) {
+            return {
+                handler: 'upstream',
+                reason: `DID method '${didMethod}' with '${proofType}' - forwarding to upstream`
+            };
+        }
+
+        // CREDEBL can handle but Inji can't
+        if (CREDEBL_SUPPORTED_DID_METHODS.includes(didMethod)) {
+            return {
+                handler: 'credebl',
+                reason: `DID method '${didMethod}' handled by CREDEBL agent`
+            };
+        }
+    }
+
+    // Default: try upstream for unknown credentials
+    return {
+        handler: 'upstream',
+        reason: 'Unknown credential type, trying upstream'
+    };
+}
+
+/**
+ * Check if we should handle this credential via CREDEBL agent
+ * Returns true if this adapter should handle verification, false if should forward upstream
+ */
+function shouldHandleCredential(credential) {
+    const strategy = determineRoutingStrategy(credential);
+    console.log('[ADAPTER] Routing decision:', strategy.handler, '-', strategy.reason);
+    return strategy.handler === 'credebl';
 }
 
 /**
