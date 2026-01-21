@@ -3,7 +3,7 @@
       "externalIp": "192.168.1.105",
       "inboundEndpoint": "192.168.1.105",
       "username": "credebl",
-      "sgApiKey": "YOUR_SENDGRID_API_KEY_HERE",
+      "sgApiKey": "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",
       "emailFrom": "adam@mwaniki.dev",
       "apiEndpoint": "http://192.168.1.105:5000",
       "tailsFileServer": "http://192.168.1.105:5000"

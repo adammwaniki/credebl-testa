@@ -1,0 +1,20 @@
+migration-package/
+# Inji Verify official repo (only docker-compose/ is needed)
+patches/inji-verify-official/.github/
+patches/inji-verify-official/api-test/
+patches/inji-verify-official/db_scripts/
+patches/inji-verify-official/db_upgrade_script/
+patches/inji-verify-official/deploy/
+patches/inji-verify-official/docs/
+patches/inji-verify-official/helm/
+patches/inji-verify-official/inji-verify-sdk/
+patches/inji-verify-official/ui-test/
+patches/inji-verify-official/utilities/
+patches/inji-verify-official/verify-service/
+patches/inji-verify-official/verify-ui/
+patches/inji-verify-official/pom.xml
+patches/inji-verify-official/LICENSE
+patches/inji-verify-official/README.md
+patches/inji-verify-official/.gitignore
+# Old config attempts
+patches/inji-verify-config/
