@@ -39,7 +39,7 @@ The verification adapter enables credential verification in environments with li
 
 ### Use Case
 
-Remote village deployment where field workers need to verify beneficiary credentials without reliable internet connectivity.
+Remote village deployment where students need to verify education credentials without reliable internet connectivity.
 
 ---
 
