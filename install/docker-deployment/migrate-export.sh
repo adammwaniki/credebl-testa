@@ -228,7 +228,7 @@ echo -e "  ${GREEN}Created required directories${NC}"
 # Step 4: Start infrastructure services first
 echo -e "${YELLOW}[4/6] Starting infrastructure services...${NC}"
 
-docker compose up -d credebl-postgres credebl-nats credebl-redis
+docker compose up -d postgres nats redis
 echo "  Waiting for PostgreSQL to be ready..."
 sleep 10
 

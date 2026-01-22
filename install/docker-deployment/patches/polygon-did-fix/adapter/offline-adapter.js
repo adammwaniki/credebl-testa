@@ -1131,10 +1131,12 @@ const server = http.createServer(async (req, res) => {
                 // 1. { verifiableCredentials: [credential] } - Inji Verify array format
                 // 2. { credential: credential } - wrapped format
                 // 3. { verifiableCredential: credential } - singular format
-                // 4. credential directly (has @context) - raw credential
+                // 4. { credentialDocument: credential } - Inji Verify UI format
+                // 5. credential directly (has @context) - raw credential
                 let credential = request.verifiableCredentials?.[0]
                     || request.credential
-                    || request.verifiableCredential;
+                    || request.verifiableCredential
+                    || request.credentialDocument;
 
                 // Check if request itself is a credential (raw format from Inji UI)
                 if (!credential && request['@context']) {
