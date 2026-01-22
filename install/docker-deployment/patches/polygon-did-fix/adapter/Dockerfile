@@ -1,23 +1,44 @@
 FROM node:20-alpine
 
 LABEL maintainer="CREDEBL"
-LABEL description="Verification adapter for did:polygon credentials with upstream forwarding"
+LABEL description="Offline-capable verification adapter with issuer caching and context proxy"
 
 WORKDIR /app
 
-# Copy adapter
+# Create directories
+RUN mkdir -p /app/cache /app/contexts
+
+# Copy adapters
 COPY adapter.js .
+COPY offline-adapter.js .
+COPY context-proxy.js .
+
+# Copy cached JSON-LD contexts
+COPY contexts/ /app/contexts/
 
 # Environment variables with defaults
 ENV ADAPTER_PORT=8085
+ENV CONTEXT_PROXY_PORT=8086
 ENV CREDEBL_AGENT_URL=http://localhost:8004
 ENV CREDEBL_API_KEY=supersecret-that-too-16chars
 ENV UPSTREAM_VERIFY_SERVICE=http://verify-service:8080
+ENV POLYGON_RPC_URL=https://rpc-amoy.polygon.technology
+ENV CACHE_FILE=/app/cache/issuer-cache.json
+ENV CACHE_TTL_MS=604800000
+ENV CONTEXTS_DIR=/app/contexts
 
-EXPOSE 8085
+# Use offline adapter by default
+ENV USE_OFFLINE_ADAPTER=true
+ENV RUN_CONTEXT_PROXY=true
+
+EXPOSE 8085 8086
+
+# Volume for persistent cache
+VOLUME /app/cache
 
 # Health check
 HEALTHCHECK --interval=30s --timeout=3s --start-period=5s --retries=3 \
   CMD node -e "require('http').get('http://localhost:8085/health', (r) => process.exit(r.statusCode === 200 ? 0 : 1))"
 
-CMD ["node", "adapter.js"]
+# Start script - runs context proxy in background and main adapter
+CMD ["sh", "-c", "if [ \"$RUN_CONTEXT_PROXY\" = \"true\" ]; then node context-proxy.js & fi; if [ \"$USE_OFFLINE_ADAPTER\" = \"true\" ]; then node offline-adapter.js; else node adapter.js; fi"]

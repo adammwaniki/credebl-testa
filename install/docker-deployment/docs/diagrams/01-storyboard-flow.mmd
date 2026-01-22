@@ -1,0 +1,37 @@
+%%{init: {'theme': 'base', 'themeVariables': { 'primaryColor': '#4F46E5', 'primaryTextColor': '#fff', 'primaryBorderColor': '#3730A3', 'lineColor': '#6366F1', 'secondaryColor': '#E0E7FF', 'tertiaryColor': '#F5F3FF'}}}%%
+
+flowchart LR
+    subgraph Phase1["Phase 1: Setup"]
+        A1[Admin Registration] --> A2[Organization Creation]
+        A2 --> A3[Agent Provisioning]
+        A3 --> A4[Schema Definition]
+    end
+
+    subgraph Phase2["Phase 2: Issuance"]
+        B1[Holder Registration] --> B2[Credential Request]
+        B2 --> B3[Credential Signing]
+        B3 --> B4[Credential Delivery]
+    end
+
+    subgraph Phase3["Phase 3: Holding"]
+        C1[Store in Wallet] --> C2[Generate QR Code]
+        C2 --> C3[Display/Share]
+    end
+
+    subgraph Phase4["Phase 4: Verification"]
+        D1[Scan QR Code]
+        D1 --> D2{Online?}
+        D2 -->|Yes| D3[Online Verification]
+        D2 -->|No| D4[Offline Verification]
+        D3 --> D5[Result: SUCCESS]
+        D4 --> D5
+    end
+
+    Phase1 --> Phase2
+    Phase2 --> Phase3
+    Phase3 --> Phase4
+
+    style Phase1 fill:#DBEAFE,stroke:#2563EB
+    style Phase2 fill:#D1FAE5,stroke:#059669
+    style Phase3 fill:#FEF3C7,stroke:#D97706
+    style Phase4 fill:#FCE7F3,stroke:#DB2777

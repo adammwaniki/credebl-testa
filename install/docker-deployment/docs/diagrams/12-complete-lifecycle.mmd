@@ -1,0 +1,70 @@
+%%{init: {'theme': 'base', 'themeVariables': { 'fontSize': '14px'}}}%%
+
+flowchart TB
+    subgraph Setup["PHASE 1: SETUP"]
+        direction LR
+        S1[Admin<br/>Registration] --> S2[Organization<br/>Creation]
+        S2 --> S3[Agent<br/>Provisioning]
+        S3 --> S4[DID<br/>Registration]
+        S4 --> S5[Schema<br/>Definition]
+    end
+
+    subgraph Issuance["PHASE 2: ISSUANCE"]
+        direction LR
+        I1[Holder<br/>Registration] --> I2[Credential<br/>Request]
+        I2 --> I3[Agent Signs<br/>Credential]
+        I3 --> I4[Credential<br/>Delivery]
+    end
+
+    subgraph Holding["PHASE 3: HOLDING"]
+        direction LR
+        H1[Store in<br/>Wallet] --> H2[Generate<br/>QR Code]
+        H2 --> H3[Ready for<br/>Presentation]
+    end
+
+    subgraph Verification["PHASE 4: VERIFICATION"]
+        direction TB
+        V1[Scan QR]
+        V1 --> V2{Connectivity?}
+
+        subgraph Online["ONLINE PATH"]
+            O1[Route to<br/>Backend]
+            O2[Resolve DID<br/>from Blockchain]
+            O3[Verify<br/>Signature]
+            O1 --> O2 --> O3
+        end
+
+        subgraph Offline["OFFLINE PATH"]
+            F1[Check<br/>Issuer Cache]
+            F2[Validate<br/>Structure]
+            F3[Trusted Issuer<br/>Verification]
+            F1 --> F2 --> F3
+        end
+
+        V2 -->|Online| Online
+        V2 -->|Offline| Offline
+
+        Online --> V3[SUCCESS<br/>Cryptographic]
+        Offline --> V4[SUCCESS<br/>Trusted Issuer]
+    end
+
+    subgraph Sync["PRE-OFFLINE SYNC"]
+        direction LR
+        P1[POST /sync] --> P2[Resolve DIDs]
+        P2 --> P3[Cache Public Keys]
+    end
+
+    Setup --> Issuance
+    Issuance --> Holding
+    Holding --> Verification
+    Sync -.->|Required before| Offline
+
+    style Setup fill:#DBEAFE,stroke:#2563EB
+    style Issuance fill:#D1FAE5,stroke:#059669
+    style Holding fill:#FEF3C7,stroke:#D97706
+    style Verification fill:#FCE7F3,stroke:#DB2777
+    style Online fill:#ECFDF5,stroke:#10B981
+    style Offline fill:#FEF9C3,stroke:#EAB308
+    style Sync fill:#E0E7FF,stroke:#6366F1
+    style V3 fill:#059669,color:#fff
+    style V4 fill:#059669,color:#fff

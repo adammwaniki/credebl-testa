@@ -1,0 +1,103 @@
+%%{init: {'theme': 'base'}}%%
+
+erDiagram
+    USER ||--o{ USER_ORG_ROLE : "belongs to"
+    ORGANIZATION ||--o{ USER_ORG_ROLE : "has members"
+    ORGANIZATION ||--|| WALLET : "has"
+    ORGANIZATION ||--|| AGENT : "has"
+    ORGANIZATION ||--o{ SCHEMA : "creates"
+    SCHEMA ||--o{ CREDENTIAL_DEFINITION : "defines"
+    AGENT ||--o{ CREDENTIAL : "issues"
+    CREDENTIAL_DEFINITION ||--o{ CREDENTIAL : "based on"
+    CREDENTIAL }o--|| HOLDER : "held by"
+
+    USER {
+        uuid id PK
+        string email
+        string keycloakId
+        string firstName
+        string lastName
+        datetime createdAt
+    }
+
+    ORGANIZATION {
+        uuid id PK
+        string name
+        string description
+        string logoUrl
+        string status
+        datetime createdAt
+    }
+
+    USER_ORG_ROLE {
+        uuid id PK
+        uuid userId FK
+        uuid orgId FK
+        string role
+    }
+
+    WALLET {
+        uuid id PK
+        uuid orgId FK
+        string masterKey
+        string type
+    }
+
+    AGENT {
+        uuid id PK
+        uuid orgId FK
+        string did
+        uuid walletId FK
+        json endpoints
+        json config
+        string status
+    }
+
+    SCHEMA {
+        uuid id PK
+        uuid orgId FK
+        string name
+        string version
+        json attributes
+        string schemaUrl
+    }
+
+    CREDENTIAL_DEFINITION {
+        uuid id PK
+        uuid schemaId FK
+        uuid agentId FK
+        string tag
+        string credDefId
+    }
+
+    CREDENTIAL {
+        uuid id PK
+        uuid credDefId FK
+        uuid holderId FK
+        json attributes
+        string status
+        datetime issuedAt
+        datetime expiresAt
+    }
+
+    HOLDER {
+        uuid id PK
+        string did
+        string walletType
+        json metadata
+    }
+
+    ISSUER_CACHE {
+        string did PK
+        json didDocument
+        string publicKeyHex
+        string keyType
+        datetime cachedAt
+        datetime expiresAt
+    }
+
+    CONTEXT_CACHE {
+        string url PK
+        text content
+        datetime cachedAt
+    }

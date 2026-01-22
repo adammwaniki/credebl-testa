@@ -1,0 +1,89 @@
+%%{init: {'theme': 'base'}}%%
+
+flowchart TB
+    subgraph Internet["Internet / External"]
+        Browser([Web Browser])
+        Mobile([Mobile App])
+        Polygon[(Polygon Blockchain<br/>Amoy Testnet)]
+    end
+
+    subgraph Docker["Docker Compose Network"]
+        subgraph Frontend["Frontend Layer"]
+            UI[CREDEBL UI<br/>:3000]
+            Inji[Inji Verify UI<br/>:3001]
+        end
+
+        subgraph Gateway["API Gateway Layer"]
+            GW[API Gateway<br/>:5001]
+            Adapter[Verification Adapter<br/>:8085 :8086]
+        end
+
+        subgraph Services["Microservices Layer"]
+            User[User Service]
+            Org[Organization Service]
+            Issuance[Issuance Service]
+            Verification[Verification Service]
+            Connection[Connection Service]
+            Webhook[Webhook Service]
+            Ledger[Ledger Service]
+            Notification[Notification Service]
+            AgentProv[Agent Provisioning]
+            CloudWallet[Cloud Wallet]
+            Geolocation[Geolocation]
+            Utility[Utility Service]
+        end
+
+        subgraph Agent["Agent Layer"]
+            Credo[Credo Agent<br/>:8004 :9004]
+            InjiSvc[Inji Verify Service<br/>:8082]
+        end
+
+        subgraph Data["Data Layer"]
+            Postgres[(PostgreSQL<br/>:5433)]
+            Redis[(Redis<br/>:6381)]
+            NATS[NATS<br/>:4222]
+            Keycloak[Keycloak<br/>:8081]
+            MinIO[(MinIO<br/>:9000)]
+            Schema[Schema File Server<br/>:4001]
+        end
+
+        subgraph Cache["Adapter Cache"]
+            IssuerCache[(issuer-cache.json)]
+            ContextCache[(contexts/)]
+        end
+    end
+
+    Browser --> UI
+    Browser --> Inji
+    Mobile --> Inji
+
+    UI --> GW
+    Inji --> Adapter
+
+    GW --> User
+    GW --> Org
+    GW --> Issuance
+    GW --> Verification
+
+    Adapter --> Credo
+    Adapter --> InjiSvc
+    Adapter --> IssuerCache
+    Adapter --> ContextCache
+
+    User --> Postgres
+    User --> Redis
+    User --> NATS
+    User --> Keycloak
+
+    Org --> Postgres
+    Issuance --> Credo
+    Verification --> Credo
+
+    Credo --> Polygon
+    InjiSvc --> Postgres
+
+    style Adapter fill:#10B981,color:#fff
+    style Credo fill:#6366F1,color:#fff
+    style Postgres fill:#336791,color:#fff
+    style Redis fill:#DC382D,color:#fff
+    style IssuerCache fill:#F59E0B,color:#fff

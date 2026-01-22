@@ -1,0 +1,75 @@
+%%{init: {'theme': 'base', 'themeVariables': { 'primaryColor': '#6366F1'}}}%%
+
+flowchart TB
+    subgraph External["External Requests"]
+        InjiUI[Inji Verify UI]
+        DirectAPI[Direct API Calls]
+    end
+
+    subgraph Adapter["VERIFICATION ADAPTER :8085"]
+        direction TB
+
+        subgraph Endpoints["HTTP Endpoints"]
+            Health[GET /health]
+            Cache[GET /cache]
+            Sync[POST /sync]
+            VerifyOffline[POST /verify-offline]
+            Verify[POST /v1/verify/vc-verification]
+        end
+
+        subgraph Core["Core Components"]
+            Parser[Request Parser<br/>Multi-format Support]
+            Connectivity[Connectivity Detector<br/>Ping Services]
+            Router[Verification Router<br/>DID Method Based]
+        end
+
+        subgraph Verification["Verification Strategies"]
+            Online[Online Mode<br/>Full Crypto]
+            Offline[Offline Mode<br/>Trusted Issuer]
+            Hybrid[Hybrid Mode<br/>Ed25519 + Cached]
+        end
+
+        subgraph Storage["Data Storage"]
+            IssuerCache[(Issuer Cache<br/>issuer-cache.json)]
+        end
+    end
+
+    subgraph ContextProxy["CONTEXT PROXY :8086"]
+        CtxServer[JSON-LD Context Server]
+        CtxCache[(Cached Contexts<br/>ed25519-2020.jsonld<br/>credentials-v1.json)]
+    end
+
+    subgraph Backends["Verification Backends"]
+        Agent[Credo Agent<br/>:8004]
+        InjiSvc[Inji Verify Service<br/>:8082]
+    end
+
+    InjiUI --> Verify
+    DirectAPI --> Health
+    DirectAPI --> Cache
+    DirectAPI --> Sync
+    DirectAPI --> VerifyOffline
+
+    Verify --> Parser
+    Parser --> Connectivity
+    Connectivity --> Router
+
+    Router --> Online
+    Router --> Offline
+    Router --> Hybrid
+
+    Online --> Agent
+    Online --> InjiSvc
+    Offline --> IssuerCache
+    Hybrid --> IssuerCache
+
+    Sync --> IssuerCache
+    Cache --> IssuerCache
+
+    CtxServer --> CtxCache
+
+    style Adapter fill:#EEF2FF,stroke:#6366F1
+    style ContextProxy fill:#F0FDF4,stroke:#22C55E
+    style IssuerCache fill:#FEF3C7,stroke:#F59E0B
+    style Agent fill:#DBEAFE,stroke:#3B82F6
+    style InjiSvc fill:#E0E7FF,stroke:#6366F1

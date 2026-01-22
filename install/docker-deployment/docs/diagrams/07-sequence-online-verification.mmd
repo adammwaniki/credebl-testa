@@ -1,0 +1,39 @@
+%%{init: {'theme': 'base'}}%%
+
+sequenceDiagram
+    autonumber
+    participant V as Verifier
+    participant UI as Inji Verify UI
+    participant A as Verification Adapter
+    participant AG as Credo Agent
+    participant P as Polygon RPC
+
+    Note over V,P: ONLINE VERIFICATION FLOW (did:polygon)
+
+    V->>UI: Scan QR Code
+    UI->>A: POST /v1/verify/vc-verification<br/>{credential JSON}
+
+    A->>A: Parse credential<br/>Extract issuer DID
+
+    A->>AG: Ping /agent (connectivity check)
+    AG-->>A: 200 OK
+
+    Note over A: Online mode detected
+
+    A->>AG: POST /agent/token<br/>Authorization: API_KEY
+    AG-->>A: {token: "jwt..."}
+
+    A->>AG: POST /agent/credential/verify<br/>Authorization: Bearer jwt<br/>{credential}
+
+    AG->>P: eth_call getDID(address)
+    P-->>AG: DID Document (JSON)
+
+    AG->>AG: Extract public key<br/>Verify EcdsaSecp256k1Signature2019
+
+    AG-->>A: {isValid: true, validations: {...}}
+
+    A-->>UI: {<br/>  verificationStatus: "SUCCESS",<br/>  online: true,<br/>  backend: "credebl-agent"<br/>}
+
+    UI-->>V: Display: ✓ Credential Valid
+
+    Note over V,P: Full cryptographic verification completed

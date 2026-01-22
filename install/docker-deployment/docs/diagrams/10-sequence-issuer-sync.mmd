@@ -1,0 +1,41 @@
+%%{init: {'theme': 'base'}}%%
+
+sequenceDiagram
+    autonumber
+    participant Admin as Administrator
+    participant A as Verification Adapter
+    participant AG as Credo Agent
+    participant P as Polygon RPC
+    participant C as Issuer Cache
+
+    Note over Admin,C: ISSUER SYNC FLOW (Pre-Offline Preparation)
+
+    Admin->>A: POST /sync<br/>{did: "did:polygon:0xD3A..."}
+
+    A->>A: Parse DID method
+
+    alt Resolve via Agent (preferred)
+        A->>AG: POST /agent/token
+        AG-->>A: {token: "jwt..."}
+
+        A->>AG: GET /dids/did:polygon:0xD3A...
+        AG->>P: eth_call getDID(address)
+        P-->>AG: DID Document string
+        AG-->>A: {didDocument: {...}}
+    else Direct Polygon Resolution (fallback)
+        A->>P: eth_call getDID(address)
+        P-->>A: ABI-encoded DID Document
+        A->>A: Decode ABI string
+    end
+
+    A->>A: Extract verification method
+    A->>A: Parse public key<br/>(publicKeyHex, publicKeyMultibase, or JWK)
+    A->>A: Determine key type<br/>(secp256k1, Ed25519)
+
+    A->>C: Store issuer data<br/>{<br/>  did,<br/>  didDocument,<br/>  publicKeyHex,<br/>  keyType,<br/>  cachedAt<br/>}
+
+    C-->>A: Saved successfully
+
+    A-->>Admin: {<br/>  results: [{<br/>    success: true,<br/>    did: "did:polygon:0xD3A...",<br/>    keyType: "secp256k1",<br/>    publicKeyHex: "04abc...",<br/>    cachedAt: "2026-01-21T20:00:00Z"<br/>  }]<br/>}
+
+    Note over Admin,C: Issuer now available for offline verification

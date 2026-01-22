@@ -1,0 +1,39 @@
+%%{init: {'theme': 'base'}}%%
+
+sequenceDiagram
+    autonumber
+    participant V as Verifier
+    participant UI as Inji Verify UI
+    participant A as Verification Adapter
+    participant C as Issuer Cache
+
+    Note over V,C: OFFLINE VERIFICATION FLOW
+
+    V->>UI: Scan QR Code
+    UI->>A: POST /v1/verify/vc-verification<br/>{credential JSON}
+
+    A->>A: Parse credential<br/>Extract issuer DID, proof type
+
+    A->>A: Ping backends (connectivity check)
+    Note over A: Connection failed - Offline mode
+
+    A->>C: Lookup issuer DID
+    C-->>A: {<br/>  did: "did:polygon:0x...",<br/>  publicKeyHex: "04abc...",<br/>  keyType: "secp256k1",<br/>  cachedAt: "2026-01-21"<br/>}
+
+    Note over A: Issuer found in cache
+
+    A->>A: Validate credential structure
+
+    A->>A: Check: issuer matches cached DID ✓
+    A->>A: Check: proof exists ✓
+    A->>A: Check: verificationMethod references issuer ✓
+    A->>A: Check: not expired ✓
+    A->>A: Check: required fields present ✓
+
+    Note over A: Structure validation passed
+
+    A-->>UI: {<br/>  verificationStatus: "SUCCESS",<br/>  offline: true,<br/>  verificationLevel: "TRUSTED_ISSUER",<br/>  message: "Verified via cached issuer",<br/>  cachedIssuer: {<br/>    did: "did:polygon:0x...",<br/>    cachedAt: "2026-01-21"<br/>  }<br/>}
+
+    UI-->>V: Display: ✓ Credential Valid (Offline)
+
+    Note over V,C: Trusted issuer verification completed

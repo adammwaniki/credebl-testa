@@ -1,0 +1,50 @@
+%%{init: {'theme': 'base', 'themeVariables': { 'primaryColor': '#F59E0B'}}}%%
+
+flowchart TB
+    subgraph External["External Actors"]
+        Verifier([Verifier<br/>Field Worker])
+        Holder([Holder<br/>Beneficiary])
+    end
+
+    subgraph UI["Presentation Layer"]
+        InjiUI[Inji Verify UI<br/>:3001]
+    end
+
+    subgraph Adapter["Verification Adapter Layer"]
+        VA[Verification Adapter<br/>:8085]
+        CC{Connectivity<br/>Check}
+        CacheLookup{Issuer in<br/>Cache?}
+        Validate[Structure<br/>Validation]
+    end
+
+    subgraph Cache["Local Cache"]
+        IssuerCache[(issuer-cache.json<br/>DID Documents<br/>Public Keys)]
+    end
+
+    subgraph Response["Response"]
+        Result[/Verification Result\]
+        Unknown[/Unknown Issuer\]
+    end
+
+    Holder -->|1. Present QR| Verifier
+    Verifier -->|2. Scan| InjiUI
+    InjiUI -->|3. POST /v1/verify/vc-verification| VA
+    VA --> CC
+    CC -->|Offline ✗| CacheLookup
+    CacheLookup -->|Found| Validate
+    CacheLookup -->|Not Found| Unknown
+    Validate -->|4. Lookup Public Key| IssuerCache
+    IssuerCache -->|5. Return Cached Data| Validate
+    Validate -->|6. Check Structure| Validate
+    Validate -->|7. Verify Issuer Match| Validate
+    Validate -->|8. Check Expiration| Validate
+    Validate -->|Valid| Result
+    Result -->|"verificationStatus: SUCCESS<br/>verificationLevel: TRUSTED_ISSUER<br/>offline: true"| InjiUI
+    Unknown -->|"verificationStatus: UNKNOWN_ISSUER<br/>message: Sync when online"| InjiUI
+    InjiUI -->|9. Show Result| Verifier
+
+    style VA fill:#F59E0B,color:#fff
+    style IssuerCache fill:#FBBF24,color:#000
+    style Result fill:#059669,color:#fff
+    style Unknown fill:#DC2626,color:#fff
+    style CC fill:#EF4444,color:#fff

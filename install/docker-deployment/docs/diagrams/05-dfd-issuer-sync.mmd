@@ -1,0 +1,60 @@
+%%{init: {'theme': 'base', 'themeVariables': { 'primaryColor': '#3B82F6'}}}%%
+
+flowchart TB
+    subgraph Trigger["Sync Trigger"]
+        Admin([Administrator])
+        Script([Sync Script])
+    end
+
+    subgraph Adapter["Verification Adapter"]
+        SyncEndpoint[POST /sync<br/>Endpoint]
+        Resolver{DID Method<br/>Resolver}
+    end
+
+    subgraph Resolution["DID Resolution"]
+        AgentResolve[Credo Agent<br/>/dids/did]
+        PolygonResolve[Polygon RPC<br/>eth_call getDID]
+        WebResolve[HTTPS Fetch<br/>/.well-known/did.json]
+        KeyResolve[Local Decode<br/>Multibase Key]
+    end
+
+    subgraph Processing["Key Extraction"]
+        Extract[Extract Public Key<br/>from DID Document]
+    end
+
+    subgraph Storage["Cache Storage"]
+        Cache[(issuer-cache.json)]
+    end
+
+    subgraph Output["Response"]
+        Success[/Sync Success\]
+        Failure[/Sync Failed\]
+    end
+
+    Admin -->|1. POST /sync| SyncEndpoint
+    Script -->|1. POST /sync| SyncEndpoint
+    SyncEndpoint -->|2. Parse DID| Resolver
+
+    Resolver -->|did:polygon| AgentResolve
+    Resolver -->|did:polygon fallback| PolygonResolve
+    Resolver -->|did:web| WebResolve
+    Resolver -->|did:key| KeyResolve
+
+    AgentResolve -->|3. DID Document| Extract
+    PolygonResolve -->|3. DID Document| Extract
+    WebResolve -->|3. DID Document| Extract
+    KeyResolve -->|3. Public Key| Extract
+
+    Extract -->|4. publicKeyHex, keyType| Cache
+    Cache -->|5. Saved| Success
+
+    AgentResolve -.->|Error| Failure
+    WebResolve -.->|Error| Failure
+
+    Success -->|"{ success: true, keyType: Ed25519 }"| SyncEndpoint
+    Failure -->|"{ success: false, error: ... }"| SyncEndpoint
+
+    style SyncEndpoint fill:#3B82F6,color:#fff
+    style Cache fill:#60A5FA,color:#000
+    style Success fill:#059669,color:#fff
+    style Failure fill:#DC2626,color:#fff

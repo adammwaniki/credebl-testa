@@ -1,0 +1,54 @@
+%%{init: {'theme': 'base', 'themeVariables': { 'primaryColor': '#10B981'}}}%%
+
+flowchart TB
+    subgraph External["External Actors"]
+        Verifier([Verifier<br/>Field Worker])
+        Holder([Holder<br/>Beneficiary])
+    end
+
+    subgraph UI["Presentation Layer"]
+        InjiUI[Inji Verify UI<br/>:3001]
+    end
+
+    subgraph Adapter["Verification Adapter Layer"]
+        VA[Verification Adapter<br/>:8085]
+        CC{Connectivity<br/>Check}
+        Router{DID Method<br/>Router}
+    end
+
+    subgraph Backends["Verification Backends"]
+        Agent[Credo Agent<br/>:8004]
+        InjiSvc[Inji Verify Service<br/>:8082]
+    end
+
+    subgraph Blockchain["External Resolution"]
+        Polygon[(Polygon RPC<br/>DID Registry)]
+        Web[(Web Server<br/>did.json)]
+    end
+
+    subgraph Response["Response"]
+        Result[/Verification Result\]
+    end
+
+    Holder -->|1. Present QR| Verifier
+    Verifier -->|2. Scan| InjiUI
+    InjiUI -->|3. POST /v1/verify/vc-verification| VA
+    VA --> CC
+    CC -->|Online ✓| Router
+    Router -->|did:polygon| Agent
+    Router -->|did:web/key| InjiSvc
+    Agent -->|4. Resolve DID| Polygon
+    InjiSvc -->|4. Fetch did.json| Web
+    Agent -->|5. Verify Signature| Agent
+    InjiSvc -->|5. Verify Signature| InjiSvc
+    Agent -->|6. isValid: true| VA
+    InjiSvc -->|6. verified: true| VA
+    VA -->|7. verificationStatus: SUCCESS| Result
+    Result -->|8. Display| InjiUI
+    InjiUI -->|9. Show Valid ✓| Verifier
+
+    style VA fill:#10B981,color:#fff
+    style Agent fill:#6366F1,color:#fff
+    style InjiSvc fill:#8B5CF6,color:#fff
+    style Polygon fill:#7C3AED,color:#fff
+    style Result fill:#059669,color:#fff

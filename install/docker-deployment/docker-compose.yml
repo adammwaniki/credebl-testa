@@ -320,13 +320,26 @@ services:
       dockerfile: Dockerfile
     ports:
       - '8085:8085'
+      - '8086:8086'  # Context proxy port
     environment:
       - ADAPTER_PORT=8085
+      - CONTEXT_PROXY_PORT=8086
       # CREDEBL agent - use env var or default to host gateway
       - CREDEBL_AGENT_URL=${CREDEBL_AGENT_URL:-http://host.docker.internal:8004}
       - CREDEBL_API_KEY=${CREDEBL_API_KEY:-supersecret-that-too-16chars}
       # Inji Verify service - Docker DNS (same network)
       - UPSTREAM_VERIFY_SERVICE=http://inji-verify-service:8080
+      # Offline verification settings
+      - USE_OFFLINE_ADAPTER=true
+      - RUN_CONTEXT_PROXY=true
+      # Polygon Mainnet RPC and DID Registry
+      - POLYGON_RPC_URL=${POLYGON_RPC_URL:-https://polygon-rpc.com}
+      - POLYGON_DID_REGISTRY=${POLYGON_DID_REGISTRY:-0x0C16958c4246271622201101C83B9F0Fc7180d15}
+      - CACHE_FILE=/app/cache/issuer-cache.json
+      - CACHE_TTL_MS=604800000
+      - CONTEXTS_DIR=/app/contexts
+    volumes:
+      - adapter-cache:/app/cache
     extra_hosts:
       - "host.docker.internal:host-gateway"
     depends_on:
@@ -344,3 +357,4 @@ volumes:
   cache:
     driver: local
   inji-verify-db:
+  adapter-cache:
