@@ -20,3 +20,5 @@ deployment.log
 # Patches working files
 credo-polygon-key-exists-fix-WORKING.js
 credo-polygon-key-exists-fix.patch
+install/docker-deployment/patches/polygon-did-fix/adapter/issuer-cache.json
+install/docker-deployment/patches/polygon-did-fix/adapter/*.db

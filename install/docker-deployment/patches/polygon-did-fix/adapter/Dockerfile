@@ -1,12 +1,19 @@
 FROM node:20-alpine
 
 LABEL maintainer="CREDEBL"
-LABEL description="Offline-capable verification adapter with issuer caching and context proxy"
+LABEL description="Offline-capable verification adapter with SQLite-backed issuer cache and context proxy"
 
 WORKDIR /app
 
+# Install build dependencies for better-sqlite3
+RUN apk add --no-cache python3 make g++
+
 # Create directories
 RUN mkdir -p /app/cache /app/contexts
+
+# Copy package.json and install dependencies
+COPY package.json .
+RUN npm install --production
 
 # Copy adapters
 COPY adapter.js .
@@ -24,6 +31,7 @@ ENV CREDEBL_API_KEY=supersecret-that-too-16chars
 ENV UPSTREAM_VERIFY_SERVICE=http://verify-service:8080
 ENV POLYGON_RPC_URL=https://rpc-amoy.polygon.technology
 ENV CACHE_FILE=/app/cache/issuer-cache.json
+ENV CACHE_DB=/app/cache/issuer-cache.db
 ENV CACHE_TTL_MS=604800000
 ENV CONTEXTS_DIR=/app/contexts
 
@@ -33,7 +41,7 @@ ENV RUN_CONTEXT_PROXY=true
 
 EXPOSE 8085 8086
 
-# Volume for persistent cache
+# Volume for persistent cache (SQLite database)
 VOLUME /app/cache
 
 # Health check

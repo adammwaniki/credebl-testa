@@ -24,6 +24,7 @@ const https = require('https');
 const crypto = require('crypto');
 const fs = require('fs');
 const path = require('path');
+const Database = require('better-sqlite3');
 
 // ============================================================================
 // CONFIGURATION
@@ -42,7 +43,8 @@ const CONFIG = {
     polygonDidRegistry: process.env.POLYGON_DID_REGISTRY || '0x0C76cc3DC2c12E274123e84a34eb176C3912543c',
 
     // Cache settings
-    cacheFile: process.env.CACHE_FILE || './issuer-cache.json',
+    cacheFile: process.env.CACHE_FILE || './issuer-cache.json', // Legacy JSON (for migration)
+    cacheDb: process.env.CACHE_DB || './cache/issuer-cache.db', // SQLite database
     cacheTtlMs: parseInt(process.env.CACHE_TTL_MS) || 7 * 24 * 60 * 60 * 1000, // 7 days
 
     // Connectivity check
@@ -51,86 +53,221 @@ const CONFIG = {
 };
 
 // ============================================================================
-// ISSUER CACHE
+// ISSUER CACHE (SQLite-backed for consistency and scalability)
 // ============================================================================
 
 class IssuerCache {
-    constructor(cacheFile) {
-        this.cacheFile = cacheFile;
-        this.cache = this.load();
-    }
+    constructor(dbPath, legacyJsonPath) {
+        this.dbPath = dbPath;
+        this.legacyJsonPath = legacyJsonPath;
 
-    load() {
-        try {
-            if (fs.existsSync(this.cacheFile)) {
-                const data = fs.readFileSync(this.cacheFile, 'utf8');
-                console.log(`[CACHE] Loaded ${Object.keys(JSON.parse(data).issuers || {}).length} issuers from cache`);
-                return JSON.parse(data);
-            }
-        } catch (e) {
-            console.error('[CACHE] Failed to load cache:', e.message);
+        // Ensure cache directory exists
+        const dbDir = path.dirname(dbPath);
+        if (!fs.existsSync(dbDir)) {
+            fs.mkdirSync(dbDir, { recursive: true });
         }
-        return { issuers: {}, lastSync: null };
+
+        // Initialize SQLite database
+        this.db = new Database(dbPath);
+        this.db.pragma('journal_mode = WAL'); // Better concurrent access
+        this.db.pragma('foreign_keys = ON');
+
+        this.initSchema();
+        this.migrateFromJson();
+
+        const count = this.db.prepare('SELECT COUNT(*) as count FROM issuers').get().count;
+        console.log(`[CACHE] SQLite initialized with ${count} issuers`);
     }
 
-    save() {
+    initSchema() {
+        // Create issuers table
+        this.db.exec(`
+            CREATE TABLE IF NOT EXISTS issuers (
+                did TEXT PRIMARY KEY,
+                did_document TEXT,
+                public_key TEXT,
+                public_key_hex TEXT,
+                cached_at INTEGER NOT NULL,
+                created_at INTEGER DEFAULT (strftime('%s', 'now') * 1000),
+                updated_at INTEGER DEFAULT (strftime('%s', 'now') * 1000)
+            );
+
+            CREATE INDEX IF NOT EXISTS idx_issuers_cached_at ON issuers(cached_at);
+
+            CREATE TABLE IF NOT EXISTS metadata (
+                key TEXT PRIMARY KEY,
+                value TEXT,
+                updated_at INTEGER DEFAULT (strftime('%s', 'now') * 1000)
+            );
+        `);
+
+        // Prepare statements for better performance
+        this.stmts = {
+            get: this.db.prepare('SELECT * FROM issuers WHERE did = ?'),
+            set: this.db.prepare(`
+                INSERT OR REPLACE INTO issuers (did, did_document, public_key, public_key_hex, cached_at, updated_at)
+                VALUES (?, ?, ?, ?, ?, strftime('%s', 'now') * 1000)
+            `),
+            getAll: this.db.prepare('SELECT * FROM issuers'),
+            count: this.db.prepare('SELECT COUNT(*) as count FROM issuers'),
+            delete: this.db.prepare('DELETE FROM issuers WHERE did = ?'),
+            deleteExpired: this.db.prepare('DELETE FROM issuers WHERE cached_at < ?'),
+            getMeta: this.db.prepare('SELECT value FROM metadata WHERE key = ?'),
+            setMeta: this.db.prepare(`
+                INSERT OR REPLACE INTO metadata (key, value, updated_at)
+                VALUES (?, ?, strftime('%s', 'now') * 1000)
+            `),
+        };
+    }
+
+    migrateFromJson() {
+        // Check if migration already done
+        const migrated = this.stmts.getMeta.get('migrated_from_json');
+        if (migrated) return;
+
+        // Check for legacy JSON file
+        if (!fs.existsSync(this.legacyJsonPath)) {
+            this.stmts.setMeta.run('migrated_from_json', 'no_legacy_file');
+            return;
+        }
+
         try {
-            fs.writeFileSync(this.cacheFile, JSON.stringify(this.cache, null, 2));
-            console.log(`[CACHE] Saved ${Object.keys(this.cache.issuers).length} issuers to cache`);
+            const data = JSON.parse(fs.readFileSync(this.legacyJsonPath, 'utf8'));
+            const issuers = data.issuers || {};
+
+            const insertMany = this.db.transaction((entries) => {
+                for (const [did, entry] of entries) {
+                    this.stmts.set.run(
+                        did,
+                        entry.didDocument ? JSON.stringify(entry.didDocument) : null,
+                        entry.publicKey || null,
+                        entry.publicKeyHex || null,
+                        entry.cachedAt || Date.now()
+                    );
+                }
+            });
+
+            insertMany(Object.entries(issuers));
+
+            if (data.lastSync) {
+                this.stmts.setMeta.run('last_sync', String(data.lastSync));
+            }
+
+            this.stmts.setMeta.run('migrated_from_json', new Date().toISOString());
+            console.log(`[CACHE] Migrated ${Object.keys(issuers).length} issuers from JSON to SQLite`);
+
+            // Rename legacy file to .bak
+            fs.renameSync(this.legacyJsonPath, this.legacyJsonPath + '.migrated');
         } catch (e) {
-            console.error('[CACHE] Failed to save cache:', e.message);
+            console.error('[CACHE] Failed to migrate from JSON:', e.message);
         }
     }
 
     get(did) {
-        const entry = this.cache.issuers[did];
-        if (!entry) return null;
+        const row = this.stmts.get.get(did);
+        if (!row) return null;
 
         // Check if expired
-        if (Date.now() - entry.cachedAt > CONFIG.cacheTtlMs) {
+        if (Date.now() - row.cached_at > CONFIG.cacheTtlMs) {
             console.log(`[CACHE] Entry expired for ${did}`);
             return null;
         }
 
-        return entry;
+        return {
+            did: row.did,
+            didDocument: row.did_document ? JSON.parse(row.did_document) : null,
+            publicKey: row.public_key,
+            publicKeyHex: row.public_key_hex,
+            cachedAt: row.cached_at,
+        };
     }
 
     set(did, didDocument, publicKey, publicKeyHex) {
-        this.cache.issuers[did] = {
+        this.stmts.set.run(
             did,
-            didDocument,
-            publicKey,
-            publicKeyHex,
-            cachedAt: Date.now(),
-        };
-        this.save();
+            didDocument ? JSON.stringify(didDocument) : null,
+            publicKey || null,
+            publicKeyHex || null,
+            Date.now()
+        );
         console.log(`[CACHE] Cached issuer: ${did}`);
     }
 
+    delete(did) {
+        this.stmts.delete.run(did);
+        console.log(`[CACHE] Deleted issuer: ${did}`);
+    }
+
+    cleanExpired() {
+        const expireBefore = Date.now() - CONFIG.cacheTtlMs;
+        const result = this.stmts.deleteExpired.run(expireBefore);
+        if (result.changes > 0) {
+            console.log(`[CACHE] Cleaned ${result.changes} expired issuers`);
+        }
+        return result.changes;
+    }
+
     getAll() {
-        return Object.values(this.cache.issuers);
+        const rows = this.stmts.getAll.all();
+        return rows.map(row => ({
+            did: row.did,
+            didDocument: row.did_document ? JSON.parse(row.did_document) : null,
+            publicKey: row.public_key,
+            publicKeyHex: row.public_key_hex,
+            cachedAt: row.cached_at,
+        }));
     }
 
     getStats() {
-        const issuers = Object.values(this.cache.issuers);
+        const rows = this.stmts.getAll.all();
+        const lastSyncRow = this.stmts.getMeta.get('last_sync');
+        const lastSync = lastSyncRow ? parseInt(lastSyncRow.value) : null;
+
         return {
-            totalIssuers: issuers.length,
-            lastSync: this.cache.lastSync,
-            issuers: issuers.map(i => ({
-                did: i.did,
-                cachedAt: new Date(i.cachedAt).toISOString(),
-                expiresAt: new Date(i.cachedAt + CONFIG.cacheTtlMs).toISOString(),
+            totalIssuers: rows.length,
+            lastSync: lastSync,
+            storage: 'sqlite',
+            dbPath: this.dbPath,
+            issuers: rows.map(row => ({
+                did: row.did,
+                cachedAt: new Date(row.cached_at).toISOString(),
+                expiresAt: new Date(row.cached_at + CONFIG.cacheTtlMs).toISOString(),
             }))
         };
     }
 
     setLastSync() {
-        this.cache.lastSync = Date.now();
-        this.save();
+        this.stmts.setMeta.run('last_sync', String(Date.now()));
+    }
+
+    // New methods for SQLite benefits
+    search(query) {
+        const stmt = this.db.prepare('SELECT * FROM issuers WHERE did LIKE ?');
+        const rows = stmt.all(`%${query}%`);
+        return rows.map(row => ({
+            did: row.did,
+            publicKey: row.public_key,
+            cachedAt: row.cached_at,
+        }));
+    }
+
+    getByKeyType(keyType) {
+        const stmt = this.db.prepare('SELECT * FROM issuers WHERE public_key = ?');
+        const rows = stmt.all(keyType);
+        return rows.map(row => ({
+            did: row.did,
+            publicKey: row.public_key,
+            cachedAt: row.cached_at,
+        }));
+    }
+
+    close() {
+        this.db.close();
+        console.log('[CACHE] SQLite database closed');
     }
 }
 
-const issuerCache = new IssuerCache(CONFIG.cacheFile);
+const issuerCache = new IssuerCache(CONFIG.cacheDb, CONFIG.cacheFile);
 
 // ============================================================================
 // CONNECTIVITY DETECTION

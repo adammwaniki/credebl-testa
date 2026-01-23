@@ -1,6 +1,6 @@
 {
   "name": "credebl-inji-adapter",
-  "version": "1.0.0",
+  "version": "1.1.0",
   "description": "Adapter service bridging Inji Verify to CREDEBL for did:polygon credential verification",
   "main": "adapter.js",
   "scripts": {
@@ -19,6 +19,8 @@
   "engines": {
     "node": ">=18.0.0"
   },
-  "dependencies": {},
+  "dependencies": {
+    "better-sqlite3": "^11.0.0"
+  },
   "devDependencies": {}
 }
