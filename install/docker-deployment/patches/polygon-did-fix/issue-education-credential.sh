@@ -1,32 +1,36 @@
 #!/bin/bash
-# issue-employment-credential.sh - Issue an Employment Verifiable Credential using did:polygon
+# issue-education-credential.sh - Issue an Education Verifiable Credential using did:polygon
 #
-# Usage: ./issue-employment-credential.sh [OPTIONS]
+# Usage: ./issue-education-credential.sh [OPTIONS]
 #   -p, --port PORT              API port (default: 8004)
 #   -k, --api-key KEY            API key for authentication
 #   -d, --issuer-did DID         Issuer DID
-#   --employee-name NAME         Employee's full name (required)
-#   --employee-did DID           Employee's DID (default: generated)
-#   --employer-name NAME         Employer/Company name (required)
-#   --job-title TITLE            Job title (required)
-#   --department DEPT            Department name
-#   --date-of-joining DATE       Date of joining (YYYY-MM-DD)
-#   --employee-id ID             Employee ID
-#   --employment-type TYPE       Employment type (full-time, part-time, contract)
+#   --student-name NAME          Student's full name (required)
+#   --student-did DID            Student's DID (default: generated)
+#   --institution NAME           Institution/University name (required)
+#   --degree DEGREE              Degree/Qualification (required)
+#   --field-of-study FIELD       Field of study/Major
+#   --enrollment-date DATE       Enrollment date (YYYY-MM-DD)
+#   --graduation-date DATE       Graduation date (YYYY-MM-DD)
+#   --student-id ID              Student ID
+#   --gpa GPA                    Grade Point Average
+#   --honors HONORS              Honors (cum laude, magna cum laude, etc.)
 #   -v, --verify                 Verify the credential after issuance
 #   -q, --qr                     Generate Inji Verify compatible QR code
 #   -o, --output FILE            Save credential to file
 #   -h, --help                   Show this help message
 #
 # Example:
-#   ./issue-employment-credential.sh \
-#     --employee-name "John Doe" \
-#     --employer-name "Acme Corporation" \
-#     --job-title "Software Engineer" \
-#     --department "Engineering" \
-#     --date-of-joining "2024-01-15" \
-#     --employee-id "EMP001" \
-#     --employment-type "full-time" \
+#   ./issue-education-credential.sh \
+#     --student-name "Alice Johnson" \
+#     --institution "State University" \
+#     --degree "Bachelor of Science" \
+#     --field-of-study "Computer Science" \
+#     --enrollment-date "2020-09-01" \
+#     --graduation-date "2024-06-15" \
+#     --student-id "STU2024001" \
+#     --gpa "3.85" \
+#     --honors "magna cum laude" \
 #     -v -q
 
 set -e
@@ -37,14 +41,16 @@ SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 PORT="8004"
 API_KEY="${API_KEY:-supersecret-that-too-16chars}"
 ISSUER_DID="did:polygon:0xD3A288e4cCeb5ADE57c5B674475d6728Af3bD9Fd"
-EMPLOYEE_NAME=""
-EMPLOYEE_DID=""
-EMPLOYER_NAME=""
-JOB_TITLE=""
-DEPARTMENT=""
-DATE_OF_JOINING=""
-EMPLOYEE_ID=""
-EMPLOYMENT_TYPE=""
+STUDENT_NAME=""
+STUDENT_DID=""
+INSTITUTION=""
+DEGREE=""
+FIELD_OF_STUDY=""
+ENROLLMENT_DATE=""
+GRADUATION_DATE=""
+STUDENT_ID=""
+GPA=""
+HONORS=""
 VERIFY_CREDENTIAL=false
 GENERATE_QR=false
 OUTPUT_FILE=""
@@ -64,36 +70,44 @@ while [[ $# -gt 0 ]]; do
             ISSUER_DID="$2"
             shift 2
             ;;
-        --employee-name)
-            EMPLOYEE_NAME="$2"
+        --student-name)
+            STUDENT_NAME="$2"
             shift 2
             ;;
-        --employee-did)
-            EMPLOYEE_DID="$2"
+        --student-did)
+            STUDENT_DID="$2"
             shift 2
             ;;
-        --employer-name)
-            EMPLOYER_NAME="$2"
+        --institution)
+            INSTITUTION="$2"
             shift 2
             ;;
-        --job-title)
-            JOB_TITLE="$2"
+        --degree)
+            DEGREE="$2"
             shift 2
             ;;
-        --department)
-            DEPARTMENT="$2"
+        --field-of-study)
+            FIELD_OF_STUDY="$2"
             shift 2
             ;;
-        --date-of-joining)
-            DATE_OF_JOINING="$2"
+        --enrollment-date)
+            ENROLLMENT_DATE="$2"
             shift 2
             ;;
-        --employee-id)
-            EMPLOYEE_ID="$2"
+        --graduation-date)
+            GRADUATION_DATE="$2"
             shift 2
             ;;
-        --employment-type)
-            EMPLOYMENT_TYPE="$2"
+        --student-id)
+            STUDENT_ID="$2"
+            shift 2
+            ;;
+        --gpa)
+            GPA="$2"
+            shift 2
+            ;;
+        --honors)
+            HONORS="$2"
             shift 2
             ;;
         -v|--verify)
@@ -109,7 +123,7 @@ while [[ $# -gt 0 ]]; do
             shift 2
             ;;
         -h|--help)
-            head -30 "$0" | tail -27
+            head -32 "$0" | tail -29
             exit 0
             ;;
         *)
@@ -120,64 +134,84 @@ while [[ $# -gt 0 ]]; do
 done
 
 # Interactive mode if required fields are missing
-if [ -z "$EMPLOYEE_NAME" ]; then
-    read -p "Employee Name: " EMPLOYEE_NAME
+if [ -z "$STUDENT_NAME" ]; then
+    read -p "Student Name: " STUDENT_NAME
 fi
 
-if [ -z "$EMPLOYER_NAME" ]; then
-    read -p "Employer/Company Name: " EMPLOYER_NAME
+if [ -z "$INSTITUTION" ]; then
+    read -p "Institution/University Name: " INSTITUTION
 fi
 
-if [ -z "$JOB_TITLE" ]; then
-    read -p "Job Title: " JOB_TITLE
+if [ -z "$DEGREE" ]; then
+    read -p "Degree/Qualification: " DEGREE
 fi
 
 # Optional fields - prompt if not provided
-if [ -z "$DEPARTMENT" ]; then
-    read -p "Department (press Enter to skip): " DEPARTMENT
+if [ -z "$FIELD_OF_STUDY" ]; then
+    read -p "Field of Study/Major (press Enter to skip): " FIELD_OF_STUDY
 fi
 
-if [ -z "$DATE_OF_JOINING" ]; then
-    read -p "Date of Joining (YYYY-MM-DD, press Enter for today): " DATE_OF_JOINING
-    if [ -z "$DATE_OF_JOINING" ]; then
-        DATE_OF_JOINING=$(date +%Y-%m-%d)
-    fi
+if [ -z "$ENROLLMENT_DATE" ]; then
+    read -p "Enrollment Date (YYYY-MM-DD, press Enter to skip): " ENROLLMENT_DATE
 fi
 
-if [ -z "$EMPLOYEE_ID" ]; then
-    read -p "Employee ID (press Enter to skip): " EMPLOYEE_ID
+if [ -z "$GRADUATION_DATE" ]; then
+    read -p "Graduation Date (YYYY-MM-DD, press Enter to skip): " GRADUATION_DATE
 fi
 
-if [ -z "$EMPLOYMENT_TYPE" ]; then
-    read -p "Employment Type (full-time/part-time/contract, press Enter to skip): " EMPLOYMENT_TYPE
+if [ -z "$STUDENT_ID" ]; then
+    read -p "Student ID (press Enter to skip): " STUDENT_ID
 fi
 
-# Generate employee DID if not provided
-if [ -z "$EMPLOYEE_DID" ]; then
-    EMPLOYEE_DID="did:example:employee:$(echo -n "$EMPLOYEE_NAME" | md5sum | cut -c1-16)"
+if [ -z "$GPA" ]; then
+    read -p "GPA (press Enter to skip): " GPA
+fi
+
+if [ -z "$HONORS" ]; then
+    read -p "Honors (e.g., cum laude, press Enter to skip): " HONORS
+fi
+
+# Generate student DID if not provided
+if [ -z "$STUDENT_DID" ]; then
+    STUDENT_DID="did:example:student:$(echo -n "$STUDENT_NAME" | md5sum | cut -c1-16)"
 fi
 
 # Validate required fields
-if [ -z "$EMPLOYEE_NAME" ] || [ -z "$EMPLOYER_NAME" ] || [ -z "$JOB_TITLE" ]; then
-    echo "ERROR: Employee name, employer name, and job title are required"
+if [ -z "$STUDENT_NAME" ] || [ -z "$INSTITUTION" ] || [ -z "$DEGREE" ]; then
+    echo "ERROR: Student name, institution, and degree are required"
     exit 1
 fi
 
 echo "==========================================="
-echo "  Employment Credential Issuance"
+echo "  Education Credential Issuance"
 echo "==========================================="
 echo ""
 echo "Credential Details:"
-echo "  Employee Name: $EMPLOYEE_NAME"
-echo "  Employee DID: $EMPLOYEE_DID"
-echo "  Employer: $EMPLOYER_NAME"
-echo "  Job Title: $JOB_TITLE"
-[ -n "$DEPARTMENT" ] && echo "  Department: $DEPARTMENT"
-[ -n "$DATE_OF_JOINING" ] && echo "  Date of Joining: $DATE_OF_JOINING"
-[ -n "$EMPLOYEE_ID" ] && echo "  Employee ID: $EMPLOYEE_ID"
-[ -n "$EMPLOYMENT_TYPE" ] && echo "  Employment Type: $EMPLOYMENT_TYPE"
+echo "  Student Name: $STUDENT_NAME"
+echo "  Student DID: $STUDENT_DID"
+echo "  Institution: $INSTITUTION"
+echo "  Degree: $DEGREE"
+[ -n "$FIELD_OF_STUDY" ] && echo "  Field of Study: $FIELD_OF_STUDY"
+[ -n "$ENROLLMENT_DATE" ] && echo "  Enrollment Date: $ENROLLMENT_DATE"
+[ -n "$GRADUATION_DATE" ] && echo "  Graduation Date: $GRADUATION_DATE"
+[ -n "$STUDENT_ID" ] && echo "  Student ID: $STUDENT_ID"
+[ -n "$GPA" ] && echo "  GPA: $GPA"
+[ -n "$HONORS" ] && echo "  Honors: $HONORS"
 echo ""
 echo "Issuer DID: $ISSUER_DID"
+echo ""
+
+# Determine proof type based on DID method
+DID_METHOD=$(echo "$ISSUER_DID" | cut -d':' -f2)
+if [ "$DID_METHOD" = "polygon" ]; then
+    PROOF_TYPE="EcdsaSecp256k1Signature2019"
+elif [ "$DID_METHOD" = "indy" ]; then
+    PROOF_TYPE="Ed25519Signature2018"
+else
+    # Default to Ed25519 for did:key, did:web, etc.
+    PROOF_TYPE="Ed25519Signature2018"
+fi
+echo "Proof Type: $PROOF_TYPE (based on $DID_METHOD)"
 echo ""
 
 # Get JWT token
@@ -199,54 +233,62 @@ ISSUANCE_DATE=$(date -u +"%Y-%m-%dT%H:%M:%SZ")
 
 # Start building the credential subject JSON
 SUBJECT_JSON="{
-        \"id\": \"$EMPLOYEE_DID\",
-        \"type\": \"EmploymentCredential\",
-        \"employeeName\": \"$EMPLOYEE_NAME\",
-        \"employerName\": \"$EMPLOYER_NAME\",
-        \"jobTitle\": \"$JOB_TITLE\""
+        \"id\": \"$STUDENT_DID\",
+        \"type\": \"EducationCredential\",
+        \"name\": \"$STUDENT_NAME\",
+        \"alumniOf\": \"$INSTITUTION\",
+        \"degree\": \"$DEGREE\""
 
 # Add optional fields if provided
-[ -n "$DEPARTMENT" ] && SUBJECT_JSON="$SUBJECT_JSON,
-        \"department\": \"$DEPARTMENT\""
+[ -n "$FIELD_OF_STUDY" ] && SUBJECT_JSON="$SUBJECT_JSON,
+        \"fieldOfStudy\": \"$FIELD_OF_STUDY\""
 
-[ -n "$DATE_OF_JOINING" ] && SUBJECT_JSON="$SUBJECT_JSON,
-        \"dateOfJoining\": \"$DATE_OF_JOINING\""
+[ -n "$ENROLLMENT_DATE" ] && SUBJECT_JSON="$SUBJECT_JSON,
+        \"enrollmentDate\": \"$ENROLLMENT_DATE\""
 
-[ -n "$EMPLOYEE_ID" ] && SUBJECT_JSON="$SUBJECT_JSON,
-        \"employeeId\": \"$EMPLOYEE_ID\""
+[ -n "$GRADUATION_DATE" ] && SUBJECT_JSON="$SUBJECT_JSON,
+        \"graduationDate\": \"$GRADUATION_DATE\""
 
-[ -n "$EMPLOYMENT_TYPE" ] && SUBJECT_JSON="$SUBJECT_JSON,
-        \"employmentType\": \"$EMPLOYMENT_TYPE\""
+[ -n "$STUDENT_ID" ] && SUBJECT_JSON="$SUBJECT_JSON,
+        \"studentId\": \"$STUDENT_ID\""
+
+[ -n "$GPA" ] && SUBJECT_JSON="$SUBJECT_JSON,
+        \"gpa\": \"$GPA\""
+
+[ -n "$HONORS" ] && SUBJECT_JSON="$SUBJECT_JSON,
+        \"honors\": \"$HONORS\""
 
 # Close the subject JSON
 SUBJECT_JSON="$SUBJECT_JSON
     }"
 
 # Create the full credential payload
-# Include inline JSON-LD context for employment credential terms using schema.org vocabulary
+# Include inline JSON-LD context for education credential terms using schema.org vocabulary
 CREDENTIAL_PAYLOAD=$(cat <<EOF
 {
     "credential": {
         "@context": [
             "https://www.w3.org/2018/credentials/v1",
             {
-                "EmploymentCredential": "https://schema.org/EmployeeRole",
-                "employeeName": "https://schema.org/name",
-                "employerName": "https://schema.org/legalName",
-                "jobTitle": "https://schema.org/jobTitle",
-                "department": "https://schema.org/department",
-                "dateOfJoining": "https://schema.org/startDate",
-                "employeeId": "https://schema.org/identifier",
-                "employmentType": "https://schema.org/employmentType"
+                "EducationCredential": "https://schema.org/EducationalOccupationalCredential",
+                "name": "https://schema.org/name",
+                "alumniOf": "https://schema.org/alumniOf",
+                "degree": "https://schema.org/educationalCredentialAwarded",
+                "fieldOfStudy": "https://schema.org/programName",
+                "enrollmentDate": "https://schema.org/startDate",
+                "graduationDate": "https://schema.org/endDate",
+                "studentId": "https://schema.org/identifier",
+                "gpa": "https://schema.org/ratingValue",
+                "honors": "https://schema.org/honorificSuffix"
             }
         ],
-        "type": ["VerifiableCredential", "EmploymentCredential"],
+        "type": ["VerifiableCredential", "EducationCredential"],
         "issuer": "$ISSUER_DID",
         "issuanceDate": "$ISSUANCE_DATE",
         "credentialSubject": $SUBJECT_JSON
     },
     "verificationMethod": "${ISSUER_DID}#key-1",
-    "proofType": "EcdsaSecp256k1Signature2019"
+    "proofType": "$PROOF_TYPE"
 }
 EOF
 )
@@ -280,7 +322,7 @@ else:
 
 # Save credential to file
 if [ -z "$OUTPUT_FILE" ]; then
-    OUTPUT_FILE="/tmp/employment-credential-$(date +%s).json"
+    OUTPUT_FILE="/tmp/education-credential-$(date +%s).json"
 fi
 echo "$SIGNED_CREDENTIAL" > "$OUTPUT_FILE"
 echo "   Saved to: $OUTPUT_FILE"
@@ -332,9 +374,9 @@ const fs = require('fs');
 
 const credential = JSON.parse(fs.readFileSync('$OUTPUT_FILE', 'utf8'));
 
-// JSON-XT Key Mapper for Employment Credentials
-// Maps long keys to short tokens for compact representation
-const employmentCredentialMapper = {
+// JSON-XT Key Mapper for Education Credentials
+// Maps long keys to short keys for compact representation
+const educationCredentialMapper = {
     // W3C VC standard fields
     '@context': 'x',
     'type': 't',
@@ -352,27 +394,31 @@ const employmentCredentialMapper = {
     'created': 'cr',
     'jws': 'jw',
 
-    // Employment credential fields
-    'EmploymentCredential': 'EmC',
+    // Education credential fields
+    'EducationCredential': 'EC',
     'VerifiableCredential': 'VC',
-    'employeeName': 'en',
-    'employerName': 'er',
-    'jobTitle': 'jt',
-    'department': 'dp',
-    'dateOfJoining': 'doj',
-    'employeeId': 'eid',
-    'employmentType': 'et',
+    'name': 'n',
+    'alumniOf': 'ao',
+    'degree': 'd',
+    'fieldOfStudy': 'fs',
+    'enrollmentDate': 'ed',
+    'graduationDate': 'gd',
+    'studentId': 'si',
+    'gpa': 'g',
+    'honors': 'h',
 
     // Schema.org URLs (map to short tokens)
     'https://www.w3.org/2018/credentials/v1': 'w3c',
-    'https://schema.org/EmployeeRole': 's:er',
+    'https://schema.org/EducationalOccupationalCredential': 's:eoc',
     'https://schema.org/name': 's:n',
-    'https://schema.org/legalName': 's:ln',
-    'https://schema.org/jobTitle': 's:jt',
-    'https://schema.org/department': 's:dp',
+    'https://schema.org/alumniOf': 's:ao',
+    'https://schema.org/educationalCredentialAwarded': 's:eca',
+    'https://schema.org/programName': 's:pn',
     'https://schema.org/startDate': 's:sd',
+    'https://schema.org/endDate': 's:ed',
     'https://schema.org/identifier': 's:id',
-    'https://schema.org/employmentType': 's:et',
+    'https://schema.org/ratingValue': 's:rv',
+    'https://schema.org/honorificSuffix': 's:hs',
 
     // Signature types
     'EcdsaSecp256k1Signature2019': 'ES256K',
@@ -383,7 +429,7 @@ const employmentCredentialMapper = {
 
 // Create reverse mapper for decoding
 const reverseMapper = {};
-for (const [key, value] of Object.entries(employmentCredentialMapper)) {
+for (const [key, value] of Object.entries(educationCredentialMapper)) {
     reverseMapper[value] = key;
 }
 
@@ -405,16 +451,16 @@ function applyMapping(obj, mapper) {
 }
 
 // Apply mapping to create JSON-XT version
-const jsonxt = applyMapping(credential, employmentCredentialMapper);
+const jsonxt = applyMapping(credential, educationCredentialMapper);
 
 // Save JSON-XT credential
 fs.writeFileSync('$JSONXT_FILE', JSON.stringify(jsonxt, null, 2));
 
 // Save mapper for reference (needed for decoding)
 fs.writeFileSync('$MAPPER_FILE', JSON.stringify({
-    mapper: employmentCredentialMapper,
+    mapper: educationCredentialMapper,
     reverseMapper: reverseMapper,
-    description: 'JSON-XT key mapper for Employment Credentials'
+    description: 'JSON-XT key mapper for Education Credentials'
 }, null, 2));
 
 // Generate QR data from original JSON-LD (for Inji compatibility)
@@ -468,7 +514,7 @@ fi
 
 echo ""
 echo "==========================================="
-echo "       Employment Credential Issued!"
+echo "       Education Credential Issued!"
 echo "==========================================="
 echo ""
 echo "Signed Credential:"

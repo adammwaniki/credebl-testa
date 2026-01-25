@@ -558,6 +558,206 @@ export CREDEBL_API_KEY="your-api-key"
 ./full-issuance-flow.sh -n "Your Organization" -p "Job Title"
 ```
 
+### 4.4 JSON-XT Compact Format
+
+The credential issuance scripts support **JSON-XT** output - a compact representation that reduces credential size by ~45% through key mapping.
+
+#### What is JSON-XT?
+
+JSON-XT (JSON eXtended/Transformed) is a compression technique that:
+- Maps long JSON keys to short tokens (e.g., `credentialSubject` → `cs`)
+- Maps long string values like URLs to short tokens (e.g., `https://www.w3.org/2018/credentials/v1` → `w3c`)
+- Maintains the same structure - just with shorter keys/values
+- Requires a **mapper** to decode back to standard JSON-LD
+
+#### Comparison: JSON-LD vs JSON-XT vs CBOR
+
+| Format | Description | Size | Use Case |
+|--------|-------------|------|----------|
+| **JSON-LD** | Standard W3C VC format with semantic context | Baseline | Interoperability, verification |
+| **JSON-XT** | Key-mapped JSON with short tokens | ~45% smaller | Storage, transmission |
+| **CBOR** | Binary encoding (used inside PixelPass QR) | ~60% smaller | QR codes, IoT |
+
+#### Credential Key Mappers
+
+##### Education Credential Mapper
+
+The `issue-education-credential.sh` script uses this mapper:
+
+```javascript
+const educationCredentialMapper = {
+    // W3C VC standard fields
+    '@context': 'x',
+    'type': 't',
+    'id': 'i',
+    'issuer': 'is',
+    'issuanceDate': 'idt',
+    'credentialSubject': 'cs',
+    'proof': 'p',
+
+    // Proof fields
+    'verificationMethod': 'vm',
+    'proofPurpose': 'pp',
+    'proofValue': 'pv',
+    'created': 'cr',
+    'jws': 'jw',
+
+    // Education credential fields
+    'EducationCredential': 'EC',
+    'VerifiableCredential': 'VC',
+    'name': 'n',
+    'alumniOf': 'ao',
+    'degree': 'd',
+    'fieldOfStudy': 'fs',
+    'enrollmentDate': 'ed',
+    'graduationDate': 'gd',
+    'studentId': 'si',
+    'gpa': 'g',
+    'honors': 'h',
+
+    // Schema.org URLs
+    'https://www.w3.org/2018/credentials/v1': 'w3c',
+    'https://schema.org/EducationalOccupationalCredential': 's:eoc',
+
+    // Signature types
+    'EcdsaSecp256k1Signature2019': 'ES256K',
+    'Ed25519Signature2018': 'EdDSA18',
+    'Ed25519Signature2020': 'EdDSA20',
+    'assertionMethod': 'am'
+};
+```
+
+##### Employment Credential Mapper
+
+The `issue-employment-credential.sh` script uses this mapper:
+
+```javascript
+const employmentCredentialMapper = {
+    // W3C VC standard fields
+    '@context': 'x',
+    'type': 't',
+    'id': 'i',
+    'issuer': 'is',
+    'issuanceDate': 'idt',
+    'expirationDate': 'edt',
+    'credentialSubject': 'cs',
+    'proof': 'p',
+
+    // Proof fields
+    'verificationMethod': 'vm',
+    'proofPurpose': 'pp',
+    'proofValue': 'pv',
+    'created': 'cr',
+    'jws': 'jw',
+
+    // Employment credential fields
+    'EmploymentCredential': 'EmC',
+    'VerifiableCredential': 'VC',
+    'employeeName': 'en',
+    'employerName': 'er',
+    'jobTitle': 'jt',
+    'department': 'dp',
+    'dateOfJoining': 'doj',
+    'employeeId': 'eid',
+    'employmentType': 'et',
+
+    // Schema.org URLs
+    'https://www.w3.org/2018/credentials/v1': 'w3c',
+    'https://schema.org/EmployeeRole': 's:er',
+    'https://schema.org/name': 's:n',
+    'https://schema.org/legalName': 's:ln',
+    'https://schema.org/jobTitle': 's:jt',
+    'https://schema.org/department': 's:dp',
+    'https://schema.org/startDate': 's:sd',
+    'https://schema.org/identifier': 's:id',
+    'https://schema.org/employmentType': 's:et',
+
+    // Signature types
+    'EcdsaSecp256k1Signature2019': 'ES256K',
+    'Ed25519Signature2018': 'EdDSA18',
+    'Ed25519Signature2020': 'EdDSA20',
+    'assertionMethod': 'am'
+};
+```
+
+#### Generating JSON-XT Output
+
+Use the `-q` flag to generate both JSON-LD and JSON-XT:
+
+**Education Credential:**
+```bash
+./issue-education-credential.sh \
+  --student-name "Diana Muthoni" \
+  --institution "University of Nairobi" \
+  --degree "Bachelor of Science" \
+  --field-of-study "Computer Science" \
+  --enrollment-date "2020-09-01" \
+  --graduation-date "2024-06-30" \
+  -q  # Generates QR + JSON-XT
+```
+
+**Employment Credential:**
+```bash
+./issue-employment-credential.sh \
+  --employee-name "John Smith" \
+  --employer-name "Acme Corporation" \
+  --job-title "Software Engineer" \
+  --department "Engineering" \
+  --date-of-joining "2023-01-15" \
+  --employee-id "EMP001" \
+  -q  # Generates QR + JSON-XT
+```
+
+**Output files (both scripts):**
+```
+/tmp/<type>-credential-*.json        # Original JSON-LD
+/tmp/<type>-credential-*-jsonxt.json # Compact JSON-XT
+/tmp/<type>-credential-*-mapper.json # Key mapper for decoding
+/tmp/<type>-credential-*-qr.png      # QR code image
+/tmp/<type>-credential-*-qr.txt      # QR data (base45 encoded)
+```
+
+#### Example Size Comparison
+
+| Credential | JSON-LD | JSON-XT | Reduction |
+|------------|---------|---------|-----------|
+| Education Credential | 1,388 bytes | 760 bytes | 45.2% |
+| Employment Credential | 1,245 bytes | 685 bytes | 45.0% |
+
+#### Important Notes
+
+1. **Verification uses JSON-LD**: Inji Verify expects standard JSON-LD format. JSON-XT is for storage/transmission only.
+2. **PixelPass uses CBOR internally**: The QR code is encoded from JSON-LD using zlib → CBOR → base45.
+3. **Mapper must be preserved**: To decode JSON-XT back to JSON-LD, you need the mapper file.
+4. **Custom mappers**: Create credential-type-specific mappers for maximum compression.
+
+#### Implementation Reference
+
+The JSON-XT mappers are implemented in the credential issuance scripts:
+
+| Credential Type | Script | Mapper Variable |
+|-----------------|--------|-----------------|
+| Education | `issue-education-credential.sh` | `educationCredentialMapper` (lines 377-428) |
+| Employment | `issue-employment-credential.sh` | `employmentCredentialMapper` (lines 327-378) |
+
+**File locations:**
+```
+patches/polygon-did-fix/
+├── issue-education-credential.sh    # Education credential with JSON-XT
+├── issue-employment-credential.sh   # Employment credential with JSON-XT
+└── POC-DEPLOYMENT-GUIDE.md          # This documentation
+```
+
+**Creating custom mappers:**
+
+To create a JSON-XT mapper for a new credential type:
+
+1. Identify all keys and string values in your credential
+2. Create short tokens (1-3 chars) for each
+3. Include standard W3C VC fields (@context, type, proof, etc.)
+4. Include schema.org URL mappings if using schema.org vocabulary
+5. Store the mapper alongside the credential for decoding
+
 ---
 
 ## Part 5: Network Topology Options
@@ -715,6 +915,8 @@ POST /v1/verify/vc-verification
 | `504 Gateway Timeout` | Adapter unreachable | Check SSH tunnel or adapter service status |
 | `No credentials found` | Wrong request format | Adapter expects `credential` or `verifiableCredentials` field |
 | DID resolution fails | RPC endpoint issue | Verify Polygon RPC URL is accessible |
+| Agent crashes with "password authentication failed" | Postgres password mismatch | Reset postgres password (see section 7.4) |
+| Agent container exits immediately | Database connection error | Check postgres is running and password is correct |
 
 ### 7.2 Debugging Commands
 
@@ -746,6 +948,61 @@ curl "https://resolver.identity.foundation/1.0/identifiers/did:polygon:mainnet:Y
 # Or via CREDEBL agent
 curl -H "Authorization: Bearer $TOKEN" \
   "http://localhost:8004/dids/did:polygon:YOUR_ADDRESS"
+```
+
+### 7.4 Database Connection Issues
+
+The AFJ (Aries Framework JavaScript) agent stores wallet data in PostgreSQL. If the agent fails to start with a "password authentication failed" error, follow these steps:
+
+**Symptoms:**
+```
+WalletError: Error opening wallet TestaIssuer002Wallet: Error connecting to database pool
+Caused by: error returned from database: password authentication failed for user "postgres"
+```
+
+**Diagnosis:**
+```bash
+# Check postgres container logs for authentication failures
+sudo docker logs credebl-postgres 2>&1 | grep "password authentication failed"
+
+# Check if agent container is running
+sudo docker ps -a | grep agent
+
+# View agent crash logs
+sudo docker logs <agent-container-name> --tail 50
+```
+
+**Solution - Reset PostgreSQL Password:**
+
+```bash
+# Connect to postgres container and reset password
+sudo docker exec credebl-postgres psql -U postgres -c "ALTER USER postgres PASSWORD 'postgres';"
+
+# Verify connection works from another container
+sudo docker run --rm --network docker-deployment_default postgres:16 \
+  psql 'postgresql://postgres:postgres@credebl-postgres:5432/credebl' -c 'SELECT 1'
+
+# Restart the failed agent container
+sudo docker start <agent-container-name>
+
+# Check agent logs for successful startup
+sudo docker logs <agent-container-name> --tail 20
+```
+
+**Root Cause:**
+
+This issue typically occurs when:
+1. The postgres container was initialized with a different password
+2. The container data volume was reused but environment variables changed
+3. The `pg_hba.conf` uses `scram-sha-256` authentication but the password hash doesn't match
+
+**Prevention:**
+
+Ensure the `POSTGRES_PASSWORD` environment variable in docker-compose matches what's stored in the postgres data volume. If starting fresh, remove the postgres volume first:
+
+```bash
+sudo docker-compose down -v  # Warning: This deletes all data
+sudo docker-compose up -d
 ```
 
 ---

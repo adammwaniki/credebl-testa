@@ -296,7 +296,7 @@ Remote village deployment where students need to verify education credentials wi
 │                                                                             │
 │   Option A: Full Credential (for small credentials)                         │
 │   ┌─────────────────────────────────────────────────────────────────────┐   │
-│   │  QR contains: CBOR format embedded credential                       │   │
+│   │  QR contains: JSON-LD format embedded credential                       │   │
 │   │  Pros: Self-contained, works completely offline                     │   │
 │   │  Cons: Large QR code, limited data capacity                         │   │
 │   └─────────────────────────────────────────────────────────────────────┘   │

@@ -216,6 +216,16 @@ echo "  - Issuer: did:web:mosip.github.io:inji-config:collab:tan"
 echo "  - Type: IncomeTaxAccountCredential"
 echo "  - Proof Type: Ed25519Signature2020"
 echo ""
+echo -e "${CYAN}Credential Subject:${NC}"
+echo "  - Full Name: Antony Muriithi"
+echo "  - TAN: 314937391853"
+echo "  - Gender: Male"
+echo "  - Date of Birth: 1994/12/08"
+echo "  - Email: antony@cdpi.dev"
+echo ""
+echo -e "${CYAN}Full Credential JSON:${NC}"
+echo "$SAMPLE_CREDENTIAL" | jq '.' 2>/dev/null || echo "$SAMPLE_CREDENTIAL"
+echo ""
 
 OFFLINE_RESPONSE=$(curl -s -X POST "$ADAPTER_URL/verify-offline" \
     -H "Content-Type: application/json" \
@@ -256,6 +266,11 @@ echo "  3. Routes to offline mode if both conditions are met"
 echo ""
 echo "This avoids the w3id.org JSON-LD context fetch issue."
 echo ""
+echo -e "${CYAN}Credential being verified:${NC}"
+echo "  - Issuer: did:web:mosip.github.io:inji-config:collab:tan"
+echo "  - Subject: Antony Muriithi (TAN: 314937391853)"
+echo "  - Type: IncomeTaxAccountCredential"
+echo ""
 
 AUTO_RESPONSE=$(curl -s -X POST "$ADAPTER_URL/v1/verify/vc-verification" \
     -H "Content-Type: application/json" \
@@ -287,6 +302,11 @@ echo "The Inji Verify UI proxies verification requests through nginx."
 echo "This test confirms the full end-to-end flow works."
 echo ""
 echo "Flow: Browser -> UI (nginx) -> Adapter -> Response"
+echo ""
+echo -e "${CYAN}Credential being verified:${NC}"
+echo "  - Issuer: did:web:mosip.github.io:inji-config:collab:tan"
+echo "  - Subject: Antony Muriithi (TAN: 314937391853)"
+echo "  - Type: IncomeTaxAccountCredential"
 echo ""
 
 UI_RESPONSE=$(curl -s --max-time 10 -X POST "$UI_URL/v1/verify/vc-verification" \
