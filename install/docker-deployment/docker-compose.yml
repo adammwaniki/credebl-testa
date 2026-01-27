@@ -288,7 +288,10 @@ services:
 
   inji-verify-ui:
     container_name: inji-verify-ui
-    image: mosipid/inji-verify-ui:0.16.0
+    # Custom build with JSON-XT support in SDK
+    build:
+      context: ./patches/inji-verify-official
+      dockerfile: verify-ui/Dockerfile.jsonxt
     ports:
       - "3001:8000"
     environment:
