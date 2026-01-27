@@ -9,7 +9,7 @@ WORKDIR /app
 RUN apk add --no-cache python3 make g++
 
 # Create directories
-RUN mkdir -p /app/cache /app/contexts
+RUN mkdir -p /app/cache /app/contexts /app/templates
 
 # Copy package.json and install dependencies
 COPY package.json .
@@ -22,6 +22,9 @@ COPY context-proxy.js .
 
 # Copy cached JSON-LD contexts
 COPY contexts/ /app/contexts/
+
+# Copy JSON-XT templates
+COPY templates/ /app/templates/
 
 # Environment variables with defaults
 ENV ADAPTER_PORT=8085

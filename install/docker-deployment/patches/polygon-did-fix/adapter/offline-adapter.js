@@ -31,10 +31,20 @@ let jsonxt = null;
 let jsonxtTemplates = null;
 try {
     jsonxt = require('jsonxt');
-    const templatesPath = path.join(__dirname, '..', 'templates', 'jsonxt-templates.json');
-    if (fs.existsSync(templatesPath)) {
-        jsonxtTemplates = JSON.parse(fs.readFileSync(templatesPath, 'utf8'));
-        console.log('[JSONXT] Templates loaded from:', templatesPath);
+    // Try multiple template locations (Docker: /app/templates, local: ../templates)
+    const templatePaths = [
+        path.join(__dirname, 'templates', 'jsonxt-templates.json'),
+        path.join(__dirname, '..', 'templates', 'jsonxt-templates.json')
+    ];
+    for (const templatesPath of templatePaths) {
+        if (fs.existsSync(templatesPath)) {
+            jsonxtTemplates = JSON.parse(fs.readFileSync(templatesPath, 'utf8'));
+            console.log('[JSONXT] Templates loaded from:', templatesPath);
+            break;
+        }
+    }
+    if (!jsonxtTemplates) {
+        console.log('[JSONXT] Templates not found in:', templatePaths.join(', '));
     }
 } catch (e) {
     console.log('[JSONXT] Library not available (install with: npm install jsonxt)');
