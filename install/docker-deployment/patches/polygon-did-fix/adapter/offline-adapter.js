@@ -50,6 +50,15 @@ try {
     console.log('[JSONXT] Library not available (install with: npm install jsonxt)');
 }
 
+// PixelPass support (for decoding QR data)
+let pixelpass = null;
+try {
+    pixelpass = require("@mosip/pixelpass");
+    console.log("[PIXELPASS] Library loaded");
+} catch (e) {
+    console.log("[PIXELPASS] Library not available");
+}
+
 // ============================================================================
 // CONFIGURATION
 // ============================================================================
@@ -90,6 +99,28 @@ function isJsonXtUri(input) {
 }
 
 /**
+ * Check if input looks like PixelPass-encoded data (base45)
+ */
+function isPixelPassEncoded(input) {
+    if (typeof input !== "string" || input.length < 10) return false;
+    if (input.startsWith("{") || input.startsWith("jxt:")) return false;
+    // Base45 uses A-Z, 0-9, space, and $ % * + - . / :
+    return /^[A-Z0-9 $%*+./:_-]+$/i.test(input.substring(0, 50));
+}
+
+/**
+ * Decode PixelPass-encoded data
+ */
+function decodePixelPass(encoded) {
+    if (!pixelpass) throw new Error("PixelPass library not available");
+    console.log("[PIXELPASS] Decoding data...");
+    const decoded = pixelpass.decode(encoded);
+    console.log("[PIXELPASS] Decoded to:", decoded.substring(0, 80) + "...");
+    return decoded;
+}
+
+
+/**
  * Local resolver for JSON-XT decoding
  * Uses templates from ../templates/jsonxt-templates.json
  */
@@ -126,7 +157,17 @@ async function decodeJsonXt(uri) {
  * @returns {object} Parsed request object with credential
  */
 async function parseRequestBody(body) {
-    const trimmed = body.trim();
+    let trimmed = body.trim();
+
+    // Check if body is PixelPass-encoded (base45) and decode first
+    if (pixelpass && isPixelPassEncoded(trimmed)) {
+        console.log("[ADAPTER] Detected PixelPass-encoded data, decoding...");
+        try {
+            trimmed = decodePixelPass(trimmed);
+        } catch (e) {
+            console.log("[ADAPTER] PixelPass decode failed:", e.message);
+        }
+    }
 
     // Check if body is a raw JSON-XT URI
     if (isJsonXtUri(trimmed)) {
@@ -1411,6 +1452,9 @@ const server = http.createServer(async (req, res) => {
 
                 console.log('[ADAPTER] Processing credential from issuer:', credential.issuer);
                 const result = await verifyCredential(credential);
+                // Include credential in response for UI rendering
+                result.vc = credential;
+                result.verifiableCredential = credential;
                 res.writeHead(200, { 'Content-Type': 'application/json' });
                 res.end(JSON.stringify(result));
             } catch (e) {

@@ -39,6 +39,13 @@ export const vcVerification = async (credential: unknown, url: string) => {
     const response = await fetch(url + "/vc-verification", requestOptions);
     const data = await response.json();
     if (response.status !== 200) throw new Error(`Failed VC Verification due to: ${ data.error || "Unknown Error" }`);
+    // For JSON-XT credentials, return full response so UI can display credential details
+    if (data.vc || data.verifiableCredential) {
+      return {
+        verificationStatus: data.verificationStatus,
+        vc: data.vc || data.verifiableCredential
+      };
+    }
     return data.verificationStatus;
   } catch (error) {
     console.error(error);

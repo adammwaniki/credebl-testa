@@ -483,8 +483,18 @@ const QRCodeVerification: React.FC<QRCodeVerificationProps> = ({
         const txnId = await vcSubmission(vc, verifyServiceUrl, transactionId);
         onVCReceived(txnId);
       } else if (onVCProcessed) {
-        const status = await vcVerification(vc, verifyServiceUrl);
-        onVCProcessed([{ vc, vcStatus: status }]);
+        const result = await vcVerification(vc, verifyServiceUrl);
+        // Handle JSON-XT response which includes decoded credential
+        let vcToDisplay = vc;
+        let vcStatus = result;
+        if (typeof result === "object" && result.verificationStatus) {
+          vcStatus = result.verificationStatus;
+          // Use credential from response if available (JSON-XT decoded by adapter)
+          if (result.vc) {
+            vcToDisplay = result.vc;
+          }
+        }
+        onVCProcessed([{ vc: vcToDisplay, vcStatus: vcStatus }]);
       }
     } catch (error) {
       handleError(error);

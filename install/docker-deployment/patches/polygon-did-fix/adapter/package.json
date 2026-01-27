@@ -20,8 +20,8 @@
     "node": ">=18.0.0"
   },
   "dependencies": {
+    "@mosip/pixelpass": "^0.6.0",
     "better-sqlite3": "^11.0.0",
     "jsonxt": "^0.0.19"
-  },
-  "devDependencies": {}
+  }
 }

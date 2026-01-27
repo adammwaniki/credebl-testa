@@ -372,3 +372,215 @@ See [POC-DEPLOYMENT-GUIDE.md](./POC-DEPLOYMENT-GUIDE.md) for comprehensive instr
 - Network topology options
 - QR code generation
 - Troubleshooting
+
+---
+
+## Part 3: JSON-XT Credential Compression
+
+### Overview
+
+JSON-XT (Consensas format) provides significant compression for W3C Verifiable Credentials, making them suitable for QR codes. This implementation adds full JSON-XT support to the verification flow.
+
+### Compression Benefits
+
+| Format | Size | QR Complexity |
+|--------|------|---------------|
+| JSON-LD | ~1400 bytes | High density QR |
+| JSON-XT | ~500 chars | **64% smaller** |
+| PixelPass wrapped | ~550 chars | Scannable |
+
+### Architecture
+
+```
+┌─────────────────────────────────────────────────────────────────────────┐
+│                    CREDENTIAL ISSUANCE WITH JSON-XT                      │
+├─────────────────────────────────────────────────────────────────────────┤
+│                                                                          │
+│  ┌──────────────┐    ┌──────────────┐    ┌──────────────────────────┐  │
+│  │  JSON-LD     │───▶│  JSON-XT     │───▶│  PixelPass Encoding      │  │
+│  │  Credential  │    │  Compression │    │  (base45 + QR)           │  │
+│  │  (~1400 B)   │    │  (~500 chars)│    │  (~550 chars)            │  │
+│  └──────────────┘    └──────────────┘    └──────────────────────────┘  │
+│                                                                          │
+│  JSON-XT URI Format: jxt:local:educ:1:<issuer>/<date>/...              │
+│                                                                          │
+└─────────────────────────────────────────────────────────────────────────┘
+
+┌─────────────────────────────────────────────────────────────────────────┐
+│                    VERIFICATION WITH JSON-XT SUPPORT                     │
+├─────────────────────────────────────────────────────────────────────────┤
+│                                                                          │
+│  ┌──────────────┐    ┌──────────────┐    ┌──────────────────────────┐  │
+│  │  QR Code     │───▶│  Adapter     │───▶│  CREDEBL Agent           │  │
+│  │  Scan        │    │  Service     │    │  Verification            │  │
+│  └──────────────┘    └──────────────┘    └──────────────────────────┘  │
+│         │                   │                                           │
+│         │            ┌──────┴──────┐                                   │
+│         │            │             │                                   │
+│         ▼            ▼             ▼                                   │
+│  ┌────────────┐ ┌────────────┐ ┌────────────┐                         │
+│  │ PixelPass  │ │ JSON-XT    │ │ JSON-LD    │                         │
+│  │ Decode     │ │ Decode     │ │ Credential │                         │
+│  │ (base45)   │ │ (jxt:...)  │ │ (verify)   │                         │
+│  └────────────┘ └────────────┘ └────────────┘                         │
+│                                                                          │
+└─────────────────────────────────────────────────────────────────────────┘
+```
+
+### Adapter Processing Flow
+
+The adapter handles multiple input formats automatically:
+
+1. **PixelPass-encoded data** (`NCFF-...`)
+   - Decoded using `@mosip/pixelpass` library
+   - Result may be JSON-XT URI or JSON-LD
+
+2. **JSON-XT URI** (`jxt:local:educ:1:...`)
+   - Decoded using `jsonxt` library with local templates
+   - Expands to full JSON-LD credential
+
+3. **JSON-LD Credential** (`{"@context":...}`)
+   - Passed directly to verification
+
+```javascript
+// Adapter parseRequestBody() flow:
+async function parseRequestBody(body) {
+    let data = body.trim();
+
+    // Step 1: Decode PixelPass if detected
+    if (isPixelPassEncoded(data)) {
+        data = pixelpass.decode(data);  // NCFF-... → jxt:... or JSON
+    }
+
+    // Step 2: Decode JSON-XT if detected
+    if (data.startsWith("jxt:")) {
+        return { credential: await decodeJsonXt(data) };
+    }
+
+    // Step 3: Parse as JSON-LD
+    return JSON.parse(data);
+}
+```
+
+### SDK Modifications
+
+The Inji Verify SDK was modified to:
+
+1. **api.ts** - Return credential from response for JSON-XT:
+   ```typescript
+   // Returns full response when credential is decoded by adapter
+   if (data.vc || data.verifiableCredential) {
+     return {
+       verificationStatus: data.verificationStatus,
+       vc: data.vc || data.verifiableCredential
+     };
+   }
+   return data.verificationStatus;
+   ```
+
+2. **QRCodeVerification.tsx** - Use response credential for display:
+   ```typescript
+   const result = await vcVerification(vc, verifyServiceUrl);
+   // Handle JSON-XT response which includes decoded credential
+   let vcToDisplay = vc;
+   let vcStatus = result;
+   if (typeof result === "object" && result.verificationStatus) {
+     vcStatus = result.verificationStatus;
+     if (result.vc) {
+       vcToDisplay = result.vc;  // Use adapter-decoded credential
+     }
+   }
+   onVCProcessed([{ vc: vcToDisplay, vcStatus: vcStatus }]);
+   ```
+
+### Configuration
+
+Add credential types to `config.json` for UI display:
+
+```json
+{
+  "verifiableClaims": [
+    {
+      "logo": "/assets/cert.png",
+      "name": "Education Credential",
+      "type": "EducationCredential",
+      "clientIdScheme": "did",
+      "definition": {
+        "purpose": "Verification of educational qualifications",
+        "format": {
+          "ldp_vc": {
+            "proof_type": ["EcdsaSecp256k1Signature2019"]
+          }
+        }
+      }
+    }
+  ],
+  "VCRenderOrders": {
+    "EducationCredentialRenderOrder": [
+      "name",
+      "alumniOf",
+      "degree",
+      "fieldOfStudy",
+      "enrollmentDate",
+      "graduationDate",
+      "studentId",
+      "gpa",
+      "honors"
+    ]
+  }
+}
+```
+
+### Dependencies
+
+The adapter requires these npm packages:
+
+```json
+{
+  "dependencies": {
+    "@mosip/pixelpass": "^0.6.0",
+    "better-sqlite3": "^11.0.0",
+    "jsonxt": "^0.0.19"
+  }
+}
+```
+
+### Issuing JSON-XT Credentials
+
+Use the `issue-education-credential.sh` script:
+
+```bash
+./issue-education-credential.sh -v -q
+# Follow prompts for student details
+# Outputs:
+#   - JSON-LD credential file
+#   - JSON-XT URI file
+#   - QR code image (PixelPass wrapped)
+```
+
+### Testing
+
+```bash
+# Test with JSON-XT URI directly
+curl -X POST http://localhost:8085/v1/verify/vc-verification \
+  -H "Content-Type: text/plain" \
+  -d "jxt:local:educ:1:did%3Apolygon%3A0x..."
+
+# Test with PixelPass-encoded QR data
+curl -X POST http://localhost:8085/v1/verify/vc-verification \
+  -H "Content-Type: text/plain" \
+  -d "NCFF-J91S7MJ..."
+
+# Response includes credential for UI display:
+{
+  "verificationStatus": "SUCCESS",
+  "vc": {
+    "@context": [...],
+    "credentialSubject": {
+      "name": "Student Name",
+      "degree": "Bachelor of Science",
+      ...
+    }
+  }
+}
+```

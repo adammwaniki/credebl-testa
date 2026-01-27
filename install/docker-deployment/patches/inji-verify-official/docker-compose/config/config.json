@@ -5,12 +5,14 @@
       "name": "MOSIP ID",
       "type": "MOSIPVerifiableCredential",
       "essential": true,
-      "clientIdScheme":"did",
+      "clientIdScheme": "did",
       "definition": {
         "purpose": "Relying party is requesting your digital ID for the purpose of Self-Authentication",
         "format": {
           "ldp_vc": {
-            "proof_type": ["RsaSignature2018"]
+            "proof_type": [
+              "RsaSignature2018"
+            ]
           }
         },
         "input_descriptors": [
@@ -18,13 +20,17 @@
             "id": "id card credential",
             "format": {
               "ldp_vc": {
-                "proof_type": ["RsaSignature2018"]
+                "proof_type": [
+                  "RsaSignature2018"
+                ]
               }
             },
             "constraints": {
               "fields": [
                 {
-                  "path": ["$.type"],
+                  "path": [
+                    "$.type"
+                  ],
                   "filter": {
                     "type": "object",
                     "pattern": "MOSIPVerifiableCredential"
@@ -40,12 +46,14 @@
       "logo": "/assets/cert.png",
       "name": "Life Insurance",
       "type": "LifeInsuranceCredential",
-      "clientIdScheme":"did",
+      "clientIdScheme": "did",
       "definition": {
         "purpose": "Relying party is requesting your digital ID for the purpose of Self-Authentication",
         "format": {
           "ldp_vc": {
-            "proof_type": ["Ed25519Signature2018"]
+            "proof_type": [
+              "Ed25519Signature2018"
+            ]
           }
         },
         "input_descriptors": [
@@ -53,13 +61,17 @@
             "id": "id card credential",
             "format": {
               "ldp_vc": {
-                "proof_type": ["Ed25519Signature2020"]
+                "proof_type": [
+                  "Ed25519Signature2020"
+                ]
               }
             },
             "constraints": {
               "fields": [
                 {
-                  "path": ["$.type"],
+                  "path": [
+                    "$.type"
+                  ],
                   "filter": {
                     "type": "object",
                     "pattern": "LifeInsuranceCredential"
@@ -75,12 +87,14 @@
       "logo": "/assets/cert.png",
       "name": "Health Insurance",
       "type": "InsuranceCredential",
-      "clientIdScheme":"pre_registered",
+      "clientIdScheme": "pre_registered",
       "definition": {
         "purpose": "Relying party is requesting your digital ID for the purpose of Self-Authentication",
         "format": {
           "ldp_vc": {
-            "proof_type": ["Ed25519Signature2018"]
+            "proof_type": [
+              "Ed25519Signature2018"
+            ]
           }
         },
         "input_descriptors": [
@@ -88,13 +102,17 @@
             "id": "id card credential",
             "format": {
               "ldp_vc": {
-                "proof_type": ["Ed25519Signature2020"]
+                "proof_type": [
+                  "Ed25519Signature2020"
+                ]
               }
             },
             "constraints": {
               "fields": [
                 {
-                  "path": ["$.type"],
+                  "path": [
+                    "$.type"
+                  ],
                   "filter": {
                     "type": "object",
                     "pattern": "InsuranceCredential"
@@ -110,12 +128,14 @@
       "logo": "/assets/cert.png",
       "name": "Mock Identity (SD JWT)",
       "type": "SD_JWT",
-      "clientIdScheme":"did",
+      "clientIdScheme": "did",
       "definition": {
         "purpose": "Relying party is requesting your digital ID for the purpose of Self-Authentication",
         "format": {
           "vc+sd-jwt": {
-            "sd-jwt_alg_values": ["EdDSA"]
+            "sd-jwt_alg_values": [
+              "EdDSA"
+            ]
           }
         },
         "input_descriptors": [
@@ -123,13 +143,17 @@
             "id": "Mock Identity card credential",
             "format": {
               "vc+sd-jwt": {
-                "sd-jwt_alg_values": ["EdDSA"]
+                "sd-jwt_alg_values": [
+                  "EdDSA"
+                ]
               }
             },
             "constraints": {
               "fields": [
                 {
-                  "path": ["$.vct"],
+                  "path": [
+                    "$.vct"
+                  ],
                   "filter": {
                     "type": "string",
                     "pattern": "SD_JWT"
@@ -145,12 +169,14 @@
       "logo": "/assets/cert.png",
       "name": "Land Registry",
       "type": "LandStatementCredential",
-      "clientIdScheme":"did",
+      "clientIdScheme": "did",
       "definition": {
         "purpose": "Relying party is requesting your digital ID for the purpose of Self-Authentication",
         "format": {
           "ldp_vc": {
-            "proof_type": ["Ed25519Signature2020"]
+            "proof_type": [
+              "Ed25519Signature2020"
+            ]
           }
         },
         "input_descriptors": [
@@ -158,16 +184,61 @@
             "id": "id card credential",
             "format": {
               "ldp_vc": {
-                "proof_type": ["Ed25519Signature2020"]
+                "proof_type": [
+                  "Ed25519Signature2020"
+                ]
               }
             },
             "constraints": {
               "fields": [
                 {
-                  "path": ["$.type"],
+                  "path": [
+                    "$.type"
+                  ],
                   "filter": {
                     "type": "object",
                     "pattern": "LandStatementCredential"
+                  }
+                }
+              ]
+            }
+          }
+        ]
+      }
+    },
+    {
+      "logo": "/assets/cert.png",
+      "name": "Education Credential",
+      "type": "EducationCredential",
+      "clientIdScheme": "did",
+      "definition": {
+        "purpose": "Verification of educational qualifications",
+        "format": {
+          "ldp_vc": {
+            "proof_type": [
+              "EcdsaSecp256k1Signature2019"
+            ]
+          }
+        },
+        "input_descriptors": [
+          {
+            "id": "education credential",
+            "format": {
+              "ldp_vc": {
+                "proof_type": [
+                  "EcdsaSecp256k1Signature2019"
+                ]
+              }
+            },
+            "constraints": {
+              "fields": [
+                {
+                  "path": [
+                    "$.type"
+                  ],
+                  "filter": {
+                    "type": "object",
+                    "pattern": "EducationCredential"
                   }
                 }
               ]
@@ -195,7 +266,11 @@
       "farmerId",
       "dvcType",
       {
-        "farmerLandDetails": ["farmId", "district", "surveyNumber"]
+        "farmerLandDetails": [
+          "farmId",
+          "district",
+          "surveyNumber"
+        ]
       }
     ],
     "farmerCredentialRenderOrder": [
@@ -257,6 +332,17 @@
       "employeeId",
       "dateOfJoining",
       "employmentType"
+    ],
+    "EducationCredentialRenderOrder": [
+      "name",
+      "alumniOf",
+      "degree",
+      "fieldOfStudy",
+      "enrollmentDate",
+      "graduationDate",
+      "studentId",
+      "gpa",
+      "honors"
     ]
   }
 }
