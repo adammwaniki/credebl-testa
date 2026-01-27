@@ -10,12 +10,114 @@
 
 const http = require('http');
 const crypto = require('crypto');
+const fs = require('fs');
+const path = require('path');
+
+// JSON-XT support (optional - graceful fallback if not available)
+let jsonxt = null;
+let jsonxtTemplates = null;
+try {
+    jsonxt = require('jsonxt');
+    const templatesPath = path.join(__dirname, '..', 'templates', 'jsonxt-templates.json');
+    if (fs.existsSync(templatesPath)) {
+        jsonxtTemplates = JSON.parse(fs.readFileSync(templatesPath, 'utf8'));
+        console.log('[JSONXT] Templates loaded from:', templatesPath);
+    }
+} catch (e) {
+    console.log('[JSONXT] Library not available (install with: npm install jsonxt)');
+}
 
 // Configuration
 const ADAPTER_PORT = process.env.ADAPTER_PORT || 8081;
 const CREDEBL_AGENT_URL = process.env.CREDEBL_AGENT_URL || 'http://localhost:8004';
 const CREDEBL_API_KEY = process.env.CREDEBL_API_KEY || 'supersecret-that-too-16chars';
 const UPSTREAM_VERIFY_SERVICE = process.env.UPSTREAM_VERIFY_SERVICE || 'http://verify-service:8080';
+
+// ============================================================================
+// JSON-XT SUPPORT (Compact credential encoding)
+// ============================================================================
+
+/**
+ * Check if input is a JSON-XT URI
+ * JSON-XT URIs have format: jxt:resolver:type:version:encoded_data
+ */
+function isJsonXtUri(input) {
+    if (typeof input !== 'string') return false;
+    return input.startsWith('jxt:');
+}
+
+/**
+ * Local resolver for JSON-XT decoding
+ * Uses templates from ../templates/jsonxt-templates.json
+ */
+async function jsonxtLocalResolver(resolverName) {
+    if (!jsonxtTemplates) {
+        throw new Error('JSON-XT templates not loaded');
+    }
+    return jsonxtTemplates;
+}
+
+/**
+ * Decode a JSON-XT URI to a full JSON-LD credential
+ * @param {string} uri - JSON-XT URI (e.g., "jxt:local:educ:1:...")
+ * @returns {object} Decoded JSON-LD credential
+ */
+async function decodeJsonXt(uri) {
+    if (!jsonxt) {
+        throw new Error('jsonxt library not available. Install with: npm install jsonxt');
+    }
+    if (!jsonxtTemplates) {
+        throw new Error('JSON-XT templates not loaded');
+    }
+
+    console.log('[JSONXT] Decoding URI:', uri.substring(0, 50) + '...');
+    const credential = await jsonxt.unpack(uri, jsonxtLocalResolver);
+    console.log('[JSONXT] Decoded credential from issuer:', credential.issuer);
+    return credential;
+}
+
+/**
+ * Parse request body, handling JSON-XT URIs automatically
+ * If body is a JSON-XT URI, decodes it first
+ * @param {string} body - Raw request body
+ * @returns {object} Parsed request object with credential
+ */
+async function parseRequestBody(body) {
+    const trimmed = body.trim();
+
+    // Check if body is a raw JSON-XT URI
+    if (isJsonXtUri(trimmed)) {
+        console.log('[ADAPTER] Detected JSON-XT URI in request body');
+        const credential = await decodeJsonXt(trimmed);
+        return { credential, _jsonxt: true };
+    }
+
+    // Try to parse as JSON
+    const parsed = JSON.parse(trimmed);
+
+    // Check if parsed content contains JSON-XT URI
+    if (parsed.credential && typeof parsed.credential === 'string' && isJsonXtUri(parsed.credential)) {
+        console.log('[ADAPTER] Detected JSON-XT URI in credential field');
+        parsed.credential = await decodeJsonXt(parsed.credential);
+        parsed._jsonxt = true;
+    }
+    if (parsed.verifiableCredential && typeof parsed.verifiableCredential === 'string' && isJsonXtUri(parsed.verifiableCredential)) {
+        console.log('[ADAPTER] Detected JSON-XT URI in verifiableCredential field');
+        parsed.verifiableCredential = await decodeJsonXt(parsed.verifiableCredential);
+        parsed._jsonxt = true;
+    }
+    if (parsed.verifiableCredentials && Array.isArray(parsed.verifiableCredentials)) {
+        for (let i = 0; i < parsed.verifiableCredentials.length; i++) {
+            if (typeof parsed.verifiableCredentials[i] === 'string' && isJsonXtUri(parsed.verifiableCredentials[i])) {
+                console.log(`[ADAPTER] Detected JSON-XT URI in verifiableCredentials[${i}]`);
+                parsed.verifiableCredentials[i] = await decodeJsonXt(parsed.verifiableCredentials[i]);
+                parsed._jsonxt = true;
+            }
+        }
+    }
+
+    return parsed;
+}
 
 // ============================================================================
 // CREDENTIAL TYPE DETECTION
@@ -505,10 +607,15 @@ const server = http.createServer(async (req, res) => {
         req.on('data', chunk => body += chunk);
         req.on('end', async () => {
             try {
-                const request = JSON.parse(body);
+                // Parse request body with JSON-XT support
+                const request = await parseRequestBody(body);
                 console.log('[ADAPTER] Received v1 verification request');
 
-                // Support multiple input formats
+                if (request._jsonxt) {
+                    console.log('[ADAPTER] Credential decoded from JSON-XT format');
+                }
+
+                // Support multiple input formats (including JSON-XT URI decoded by parseRequestBody)
                 let credential;
                 if (request.verifiableCredentials && request.verifiableCredentials.length > 0) {
                     credential = request.verifiableCredentials[0];
@@ -554,17 +661,33 @@ const server = http.createServer(async (req, res) => {
         req.on('data', chunk => body += chunk);
         req.on('end', async () => {
             try {
-                const request = JSON.parse(body);
+                // Parse request body with JSON-XT support
+                const request = await parseRequestBody(body);
                 console.log('[ADAPTER] Received v2 verification request');
 
-                const credential = request.verifiableCredential;
+                if (request._jsonxt) {
+                    console.log('[ADAPTER] Credential decoded from JSON-XT format');
+                }
+
+                let credential = request.verifiableCredential;
                 if (!credential) {
                     res.writeHead(400, { 'Content-Type': 'application/json' });
                     res.end(JSON.stringify({ allChecksSuccessful: false }));
                     return;
                 }
 
-                const credObj = typeof credential === 'string' ? JSON.parse(credential) : credential;
+                // Handle credential that might be a JSON-XT URI string
+                let credObj;
+                if (typeof credential === 'string') {
+                    if (isJsonXtUri(credential)) {
+                        credObj = await decodeJsonXt(credential);
+                        console.log('[ADAPTER] Credential decoded from JSON-XT URI in verifiableCredential');
+                    } else {
+                        credObj = JSON.parse(credential);
+                    }
+                } else {
+                    credObj = credential;
+                }
 
                 // Check if we should handle this credential or forward to upstream
                 if (!shouldHandleCredential(credObj)) {
@@ -736,11 +859,16 @@ const server = http.createServer(async (req, res) => {
 server.listen(ADAPTER_PORT, '0.0.0.0', () => {
     console.log('===========================================');
     console.log('  CREDEBL-to-Inji Verify Adapter');
-    console.log('  with Demo Revocation System');
+    console.log('  with Demo Revocation & JSON-XT Support');
     console.log('===========================================');
     console.log('');
     console.log('Adapter listening on port:', ADAPTER_PORT);
     console.log('CREDEBL Agent URL:', CREDEBL_AGENT_URL);
+    console.log('JSON-XT:', jsonxt ? 'ENABLED' : 'DISABLED (install jsonxt package)');
+    console.log('');
+    console.log('Supported Formats:');
+    console.log('  - JSON-LD credentials (standard)');
+    console.log('  - JSON-XT URIs (jxt:resolver:type:version:data)');
     console.log('');
     console.log('Verification Endpoints:');
     console.log('  POST /v1/verify/vc-verification');

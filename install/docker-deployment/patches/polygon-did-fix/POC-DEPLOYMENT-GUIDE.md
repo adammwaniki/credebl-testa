@@ -766,6 +766,83 @@ To create a JSON-XT template for a new credential type:
 - [Consensas JSON-XT Repository](https://github.com/Consensas/jsonxt)
 - [JSON-XT NPM Package](https://www.npmjs.com/package/jsonxt)
 
+### 4.5 JSON-XT Verification Support
+
+The adapter service now supports verifying credentials in both JSON-LD and JSON-XT formats. This enables QR codes containing compact JSON-XT URIs to be scanned and verified by Inji Verify.
+
+#### How It Works
+
+When the adapter receives a verification request, it automatically detects the credential format:
+
+1. **JSON-XT URI Detection**: Checks if input starts with `jxt:`
+2. **Automatic Decoding**: If JSON-XT, decodes to full JSON-LD using local templates
+3. **Standard Verification**: Proceeds with normal signature verification
+
+```
+┌─────────────────┐     ┌─────────────────┐     ┌─────────────────┐
+│   QR Scan       │────▶│   Adapter       │────▶│   CREDEBL       │
+│   (JSON-XT URI) │     │   (Decode)      │     │   (Verify)      │
+└─────────────────┘     └─────────────────┘     └─────────────────┘
+        │                       │                       │
+   jxt:local:educ:1:...   JSON-LD credential   isValid: true/false
+```
+
+#### Supported Input Formats
+
+The adapter accepts these formats at `/v1/verify/vc-verification`:
+
+| Input Format | Example | Handling |
+|--------------|---------|----------|
+| Raw JSON-XT URI | `jxt:local:educ:1:...` | Decoded automatically |
+| JSON-LD credential | `{"@context": [...], ...}` | Passed through |
+| Wrapped credential | `{"credential": {...}}` | Unwrapped |
+| PixelPass + JSON-XT | Base45 encoded URI | PixelPass decoded, then JSON-XT decoded |
+
+#### Adapter Setup for JSON-XT
+
+The adapter requires the `jsonxt` npm package and templates:
+
+```bash
+cd adapter/
+npm install jsonxt
+
+# Ensure templates are available
+ls ../templates/jsonxt-templates.json
+```
+
+#### Startup Verification
+
+When the adapter starts, it shows JSON-XT status:
+
+```
+===========================================
+  OFFLINE-CAPABLE VERIFICATION ADAPTER
+  with JSON-XT Support
+===========================================
+
+  JSON-XT: ENABLED
+
+  Supported formats:
+    - JSON-LD credentials (standard)
+    - JSON-XT URIs (jxt:resolver:type:version:data)
+```
+
+If you see `JSON-XT: DISABLED`, install the jsonxt package.
+
+#### Testing JSON-XT Verification
+
+```bash
+# 1. Issue a credential with JSON-XT output
+./issue-education-credential.sh --student-name "Jane Doe" \
+    --university "MIT" --degree "PhD" -q
+
+# 2. Verify the JSON-XT file directly
+JSONXT_URI=$(cat /tmp/education-credential-*-jsonxt.txt)
+curl -X POST http://localhost:8085/v1/verify/vc-verification \
+    -H "Content-Type: text/plain" \
+    -d "$JSONXT_URI"
+```
+
 ---
 
 ## Part 5: Network Topology Options
