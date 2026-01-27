@@ -350,148 +350,95 @@ fi
 # Generate QR code if requested
 if [ "$GENERATE_QR" = true ]; then
     echo ""
-    echo "4. Generating JSON-XT and Inji Verify compatible QR code..."
+    echo "4. Generating JSON-XT URI and Inji Verify compatible QR code..."
 
     PIXELPASS_DIR="/tmp/pixelpass_env"
+    SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 
-    # Ensure PixelPass is installed
-    if [ ! -d "$PIXELPASS_DIR/node_modules/@injistack/pixelpass" ]; then
-        echo "   Installing PixelPass..."
-        mkdir -p "$PIXELPASS_DIR"
-        (cd "$PIXELPASS_DIR" && npm init -y > /dev/null 2>&1 && npm install @injistack/pixelpass --silent 2>/dev/null)
+    # Check Node.js version (jsonxt requires Node.js 18-22, not v24+)
+    NODE_MAJOR=$(node -v 2>/dev/null | sed 's/v\([0-9]*\).*/\1/')
+    if [ -n "$NODE_MAJOR" ] && [ "$NODE_MAJOR" -ge 24 ]; then
+        echo "   [WARN] Node.js v$NODE_MAJOR detected. jsonxt may not work with v24+."
+        echo "   [WARN] Recommended: Node.js v18-v22 LTS"
     fi
 
-    if [ -d "$PIXELPASS_DIR/node_modules/@injistack/pixelpass" ]; then
+    # Ensure PixelPass and jsonxt are installed
+    if [ ! -d "$PIXELPASS_DIR/node_modules/@injistack/pixelpass" ] || [ ! -d "$PIXELPASS_DIR/node_modules/jsonxt" ]; then
+        echo "   Installing PixelPass and jsonxt..."
+        mkdir -p "$PIXELPASS_DIR"
+        (cd "$PIXELPASS_DIR" && npm init -y > /dev/null 2>&1 && npm install @injistack/pixelpass jsonxt --silent 2>/dev/null)
+    fi
+
+    # Copy templates to pixelpass directory
+    if [ -d "$SCRIPT_DIR/templates" ]; then
+        cp -r "$SCRIPT_DIR/templates" "$PIXELPASS_DIR/" 2>/dev/null
+    fi
+
+    if [ -d "$PIXELPASS_DIR/node_modules/@injistack/pixelpass" ] && [ -d "$PIXELPASS_DIR/node_modules/jsonxt" ]; then
         QR_DATA_FILE="${OUTPUT_FILE%.json}-qr.txt"
         QR_PNG_FILE="${OUTPUT_FILE%.json}-qr.png"
-        JSONXT_FILE="${OUTPUT_FILE%.json}-jsonxt.json"
-        MAPPER_FILE="${OUTPUT_FILE%.json}-mapper.json"
+        JSONXT_FILE="${OUTPUT_FILE%.json}-jsonxt.txt"
 
-        # Encode with PixelPass and generate JSON-XT
+        # Generate JSON-XT URI using real Consensas jsonxt library
         (cd "$PIXELPASS_DIR" && node -e "
+const jsonxt = require('jsonxt');
 const { generateQRData } = require('@injistack/pixelpass');
 const fs = require('fs');
+const path = require('path');
 
+// Load templates (copied to pixelpass directory)
+const templatesPath = path.join(process.cwd(), 'templates', 'jsonxt-templates.json');
+const templates = JSON.parse(fs.readFileSync(templatesPath, 'utf8'));
+
+// Load credential
 const credential = JSON.parse(fs.readFileSync('$OUTPUT_FILE', 'utf8'));
 
-// JSON-XT Key Mapper for Education Credentials
-// Maps long keys to short keys for compact representation
-const educationCredentialMapper = {
-    // W3C VC standard fields
-    '@context': 'x',
-    'type': 't',
-    'id': 'i',
-    'issuer': 'is',
-    'issuanceDate': 'idt',
-    'expirationDate': 'edt',
-    'credentialSubject': 'cs',
-    'proof': 'p',
+async function main() {
+    try {
+        // Pack credential to JSON-XT URI using Consensas format
+        const jsonxtUri = await jsonxt.pack(credential, templates, 'educ', '1', 'local');
 
-    // Proof fields
-    'verificationMethod': 'vm',
-    'proofPurpose': 'pp',
-    'proofValue': 'pv',
-    'created': 'cr',
-    'jws': 'jw',
+        // Save JSON-XT URI to file
+        fs.writeFileSync('$JSONXT_FILE', jsonxtUri);
 
-    // Education credential fields
-    'EducationCredential': 'EC',
-    'VerifiableCredential': 'VC',
-    'name': 'n',
-    'alumniOf': 'ao',
-    'degree': 'd',
-    'fieldOfStudy': 'fs',
-    'enrollmentDate': 'ed',
-    'graduationDate': 'gd',
-    'studentId': 'si',
-    'gpa': 'g',
-    'honors': 'h',
+        // Generate QR data: wrap JSON-XT URI in PixelPass for Inji compatibility
+        const qrData = generateQRData(jsonxtUri);
+        fs.writeFileSync('$QR_DATA_FILE', qrData);
 
-    // Schema.org URLs (map to short tokens)
-    'https://www.w3.org/2018/credentials/v1': 'w3c',
-    'https://schema.org/EducationalOccupationalCredential': 's:eoc',
-    'https://schema.org/name': 's:n',
-    'https://schema.org/alumniOf': 's:ao',
-    'https://schema.org/educationalCredentialAwarded': 's:eca',
-    'https://schema.org/programName': 's:pn',
-    'https://schema.org/startDate': 's:sd',
-    'https://schema.org/endDate': 's:ed',
-    'https://schema.org/identifier': 's:id',
-    'https://schema.org/ratingValue': 's:rv',
-    'https://schema.org/honorificSuffix': 's:hs',
+        // Calculate sizes
+        const jsonldSize = JSON.stringify(credential).length;
+        const jsonxtSize = jsonxtUri.length;
+        const qrSize = qrData.length;
+        const compressionRatio = ((1 - jsonxtSize/jsonldSize) * 100).toFixed(1);
 
-    // Signature types
-    'EcdsaSecp256k1Signature2019': 'ES256K',
-    'Ed25519Signature2018': 'EdDSA18',
-    'Ed25519Signature2020': 'EdDSA20',
-    'assertionMethod': 'am'
-};
-
-// Create reverse mapper for decoding
-const reverseMapper = {};
-for (const [key, value] of Object.entries(educationCredentialMapper)) {
-    reverseMapper[value] = key;
-}
-
-// Function to recursively apply mapping to an object
-function applyMapping(obj, mapper) {
-    if (Array.isArray(obj)) {
-        return obj.map(item => applyMapping(item, mapper));
-    } else if (obj !== null && typeof obj === 'object') {
-        const mapped = {};
-        for (const [key, value] of Object.entries(obj)) {
-            const mappedKey = mapper[key] || key;
-            mapped[mappedKey] = applyMapping(value, mapper);
-        }
-        return mapped;
-    } else if (typeof obj === 'string') {
-        return mapper[obj] || obj;
+        console.log('JSON-LD size:  ' + jsonldSize + ' bytes');
+        console.log('JSON-XT size:  ' + jsonxtSize + ' chars (' + compressionRatio + '% smaller)');
+        console.log('QR data size:  ' + qrSize + ' chars');
+        console.log('');
+        console.log('JSON-XT URI format: jxt:local:educ:1:...');
+    } catch (error) {
+        console.error('Error: ' + error.message);
+        process.exit(1);
     }
-    return obj;
 }
 
-// Apply mapping to create JSON-XT version
-const jsonxt = applyMapping(credential, educationCredentialMapper);
-
-// Save JSON-XT credential
-fs.writeFileSync('$JSONXT_FILE', JSON.stringify(jsonxt, null, 2));
-
-// Save mapper for reference (needed for decoding)
-fs.writeFileSync('$MAPPER_FILE', JSON.stringify({
-    mapper: educationCredentialMapper,
-    reverseMapper: reverseMapper,
-    description: 'JSON-XT key mapper for Education Credentials'
-}, null, 2));
-
-// Generate QR data from original JSON-LD (for Inji compatibility)
-const qrData = generateQRData(JSON.stringify(credential));
-fs.writeFileSync('$QR_DATA_FILE', qrData);
-
-// Calculate sizes
-const jsonldSize = JSON.stringify(credential).length;
-const jsonxtSize = JSON.stringify(jsonxt).length;
-const qrSize = qrData.length;
-
-console.log('JSON-LD size: ' + jsonldSize + ' bytes');
-console.log('JSON-XT size: ' + jsonxtSize + ' bytes (' + ((1 - jsonxtSize/jsonldSize) * 100).toFixed(1) + '% smaller)');
-console.log('QR data size: ' + qrSize + ' chars');
+main();
 ") 2>&1
 
         if [ -s "$QR_DATA_FILE" ]; then
             echo ""
-            echo "   [OK] Credential encoded with PixelPass"
-            echo "   [OK] JSON-XT version created"
+            echo "   [OK] Credential encoded to JSON-XT URI (Consensas format)"
+            echo "   [OK] QR code generated with PixelPass wrapping"
             echo ""
             echo "   Output files:"
-            echo "     JSON-LD:  $OUTPUT_FILE"
-            echo "     JSON-XT:  $JSONXT_FILE"
-            echo "     Mapper:   $MAPPER_FILE"
-            echo "     QR data:  $QR_DATA_FILE"
+            echo "     JSON-LD:   $OUTPUT_FILE"
+            echo "     JSON-XT:   $JSONXT_FILE"
+            echo "     QR data:   $QR_DATA_FILE"
 
             # Generate PNG if qrencode is available
             if command -v qrencode &> /dev/null; then
                 qrencode -o "$QR_PNG_FILE" -s 10 -m 2 < "$QR_DATA_FILE"
-                echo "     QR image: $QR_PNG_FILE"
+                echo "     QR image:  $QR_PNG_FILE"
 
                 # Display ASCII QR in terminal
                 echo ""
@@ -503,12 +450,18 @@ console.log('QR data size: ' + qrSize + ' chars');
             else
                 echo "   [WARN] qrencode not installed - install with: sudo apt install qrencode"
             fi
+
+            # Show JSON-XT URI preview
+            echo ""
+            echo "JSON-XT URI (first 100 chars):"
+            head -c 100 "$JSONXT_FILE"
+            echo "..."
         else
-            echo "   [FAIL] PixelPass encoding failed"
+            echo "   [FAIL] JSON-XT encoding failed"
         fi
     else
-        echo "   [FAIL] Could not install PixelPass"
-        echo "   Try manually: cd $PIXELPASS_DIR && npm install @injistack/pixelpass"
+        echo "   [FAIL] Could not install required packages"
+        echo "   Try manually: cd $PIXELPASS_DIR && npm install @injistack/pixelpass jsonxt"
     fi
 fi
 
@@ -524,8 +477,7 @@ echo "$SIGNED_CREDENTIAL" | python3 -m json.tool 2>/dev/null || echo "$SIGNED_CR
 echo ""
 echo "Files:"
 echo "  JSON-LD:    $OUTPUT_FILE"
-[ "$GENERATE_QR" = true ] && [ -f "${OUTPUT_FILE%.json}-jsonxt.json" ] && echo "  JSON-XT:    ${OUTPUT_FILE%.json}-jsonxt.json"
-[ "$GENERATE_QR" = true ] && [ -f "${OUTPUT_FILE%.json}-mapper.json" ] && echo "  Mapper:     ${OUTPUT_FILE%.json}-mapper.json"
+[ "$GENERATE_QR" = true ] && [ -f "${OUTPUT_FILE%.json}-jsonxt.txt" ] && echo "  JSON-XT:    ${OUTPUT_FILE%.json}-jsonxt.txt"
 [ "$GENERATE_QR" = true ] && [ -f "${OUTPUT_FILE%.json}-qr.png" ] && echo "  QR Image:   ${OUTPUT_FILE%.json}-qr.png"
 [ "$GENERATE_QR" = true ] && [ -f "${OUTPUT_FILE%.json}-qr.txt" ] && echo "  QR Data:    ${OUTPUT_FILE%.json}-qr.txt"
 echo ""

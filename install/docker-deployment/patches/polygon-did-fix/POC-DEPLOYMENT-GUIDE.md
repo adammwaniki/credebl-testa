@@ -560,125 +560,110 @@ export CREDEBL_API_KEY="your-api-key"
 
 ### 4.4 JSON-XT Compact Format
 
-The credential issuance scripts support **JSON-XT** output - a compact representation that reduces credential size by ~45% through key mapping.
+The credential issuance scripts support **JSON-XT** (JSON eXternal Templates) output - a standardized compression format from [Consensas](https://github.com/Consensas/jsonxt) that reduces credential size to 25-35% of the original through template-based encoding.
 
 #### What is JSON-XT?
 
-JSON-XT (JSON eXtended/Transformed) is a compression technique that:
-- Maps long JSON keys to short tokens (e.g., `credentialSubject` → `cs`)
-- Maps long string values like URLs to short tokens (e.g., `https://www.w3.org/2018/credentials/v1` → `w3c`)
-- Maintains the same structure - just with shorter keys/values
-- Requires a **mapper** to decode back to standard JSON-LD
+JSON-XT is an open standard for compressing JSON documents into compact URIs:
+- Produces URIs like `jxt:resolver:type:version:encoded_data`
+- Uses **external templates** to define compression schema
+- Achieves 65-75% size reduction through typed encoding
+- Templates can be resolved via `.well-known/` URLs or embedded locally
 
 #### Comparison: JSON-LD vs JSON-XT vs CBOR
 
 | Format | Description | Size | Use Case |
 |--------|-------------|------|----------|
 | **JSON-LD** | Standard W3C VC format with semantic context | Baseline | Interoperability, verification |
-| **JSON-XT** | Key-mapped JSON with short tokens | ~45% smaller | Storage, transmission |
-| **CBOR** | Binary encoding (used inside PixelPass QR) | ~60% smaller | QR codes, IoT |
+| **JSON-XT** | Template-based URI encoding (Consensas standard) | 25-35% of original | QR codes, compact transmission |
+| **CBOR** | Binary encoding (used inside PixelPass QR) | ~40% of original | QR codes, IoT |
 
-#### Credential Key Mappers
+#### JSON-XT URI Format
 
-##### Education Credential Mapper
+A JSON-XT URI follows this structure:
 
-The `issue-education-credential.sh` script uses this mapper:
-
-```javascript
-const educationCredentialMapper = {
-    // W3C VC standard fields
-    '@context': 'x',
-    'type': 't',
-    'id': 'i',
-    'issuer': 'is',
-    'issuanceDate': 'idt',
-    'credentialSubject': 'cs',
-    'proof': 'p',
-
-    // Proof fields
-    'verificationMethod': 'vm',
-    'proofPurpose': 'pp',
-    'proofValue': 'pv',
-    'created': 'cr',
-    'jws': 'jw',
-
-    // Education credential fields
-    'EducationCredential': 'EC',
-    'VerifiableCredential': 'VC',
-    'name': 'n',
-    'alumniOf': 'ao',
-    'degree': 'd',
-    'fieldOfStudy': 'fs',
-    'enrollmentDate': 'ed',
-    'graduationDate': 'gd',
-    'studentId': 'si',
-    'gpa': 'g',
-    'honors': 'h',
-
-    // Schema.org URLs
-    'https://www.w3.org/2018/credentials/v1': 'w3c',
-    'https://schema.org/EducationalOccupationalCredential': 's:eoc',
-
-    // Signature types
-    'EcdsaSecp256k1Signature2019': 'ES256K',
-    'Ed25519Signature2018': 'EdDSA18',
-    'Ed25519Signature2020': 'EdDSA20',
-    'assertionMethod': 'am'
-};
+```
+jxt:<resolver>:<type>:<version>:<encoded_payload>
 ```
 
-##### Employment Credential Mapper
+**Components:**
+- `jxt:` - Protocol identifier
+- `resolver` - Template source (e.g., `local`, `example.com`)
+- `type` - Template type (e.g., `educ`, `empl`)
+- `version` - Template version (e.g., `1`)
+- `encoded_payload` - Compressed data using template-defined encoders
 
-The `issue-employment-credential.sh` script uses this mapper:
-
-```javascript
-const employmentCredentialMapper = {
-    // W3C VC standard fields
-    '@context': 'x',
-    'type': 't',
-    'id': 'i',
-    'issuer': 'is',
-    'issuanceDate': 'idt',
-    'expirationDate': 'edt',
-    'credentialSubject': 'cs',
-    'proof': 'p',
-
-    // Proof fields
-    'verificationMethod': 'vm',
-    'proofPurpose': 'pp',
-    'proofValue': 'pv',
-    'created': 'cr',
-    'jws': 'jw',
-
-    // Employment credential fields
-    'EmploymentCredential': 'EmC',
-    'VerifiableCredential': 'VC',
-    'employeeName': 'en',
-    'employerName': 'er',
-    'jobTitle': 'jt',
-    'department': 'dp',
-    'dateOfJoining': 'doj',
-    'employeeId': 'eid',
-    'employmentType': 'et',
-
-    // Schema.org URLs
-    'https://www.w3.org/2018/credentials/v1': 'w3c',
-    'https://schema.org/EmployeeRole': 's:er',
-    'https://schema.org/name': 's:n',
-    'https://schema.org/legalName': 's:ln',
-    'https://schema.org/jobTitle': 's:jt',
-    'https://schema.org/department': 's:dp',
-    'https://schema.org/startDate': 's:sd',
-    'https://schema.org/identifier': 's:id',
-    'https://schema.org/employmentType': 's:et',
-
-    // Signature types
-    'EcdsaSecp256k1Signature2019': 'ES256K',
-    'Ed25519Signature2018': 'EdDSA18',
-    'Ed25519Signature2020': 'EdDSA20',
-    'assertionMethod': 'am'
-};
+**Example:**
 ```
+jxt:local:educ:1:did%3Apolygon%3A0xD3A288.../1KQRS4M/did%3Aexample%3Astudent.../Janet~Quinn/...
+```
+
+#### Credential Templates
+
+Templates define how credentials are compressed. Each template specifies:
+- **columns**: Fields to extract with their encoders
+- **template**: Base JSON-LD structure for reconstruction
+
+##### Education Credential Template (`educ:1`)
+
+Located at `templates/jsonxt-templates.json`:
+
+```json
+{
+  "educ:1": {
+    "columns": [
+      {"path": "issuer", "encoder": "string"},
+      {"path": "issuanceDate", "encoder": "isodatetime-epoch-base32"},
+      {"path": "credentialSubject.id", "encoder": "string"},
+      {"path": "credentialSubject.name", "encoder": "string"},
+      {"path": "credentialSubject.alumniOf", "encoder": "string"},
+      {"path": "credentialSubject.degree", "encoder": "string"},
+      {"path": "credentialSubject.fieldOfStudy", "encoder": "string"},
+      {"path": "credentialSubject.enrollmentDate", "encoder": "isodate-1900-base32"},
+      {"path": "credentialSubject.graduationDate", "encoder": "isodate-1900-base32"},
+      {"path": "credentialSubject.studentId", "encoder": "string"},
+      {"path": "proof.type", "encoder": "string"},
+      {"path": "proof.created", "encoder": "isodatetime-epoch-base32"},
+      {"path": "proof.verificationMethod", "encoder": "string"},
+      {"path": "proof.jws", "encoder": "string"}
+    ],
+    "template": {
+      "@context": ["https://www.w3.org/2018/credentials/v1", {...}],
+      "type": ["VerifiableCredential", "EducationCredential"],
+      "credentialSubject": {"type": "EducationCredential"},
+      "proof": {"proofPurpose": "assertionMethod"}
+    }
+  }
+}
+```
+
+##### Employment Credential Template (`empl:1`)
+
+```json
+{
+  "empl:1": {
+    "columns": [
+      {"path": "issuer", "encoder": "string"},
+      {"path": "issuanceDate", "encoder": "isodatetime-epoch-base32"},
+      {"path": "credentialSubject.employeeName", "encoder": "string"},
+      {"path": "credentialSubject.employerName", "encoder": "string"},
+      {"path": "credentialSubject.jobTitle", "encoder": "string"},
+      {"path": "credentialSubject.dateOfJoining", "encoder": "isodate-1900-base32"},
+      {"path": "proof.jws", "encoder": "string"}
+    ],
+    "template": {...}
+  }
+}
+```
+
+#### Supported Encoders
+
+| Encoder | Description | Example |
+|---------|-------------|---------|
+| `string` | URL-encoded string | `Janet~Quinn` |
+| `isodatetime-epoch-base32` | ISO datetime to base32 epoch | `2024-01-27T18:32:06Z` → `1KQRS4M` |
+| `isodate-1900-base32` | ISO date to base32 (since 1900) | `2023-09-01` → `A2B` |
+| `integer-base32` | Integer to base32 | `42` → `1A` |
 
 #### Generating JSON-XT Output
 
@@ -708,55 +693,78 @@ Use the `-q` flag to generate both JSON-LD and JSON-XT:
   -q  # Generates QR + JSON-XT
 ```
 
-**Output files (both scripts):**
+**Output files:**
 ```
-/tmp/<type>-credential-*.json        # Original JSON-LD
-/tmp/<type>-credential-*-jsonxt.json # Compact JSON-XT
-/tmp/<type>-credential-*-mapper.json # Key mapper for decoding
-/tmp/<type>-credential-*-qr.png      # QR code image
-/tmp/<type>-credential-*-qr.txt      # QR data (base45 encoded)
+/tmp/<type>-credential-*.json       # Original JSON-LD
+/tmp/<type>-credential-*-jsonxt.txt # JSON-XT URI (jxt:local:...)
+/tmp/<type>-credential-*-qr.png     # QR code image
+/tmp/<type>-credential-*-qr.txt     # QR data (PixelPass wrapped)
 ```
 
 #### Example Size Comparison
 
-| Credential | JSON-LD | JSON-XT | Reduction |
-|------------|---------|---------|-----------|
-| Education Credential | 1,388 bytes | 760 bytes | 45.2% |
-| Employment Credential | 1,245 bytes | 685 bytes | 45.0% |
+| Credential | JSON-LD | JSON-XT URI | Reduction |
+|------------|---------|-------------|-----------|
+| Education Credential | ~1,400 bytes | ~400 chars | 70-75% |
+| Employment Credential | ~1,250 bytes | ~350 chars | 70-75% |
 
-#### Important Notes
+Note: JWS signatures (~180 bytes) are the largest component and limit maximum compression.
 
-1. **Verification uses JSON-LD**: Inji Verify expects standard JSON-LD format. JSON-XT is for storage/transmission only.
-2. **PixelPass uses CBOR internally**: The QR code is encoded from JSON-LD using zlib → CBOR → base45.
-3. **Mapper must be preserved**: To decode JSON-XT back to JSON-LD, you need the mapper file.
-4. **Custom mappers**: Create credential-type-specific mappers for maximum compression.
+#### Encoding and Decoding
+
+**Encoding (credential → JSON-XT URI):**
+```bash
+node jsonxt-encode.js /tmp/education-credential.json educ 1 local
+# Output: jxt:local:educ:1:did%3Apolygon%3A0x.../1KQRS4M/...
+```
+
+**Decoding (JSON-XT URI → credential):**
+```bash
+node jsonxt-decode.js "jxt:local:educ:1:..."
+# Output: Full JSON-LD credential
+```
+
+#### QR Code Integration
+
+The implementation wraps JSON-XT URIs in PixelPass for Inji Verify compatibility:
+
+1. Credential → JSON-XT URI (compact)
+2. JSON-XT URI → PixelPass encoding (base45)
+3. PixelPass data → QR code
+
+This ensures compatibility with existing Inji Verify while gaining JSON-XT compression benefits.
 
 #### Implementation Reference
-
-The JSON-XT mappers are implemented in the credential issuance scripts:
-
-| Credential Type | Script | Mapper Variable |
-|-----------------|--------|-----------------|
-| Education | `issue-education-credential.sh` | `educationCredentialMapper` (lines 377-428) |
-| Employment | `issue-employment-credential.sh` | `employmentCredentialMapper` (lines 327-378) |
 
 **File locations:**
 ```
 patches/polygon-did-fix/
-├── issue-education-credential.sh    # Education credential with JSON-XT
-├── issue-employment-credential.sh   # Employment credential with JSON-XT
-└── POC-DEPLOYMENT-GUIDE.md          # This documentation
+├── templates/
+│   └── jsonxt-templates.json      # Template definitions
+├── jsonxt-encode.js               # Encode credential to URI
+├── jsonxt-decode.js               # Decode URI to credential
+├── issue-education-credential.sh  # Uses educ:1 template
+├── issue-employment-credential.sh # Uses empl:1 template
+└── POC-DEPLOYMENT-GUIDE.md        # This documentation
 ```
 
-**Creating custom mappers:**
+**NPM Dependencies:**
+```bash
+npm install jsonxt @injistack/pixelpass
+```
 
-To create a JSON-XT mapper for a new credential type:
+#### Creating Custom Templates
 
-1. Identify all keys and string values in your credential
-2. Create short tokens (1-3 chars) for each
-3. Include standard W3C VC fields (@context, type, proof, etc.)
-4. Include schema.org URL mappings if using schema.org vocabulary
-5. Store the mapper alongside the credential for decoding
+To create a JSON-XT template for a new credential type:
+
+1. Define the `columns` array with field paths and appropriate encoders
+2. Create the `template` object with static JSON-LD structure
+3. Add to `templates/jsonxt-templates.json` with a unique `type:version` key
+4. Use appropriate encoders for dates (`isodate-1900-base32`) and datetimes (`isodatetime-epoch-base32`)
+
+**References:**
+- [Consensas JSON-XT Repository](https://github.com/Consensas/jsonxt)
+- [JSON-XT NPM Package](https://www.npmjs.com/package/jsonxt)
 
 ---
 
