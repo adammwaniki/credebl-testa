@@ -9,6 +9,8 @@ This guide documents the integration of **CREDEBL** (for W3C Verifiable Credenti
 
 ## Architecture
 
+### High-Level Overview
+
 ```
 ┌─────────────────────────────────────────────────────────────────────────┐
 │                           CREDENTIAL ISSUANCE                            │
@@ -27,6 +29,12 @@ This guide documents the integration of **CREDEBL** (for W3C Verifiable Credenti
 │         │                   │                                           │
 │         ▼                   ▼                                           │
 │  ┌──────────────────────────────────────┐                              │
+│  │  JSON-XT Compression (optional)      │                              │
+│  │  JSON-LD (~1400B) → JSON-XT (~500B)  │                              │
+│  └──────────────────────────────────────┘                              │
+│         │                                                               │
+│         ▼                                                               │
+│  ┌──────────────────────────────────────┐                              │
 │  │  PixelPass QR Encoding               │                              │
 │  │  (zlib + base45 + QR)                │                              │
 │  └──────────────────────────────────────┘                              │
@@ -39,7 +47,7 @@ This guide documents the integration of **CREDEBL** (for W3C Verifiable Credenti
 │                                                                          │
 │  ┌──────────────┐    ┌──────────────┐    ┌──────────────────────────┐  │
 │  │  Inji Verify │───▶│   Adapter    │───▶│   CREDEBL Agent          │  │
-│  │  UI (:3000)  │    │   Service    │    │   Verification API       │  │
+│  │  UI (:3001)  │    │   Service    │    │   Verification API       │  │
 │  └──────────────┘    └──────────────┘    └──────────────────────────┘  │
 │         │                                          │                    │
 │         │                                          ▼                    │
@@ -55,6 +63,166 @@ This guide documents the integration of **CREDEBL** (for W3C Verifiable Credenti
 │                                                                          │
 └─────────────────────────────────────────────────────────────────────────┘
 ```
+
+### Detailed Adapter Architecture
+
+The verification adapter handles multiple input formats and routes to appropriate backends:
+
+```
+┌─────────────────────────────────────────────────────────────────────────────────┐
+│                              INJI VERIFY UI                                      │
+│                            (Browser/Mobile)                                      │
+└─────────────────────────────────────────────────────────────────────────────────┘
+                                      │
+                                      │ QR Scan / Upload
+                                      ▼
+┌─────────────────────────────────────────────────────────────────────────────────┐
+│                               NGINX PROXY                                        │
+│                              (Port 3001/8000)                                    │
+│  ┌────────────────────────────────────────────────────────────────────────────┐ │
+│  │  /v1/verify/vc-verification  ──────────────▶  verification-adapter:8085   │ │
+│  │  /v1/verify/*                ──────────────▶  inji-verify-service:8080    │ │
+│  └────────────────────────────────────────────────────────────────────────────┘ │
+└─────────────────────────────────────────────────────────────────────────────────┘
+                                      │
+                                      ▼
+┌─────────────────────────────────────────────────────────────────────────────────┐
+│                        VERIFICATION ADAPTER (Port 8085)                          │
+│                                                                                  │
+│  ┌────────────────────────────────────────────────────────────────────────────┐ │
+│  │                         REQUEST PARSING LAYER                              │ │
+│  │                                                                            │ │
+│  │   Input Data ─────┬─────────────────────────────────────────────────────▶ │ │
+│  │                   │                                                        │ │
+│  │                   ▼                                                        │ │
+│  │   ┌─────────────────────────┐    ┌─────────────────────────┐             │ │
+│  │   │   PixelPass Detector    │    │   Format: NCFF-...      │             │ │
+│  │   │   isPixelPassEncoded()  │───▶│   Base45 encoded        │             │ │
+│  │   └─────────────────────────┘    └───────────┬─────────────┘             │ │
+│  │                                              │                            │ │
+│  │                                              ▼                            │ │
+│  │                                  ┌─────────────────────────┐             │ │
+│  │                                  │   @mosip/pixelpass      │             │ │
+│  │                                  │   decode()              │             │ │
+│  │                                  └───────────┬─────────────┘             │ │
+│  │                                              │                            │ │
+│  │                   ┌──────────────────────────┴──────────────────────────┐│ │
+│  │                   │                                                      ││ │
+│  │                   ▼                                                      ▼│ │
+│  │   ┌─────────────────────────┐                    ┌─────────────────────┐│ │
+│  │   │   JSON-XT Detector      │                    │   JSON Detector     ││ │
+│  │   │   isJsonXtUri()         │                    │   startsWith('{')   ││ │
+│  │   │   Format: jxt:...       │                    │                     ││ │
+│  │   └───────────┬─────────────┘                    └──────────┬──────────┘│ │
+│  │               │                                             │           │ │
+│  │               ▼                                             │           │ │
+│  │   ┌─────────────────────────┐                              │           │ │
+│  │   │   jsonxt library        │                              │           │ │
+│  │   │   + local templates     │                              │           │ │
+│  │   │   decode()              │                              │           │ │
+│  │   └───────────┬─────────────┘                              │           │ │
+│  │               │                                             │           │ │
+│  │               ▼                                             ▼           │ │
+│  │   ┌─────────────────────────────────────────────────────────────────┐  │ │
+│  │   │                    JSON-LD CREDENTIAL                           │  │ │
+│  │   │   { "@context": [...], "type": [...], "credentialSubject": {} } │  │ │
+│  │   └─────────────────────────────────────────────────────────────────┘  │ │
+│  └────────────────────────────────────────────────────────────────────────┘ │
+│                                      │                                       │
+│                                      ▼                                       │
+│  ┌────────────────────────────────────────────────────────────────────────┐ │
+│  │                         ROUTING LAYER                                   │ │
+│  │                                                                         │ │
+│  │   Extract Issuer DID ──▶ Determine DID Method ──▶ Route to Backend     │ │
+│  │                                                                         │ │
+│  │   ┌─────────────────┐     ┌─────────────────┐     ┌─────────────────┐  │ │
+│  │   │ did:polygon:... │────▶│ CREDEBL Agent   │────▶│ Polygon Mainnet │  │ │
+│  │   └─────────────────┘     │ (Port 8004)     │     │ (DID Resolution)│  │ │
+│  │                           └─────────────────┘     └─────────────────┘  │ │
+│  │                                                                         │ │
+│  │   ┌─────────────────┐     ┌─────────────────┐                          │ │
+│  │   │ did:web:...     │────▶│ Inji Verify     │                          │ │
+│  │   │ did:key:...     │     │ Service         │                          │ │
+│  │   │ did:jwk:...     │     │ (Port 8080)     │                          │ │
+│  │   └─────────────────┘     └─────────────────┘                          │ │
+│  └────────────────────────────────────────────────────────────────────────┘ │
+│                                      │                                       │
+│                                      ▼                                       │
+│  ┌────────────────────────────────────────────────────────────────────────┐ │
+│  │                         RESPONSE LAYER                                  │ │
+│  │                                                                         │ │
+│  │   {                                                                     │ │
+│  │     "verificationStatus": "SUCCESS" | "INVALID" | "ERROR",             │ │
+│  │     "online": true | false,                                            │ │
+│  │     "backend": "credebl-agent" | "inji-verify",                        │ │
+│  │     "vc": { ... decoded credential for UI display ... },               │ │
+│  │     "verifiableCredential": { ... same as vc ... },                    │ │
+│  │     "details": { ... verification details ... }                        │ │
+│  │   }                                                                     │ │
+│  └────────────────────────────────────────────────────────────────────────┘ │
+│                                                                              │
+└─────────────────────────────────────────────────────────────────────────────┘
+```
+
+### Data Flow for Format Detection
+
+```
+  Raw Input (from QR scan or API call)
+      │
+      ▼
+  ┌───────────────────┐
+  │ Is PixelPass?     │──── Yes ───▶ pixelpass.decode() ───┐
+  │ /^[A-Z0-9 $%*+./  │              (base45 + zlib)       │
+  │ :_-]+$/i          │                                    │
+  └─────────┬─────────┘                                    │
+            │ No                                           │
+            ▼                                              ▼
+  ┌───────────────────┐                          ┌─────────────────┐
+  │ Is JSON-XT?       │──── Yes ───▶ jsonxt     │ Decoded String  │
+  │ startsWith('jxt:')│              .decode()   │ (may be jxt:    │
+  └─────────┬─────────┘                 │        │  or JSON)       │
+            │ No                        │        └────────┬────────┘
+            ▼                           │                 │
+  ┌───────────────────┐                │                 ▼
+  │ Is JSON?          │                │        ┌─────────────────┐
+  │ startsWith('{')   │                │        │ Is JSON-XT?     │─ Yes ─▶ jsonxt.decode()
+  └─────────┬─────────┘                │        │ startsWith      │              │
+            │ Yes                      │        │ ('jxt:')        │              │
+            ▼                          │        └────────┬────────┘              │
+  ┌───────────────────┐                │                 │ No                    │
+  │ JSON.parse()      │                │                 ▼                       │
+  └─────────┬─────────┘                │        ┌─────────────────┐              │
+            │                          │        │ JSON.parse()    │              │
+            ▼                          ▼        └────────┬────────┘              │
+  ┌────────────────────────────────────────────────────────────────────────────────┐
+  │                              JSON-LD CREDENTIAL                                 │
+  │                                                                                 │
+  │  {                                                                              │
+  │    "@context": ["https://www.w3.org/2018/credentials/v1", ...],                │
+  │    "type": ["VerifiableCredential", "EducationCredential"],                    │
+  │    "issuer": "did:polygon:0x...",                                              │
+  │    "credentialSubject": { "name": "...", "degree": "...", ... },               │
+  │    "proof": { "type": "EcdsaSecp256k1Signature2019", "jws": "..." }            │
+  │  }                                                                              │
+  └────────────────────────────────────────────────────────────────────────────────┘
+```
+
+### Adapter Dependencies
+
+| Package | Purpose |
+|---------|---------|
+| `@mosip/pixelpass` | Decode PixelPass QR data (base45 + zlib) |
+| `jsonxt` | Decode JSON-XT compressed credentials |
+| `better-sqlite3` | SQLite for offline issuer cache |
+
+### Supported Input Formats
+
+| Format | Example | Detection | Processing |
+|--------|---------|-----------|------------|
+| PixelPass | `NCFF-J91S7MJ...` | Base45 character set | Decode → re-detect |
+| JSON-XT URI | `jxt:local:educ:1:...` | Starts with `jxt:` | Decode with templates |
+| JSON-LD | `{"@context":...}` | Starts with `{` | Parse directly |
+| Wrapped | `{"credential":{...}}` | Has credential field | Unwrap and process |
 
 ## Components
 
