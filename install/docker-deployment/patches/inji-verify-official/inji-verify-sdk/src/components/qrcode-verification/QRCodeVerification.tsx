@@ -487,14 +487,34 @@ const QRCodeVerification: React.FC<QRCodeVerificationProps> = ({
         // Handle JSON-XT response which includes decoded credential
         let vcToDisplay = vc;
         let vcStatus = result;
+        let offline = false;
+        let verificationLevel: 'CRYPTOGRAPHIC' | 'TRUSTED_ISSUER' | undefined;
+        let message: string | undefined;
+
         if (typeof result === "object" && result.verificationStatus) {
           vcStatus = result.verificationStatus;
           // Use credential from response if available (JSON-XT decoded by adapter)
           if (result.vc) {
             vcToDisplay = result.vc;
           }
+          // Capture offline metadata
+          if (result.offline !== undefined) {
+            offline = result.offline;
+          }
+          if (result.verificationLevel) {
+            verificationLevel = result.verificationLevel;
+          }
+          if (result.message) {
+            message = result.message;
+          }
         }
-        onVCProcessed([{ vc: vcToDisplay, vcStatus: vcStatus }]);
+        onVCProcessed([{
+          vc: vcToDisplay,
+          vcStatus: vcStatus,
+          offline,
+          verificationLevel,
+          message
+        }]);
       }
     } catch (error) {
       handleError(error);

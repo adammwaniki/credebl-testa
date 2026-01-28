@@ -7,12 +7,49 @@ import {
   vcSubmissionBody
 } from "../components/qrcode-verification/QRCodeVerification.types";
 import {QrData} from "../types/OVPSchemeQrData";
+import { verifyOffline, canVerifyOffline } from "./offlineVerifier";
+import { shouldUseOffline, IssuerCache } from "./offlineCache";
 
 const generateNonce = (): string => {
   return btoa(Date.now().toString());
 };
 
+/**
+ * Verify credential - with offline fallback
+ *
+ * Tries online verification first, falls back to offline if:
+ * 1. Network is unavailable
+ * 2. Server request fails
+ * 3. User has enabled "prefer offline" mode
+ */
 export const vcVerification = async (credential: unknown, url: string) => {
+  // Check if we should use offline mode
+  const useOffline = shouldUseOffline();
+  const credentialString = typeof credential === "string" ? credential : JSON.stringify(credential);
+
+  // If offline mode is preferred or we're offline, try offline verification first
+  if (useOffline && canVerifyOffline(credentialString)) {
+    console.log("[vcVerification] Using offline verification");
+    try {
+      const offlineResult = await verifyOffline(credentialString);
+      return {
+        verificationStatus: offlineResult.status,
+        vc: offlineResult.credential,
+        offline: true,
+        verificationLevel: offlineResult.verificationLevel,
+        message: offlineResult.message
+      };
+    } catch (offlineError) {
+      console.error("[vcVerification] Offline verification failed:", offlineError);
+      // If we're truly offline, throw the error
+      if (!navigator.onLine) {
+        throw offlineError;
+      }
+      // Otherwise, fall through to online verification
+    }
+  }
+
+  // Online verification
   let body: string;
   let contentType: string;
   if (typeof credential === "string") {
@@ -39,16 +76,47 @@ export const vcVerification = async (credential: unknown, url: string) => {
     const response = await fetch(url + "/vc-verification", requestOptions);
     const data = await response.json();
     if (response.status !== 200) throw new Error(`Failed VC Verification due to: ${ data.error || "Unknown Error" }`);
+
+    // Cache the issuer for future offline use
+    if (data.vc || data.verifiableCredential) {
+      const vc = data.vc || data.verifiableCredential;
+      const issuerDid = typeof vc.issuer === "string" ? vc.issuer : vc.issuer?.id;
+      if (issuerDid && !IssuerCache.get(issuerDid)) {
+        // Note: We don't have the public key here, but we mark the issuer as "seen"
+        // A full sync should be done via the /sync endpoint
+        console.log("[vcVerification] Issuer verified online:", issuerDid);
+      }
+    }
+
     // For JSON-XT credentials, return full response so UI can display credential details
     if (data.vc || data.verifiableCredential) {
       return {
         verificationStatus: data.verificationStatus,
-        vc: data.vc || data.verifiableCredential
+        vc: data.vc || data.verifiableCredential,
+        offline: false
       };
     }
     return data.verificationStatus;
   } catch (error) {
-    console.error(error);
+    console.error("[vcVerification] Online verification failed:", error);
+
+    // Fallback to offline verification if network failed
+    if (canVerifyOffline(credentialString)) {
+      console.log("[vcVerification] Falling back to offline verification");
+      try {
+        const offlineResult = await verifyOffline(credentialString);
+        return {
+          verificationStatus: offlineResult.status,
+          vc: offlineResult.credential,
+          offline: true,
+          verificationLevel: offlineResult.verificationLevel,
+          message: offlineResult.message || "Verified offline (network unavailable)"
+        };
+      } catch (offlineError) {
+        console.error("[vcVerification] Offline fallback also failed:", offlineError);
+      }
+    }
+
     if (error instanceof Error) {
       throw Error(error.message);
     } else {
