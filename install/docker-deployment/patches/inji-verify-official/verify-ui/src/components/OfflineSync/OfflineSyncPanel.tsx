@@ -1,5 +1,4 @@
 import React, { useState, useEffect } from 'react';
-import { useTranslation } from 'react-i18next';
 
 interface CachedIssuer {
   did: string;
@@ -9,6 +8,32 @@ interface CachedIssuer {
 }
 
 const CACHE_KEY = 'inji-verify-offline-issuers';
+const TEMPLATES_KEY = 'inji-verify-jsonxt-templates';
+
+// Template cache for JSON-XT decoding
+const TemplateCache = {
+  get(): object | null {
+    try {
+      const data = localStorage.getItem(TEMPLATES_KEY);
+      return data ? JSON.parse(data) : null;
+    } catch (e) {
+      return null;
+    }
+  },
+
+  set(templates: object): void {
+    try {
+      localStorage.setItem(TEMPLATES_KEY, JSON.stringify(templates));
+      console.log('[OfflineSync] Templates cached');
+    } catch (e) {
+      console.error('[OfflineSync] Failed to save templates:', e);
+    }
+  },
+
+  hasTemplates(): boolean {
+    return this.get() !== null;
+  }
+};
 
 // Simple cache functions (matching SDK implementation)
 const IssuerCache = {
@@ -63,6 +88,8 @@ const OfflineSyncPanel: React.FC = () => {
   const [syncing, setSyncing] = useState(false);
   const [syncError, setSyncError] = useState<string | null>(null);
   const [syncSuccess, setSyncSuccess] = useState<string | null>(null);
+  const [hasTemplates, setHasTemplates] = useState(TemplateCache.hasTemplates());
+  const [syncingTemplates, setSyncingTemplates] = useState(false);
 
   // Update online status
   useEffect(() => {
@@ -87,6 +114,52 @@ const OfflineSyncPanel: React.FC = () => {
 
   const refreshIssuers = () => {
     setIssuers(IssuerCache.list());
+    setHasTemplates(TemplateCache.hasTemplates());
+  };
+
+  // Sync JSON-XT templates from adapter
+  const syncTemplates = async (): Promise<boolean> => {
+    const adapterPort = '8085';
+    const adapterHost = window.location.hostname;
+
+    const urlsToTry = [
+      `${window.location.origin}/templates`,
+      `http://${adapterHost}:${adapterPort}/templates`,
+    ];
+
+    for (const url of urlsToTry) {
+      try {
+        console.log('[OfflineSync] Trying to fetch templates from:', url);
+        const response = await fetch(url);
+        if (response.ok) {
+          const templates = await response.json();
+          TemplateCache.set(templates);
+          setHasTemplates(true);
+          console.log('[OfflineSync] Templates synced successfully');
+          return true;
+        }
+      } catch (e) {
+        console.log('[OfflineSync] Template fetch failed:', e);
+      }
+    }
+    return false;
+  };
+
+  const handleSyncTemplates = async () => {
+    setSyncingTemplates(true);
+    setSyncError(null);
+    try {
+      const success = await syncTemplates();
+      if (success) {
+        setSyncSuccess('Templates synced!');
+      } else {
+        setSyncError('Failed to sync templates');
+      }
+    } catch (e) {
+      setSyncError('Template sync failed');
+    } finally {
+      setSyncingTemplates(false);
+    }
   };
 
   const syncIssuer = async () => {
@@ -143,6 +216,13 @@ const OfflineSyncPanel: React.FC = () => {
       if (result?.results?.[0]?.success) {
         const r = result.results[0];
         IssuerCache.set(newDid.trim(), r.publicKeyHex || '', r.keyType || 'unknown');
+
+        // Also sync templates if not already cached
+        if (!TemplateCache.hasTemplates()) {
+          console.log('[OfflineSync] Auto-syncing templates...');
+          await syncTemplates();
+        }
+
         setSyncSuccess(`Synced: ${newDid.substring(0, 30)}...`);
         setNewDid('');
         refreshIssuers();
@@ -214,6 +294,28 @@ const OfflineSyncPanel: React.FC = () => {
 
           {/* Content */}
           <div className="p-3 overflow-y-auto max-h-[50vh]">
+            {/* Template status */}
+            <div className="mb-3 p-2 bg-gray-100 rounded text-xs">
+              <div className="flex justify-between items-center">
+                <span>
+                  JSON-XT Templates: {hasTemplates ? (
+                    <span className="text-green-600 font-medium">Cached</span>
+                  ) : (
+                    <span className="text-orange-600 font-medium">Not cached</span>
+                  )}
+                </span>
+                {isOnline && !hasTemplates && (
+                  <button
+                    onClick={handleSyncTemplates}
+                    disabled={syncingTemplates}
+                    className="px-2 py-1 bg-purple-500 text-white text-xs rounded hover:bg-purple-600 disabled:bg-gray-300"
+                  >
+                    {syncingTemplates ? '...' : 'Sync'}
+                  </button>
+                )}
+              </div>
+            </div>
+
             {/* Sync form (only when online) */}
             {isOnline && (
               <div className="mb-4">
@@ -225,7 +327,7 @@ const OfflineSyncPanel: React.FC = () => {
                     type="text"
                     value={newDid}
                     onChange={(e) => setNewDid(e.target.value)}
-                    placeholder="did:polygon:testnet:0x..."
+                    placeholder="did:polygon:0x..."
                     className="flex-1 p-2 text-sm border rounded focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                     disabled={syncing}
                   />

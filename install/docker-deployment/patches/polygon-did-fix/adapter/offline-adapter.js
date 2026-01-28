@@ -1345,6 +1345,18 @@ const server = http.createServer(async (req, res) => {
         return;
     }
 
+    // JSON-XT templates endpoint - return templates for offline decoding
+    if (url.pathname === '/templates' && req.method === 'GET') {
+        if (jsonxtTemplates) {
+            res.writeHead(200, { 'Content-Type': 'application/json' });
+            res.end(JSON.stringify(jsonxtTemplates));
+        } else {
+            res.writeHead(404, { 'Content-Type': 'application/json' });
+            res.end(JSON.stringify({ error: 'JSON-XT templates not loaded' }));
+        }
+        return;
+    }
+
     // Sync endpoint - add issuer to cache
     if (url.pathname === '/sync' && req.method === 'POST') {
         let body = '';
