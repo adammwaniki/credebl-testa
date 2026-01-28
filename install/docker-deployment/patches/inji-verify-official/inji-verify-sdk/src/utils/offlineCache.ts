@@ -4,7 +4,12 @@
  * Stores issuer public keys for offline credential verification.
  * Each issuer entry is ~200-300 bytes, so with 5MB localStorage
  * we can cache 15,000+ issuers.
+ *
+ * Also manages JSON-XT templates and JSON-LD contexts for full
+ * offline cryptographic verification.
  */
+
+import { ContextCache, precacheContextsForCredential } from './cachedContexts';
 
 const CACHE_KEY = 'inji-verify-offline-issuers';
 const TEMPLATES_KEY = 'inji-verify-jsonxt-templates';
@@ -164,9 +169,7 @@ export async function syncIssuer(did: string, adapterUrl: string): Promise<boole
 
     if (result.results?.[0]?.success) {
       const r = result.results[0];
-      // The adapter returns truncated publicKeyHex, we need full key
-      // For now, store what we have - the adapter handles verification
-      IssuerCache.set(did, r.publicKeyHex || '', r.keyType || 'unknown');
+      IssuerCache.set(did, r.publicKeyHex || '', r.keyType || 'unknown', r.didDocument || null);
       OfflineSettingsStore.setLastSync();
       return true;
     }
@@ -177,6 +180,37 @@ export async function syncIssuer(did: string, adapterUrl: string): Promise<boole
     console.error('[OfflineCache] Sync error:', e);
     return false;
   }
+}
+
+/**
+ * Sync all standard JSON-LD contexts used by credentials
+ */
+export async function syncStandardContexts(): Promise<void> {
+  const standardUrls = [
+    'https://www.w3.org/2018/credentials/v1',
+    'https://w3id.org/security/v1',
+    'https://w3id.org/security/v2',
+    'https://w3id.org/security/suites/secp256k1-2019/v1',
+    'https://w3id.org/security/suites/ed25519-2020/v1',
+    'https://www.w3.org/ns/did/v1'
+  ];
+
+  console.log('[OfflineCache] Syncing standard contexts...');
+  for (const url of standardUrls) {
+    try {
+      await ContextCache.fetch(url);
+    } catch (e) {
+      // Built-in contexts are always available, so this is fine
+      console.log('[OfflineCache] Context already built-in or cached:', url);
+    }
+  }
+}
+
+/**
+ * Cache contexts from a sample credential
+ */
+export async function syncContextsFromCredential(credential: object): Promise<void> {
+  await precacheContextsForCredential(credential);
 }
 
 /**

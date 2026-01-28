@@ -8,14 +8,25 @@ export {
   OfflineSettingsStore,
   syncIssuer,
   syncTemplates,
+  syncStandardContexts,
+  syncContextsFromCredential,
   isOnline,
   shouldUseOffline
 } from './utils/offlineCache';
 
 export {
   verifyOffline,
-  canVerifyOffline
+  canVerifyOffline,
+  getVerificationCapabilities
 } from './utils/offlineVerifier';
+
+export {
+  ContextCache,
+  createOfflineDocumentLoader,
+  extractContextUrls,
+  precacheContextsForCredential,
+  BUILTIN_CONTEXTS
+} from './utils/cachedContexts';
 
 export type {
   CachedIssuer,
