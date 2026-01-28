@@ -100,27 +100,30 @@ export const vcVerification = async (credential: unknown, url: string) => {
   } catch (error) {
     console.error("[vcVerification] Online verification failed:", error);
 
-    // Fallback to offline verification if network failed
-    if (canVerifyOffline(credentialString)) {
-      console.log("[vcVerification] Falling back to offline verification");
-      try {
-        const offlineResult = await verifyOffline(credentialString);
-        return {
-          verificationStatus: offlineResult.status,
-          vc: offlineResult.credential,
-          offline: true,
-          verificationLevel: offlineResult.verificationLevel,
-          message: offlineResult.message || "Verified offline (network unavailable)"
-        };
-      } catch (offlineError) {
-        console.error("[vcVerification] Offline fallback also failed:", offlineError);
-      }
-    }
+    // Always try offline verification when network fails
+    // Don't rely on canVerifyOffline() as it may fail for various reasons
+    console.log("[vcVerification] Attempting offline verification fallback...");
+    try {
+      const offlineResult = await verifyOffline(credentialString);
+      console.log("[vcVerification] Offline verification result:", offlineResult.status);
+      return {
+        verificationStatus: offlineResult.status,
+        vc: offlineResult.credential,
+        offline: true,
+        verificationLevel: offlineResult.verificationLevel,
+        message: offlineResult.message || "Verified offline (network unavailable)"
+      };
+    } catch (offlineError) {
+      console.error("[vcVerification] Offline fallback also failed:", offlineError);
+      // If offline verification also failed, throw a more helpful error
+      const offlineMsg = offlineError instanceof Error ? offlineError.message : String(offlineError);
+      const onlineMsg = error instanceof Error ? error.message : String(error);
 
-    if (error instanceof Error) {
-      throw Error(error.message);
-    } else {
-      throw new Error("An unknown error occurred");
+      // If we're offline, prioritize the offline error message
+      if (!navigator.onLine) {
+        throw new Error(`Offline verification failed: ${offlineMsg}`);
+      }
+      throw new Error(`Online: ${onlineMsg}. Offline fallback: ${offlineMsg}`);
     }
   }
 };

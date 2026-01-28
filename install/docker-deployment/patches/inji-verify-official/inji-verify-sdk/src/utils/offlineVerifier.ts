@@ -342,41 +342,65 @@ async function verifySignature(
 export async function verifyOffline(qrData: string): Promise<OfflineVerificationResult> {
   try {
     let data = qrData.trim();
+    console.log('[OfflineVerifier] Input data length:', data.length);
+    console.log('[OfflineVerifier] Input preview:', data.substring(0, 100));
 
     // 1. Decode layers (PixelPass -> JSON-XT -> JSON)
     const format = detectFormat(data);
     console.log('[OfflineVerifier] Detected format:', format);
 
     if (format === 'pixelpass') {
-      data = decodePixelPass(data);
-      console.log('[OfflineVerifier] PixelPass decoded');
+      try {
+        data = decodePixelPass(data);
+        console.log('[OfflineVerifier] PixelPass decoded, result length:', data.length);
+        console.log('[OfflineVerifier] Decoded preview:', data.substring(0, 100));
+      } catch (pixelPassError) {
+        console.error('[OfflineVerifier] PixelPass decode error:', pixelPassError);
+        throw new Error(`PixelPass decode failed: ${pixelPassError}`);
+      }
     }
 
     let credential: any;
     if (data.startsWith('jxt:')) {
-      credential = await decodeJsonXt(data);
-      console.log('[OfflineVerifier] JSON-XT decoded');
+      try {
+        credential = await decodeJsonXt(data);
+        console.log('[OfflineVerifier] JSON-XT decoded');
+      } catch (jsonxtError) {
+        console.error('[OfflineVerifier] JSON-XT decode error:', jsonxtError);
+        throw new Error(`JSON-XT decode failed: ${jsonxtError}`);
+      }
     } else {
-      credential = JSON.parse(data);
+      try {
+        credential = JSON.parse(data);
+        console.log('[OfflineVerifier] JSON parsed');
+      } catch (jsonError) {
+        console.error('[OfflineVerifier] JSON parse error:', jsonError);
+        throw new Error(`JSON parse failed: ${jsonError}`);
+      }
     }
 
     // 2. Get issuer DID
     const issuerDid = extractIssuerDid(credential);
-    console.log('[OfflineVerifier] Issuer:', issuerDid);
+    console.log('[OfflineVerifier] Issuer DID:', issuerDid);
 
     // 3. Look up in cache
+    const allCachedIssuers = IssuerCache.list();
+    console.log('[OfflineVerifier] Cached issuers count:', allCachedIssuers.length);
+    console.log('[OfflineVerifier] Cached issuer DIDs:', allCachedIssuers.map(i => i.did));
+
     const cachedIssuer = IssuerCache.get(issuerDid);
     if (!cachedIssuer) {
+      console.log('[OfflineVerifier] Issuer NOT found in cache');
       return {
         status: 'UNKNOWN_ISSUER',
         offline: true,
-        message: 'Issuer not in offline cache. Sync while online first.',
+        message: `Issuer not in offline cache. Sync "${issuerDid}" while online first.`,
         credential,
         error: `Unknown issuer: ${issuerDid}`
       };
     }
 
-    console.log('[OfflineVerifier] Found cached issuer');
+    console.log('[OfflineVerifier] Found cached issuer:', cachedIssuer.did, cachedIssuer.keyType);
 
     // 4. Try cryptographic verification
     try {
