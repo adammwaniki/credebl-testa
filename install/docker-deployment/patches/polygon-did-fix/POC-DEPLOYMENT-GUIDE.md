@@ -1278,6 +1278,386 @@ sudo docker-compose up -d
 
 ---
 
+## Part 9: Offline Verification
+
+### 9.1 Overview
+
+The Inji Verify integration supports **offline verification** - the ability to verify credentials when the device has no network connectivity. This is critical for field use cases where internet may be unreliable or unavailable.
+
+### 9.2 Architecture
+
+```
+┌─────────────────────────────────────────────────────────────────────────────────┐
+│                           OFFLINE VERIFICATION ARCHITECTURE                      │
+└─────────────────────────────────────────────────────────────────────────────────┘
+
+┌─────────────────────────────────────────────────────────────────────────────────┐
+│                              ONLINE PHASE (Sync)                                 │
+├─────────────────────────────────────────────────────────────────────────────────┤
+│                                                                                  │
+│  ┌──────────────────┐                      ┌──────────────────────────────────┐ │
+│  │  OfflineSyncPanel │                      │     Verification Adapter        │ │
+│  │  (Browser UI)     │                      │     (Port 8085)                  │ │
+│  │                   │                      │                                  │ │
+│  │  [Sync Issuer]    │─── POST /sync ──────▶│  1. Resolve DID Document         │ │
+│  │  did:polygon:0x...│     {did: "..."}     │  2. Extract public key           │ │
+│  │                   │                      │  3. Return key material          │ │
+│  │                   │◀────────────────────│                                  │ │
+│  │                   │  {publicKeyHex,      │                                  │ │
+│  │                   │   keyType}           │                                  │ │
+│  └────────┬─────────┘                      └──────────────────────────────────┘ │
+│           │                                                                      │
+│           │  [Sync Templates]              ┌──────────────────────────────────┐ │
+│           │                                │     JSON-XT Templates            │ │
+│           │─── GET /templates ────────────▶│     (jsonxt-templates.json)      │ │
+│           │                                │                                  │ │
+│           │◀───────────────────────────────│  {educ:1: {...}, empl:1: {...}}  │ │
+│           │                                └──────────────────────────────────┘ │
+│           ▼                                                                      │
+│  ┌──────────────────┐                                                           │
+│  │   localStorage   │                                                           │
+│  │                  │                                                           │
+│  │  ┌────────────┐  │                                                           │
+│  │  │ Issuers    │  │  {did → {publicKeyHex, keyType, cachedAt}}               │
+│  │  └────────────┘  │                                                           │
+│  │  ┌────────────┐  │                                                           │
+│  │  │ Templates  │  │  {educ:1 → template, empl:1 → template}                  │
+│  │  └────────────┘  │                                                           │
+│  └──────────────────┘                                                           │
+│                                                                                  │
+└─────────────────────────────────────────────────────────────────────────────────┘
+
+┌─────────────────────────────────────────────────────────────────────────────────┐
+│                            OFFLINE PHASE (Verify)                                │
+├─────────────────────────────────────────────────────────────────────────────────┤
+│                                                                                  │
+│  ┌──────────────┐      ┌──────────────┐      ┌──────────────┐                  │
+│  │  QR Scan     │─────▶│  PixelPass   │─────▶│  Format      │                  │
+│  │              │      │  Decode      │      │  Detection   │                  │
+│  └──────────────┘      └──────────────┘      └──────┬───────┘                  │
+│                                                      │                          │
+│                              ┌───────────────────────┼───────────────────────┐  │
+│                              │                       │                       │  │
+│                              ▼                       ▼                       ▼  │
+│                     ┌──────────────┐       ┌──────────────┐       ┌──────────┐ │
+│                     │  JSON-XT     │       │  JSON-LD     │       │  SD-JWT  │ │
+│                     │  jxt:...     │       │  {...}       │       │  (future)│ │
+│                     └──────┬───────┘       └──────┬───────┘       └──────────┘ │
+│                            │                      │                            │
+│                            ▼                      │                            │
+│                     ┌──────────────┐              │                            │
+│                     │  Template    │              │                            │
+│                     │  Decode      │◀─────────────┼──── localStorage           │
+│                     │  (local)     │              │      (templates)           │
+│                     └──────┬───────┘              │                            │
+│                            │                      │                            │
+│                            └──────────┬───────────┘                            │
+│                                       ▼                                        │
+│                              ┌──────────────┐                                  │
+│                              │  Extract     │                                  │
+│                              │  Issuer DID  │                                  │
+│                              └──────┬───────┘                                  │
+│                                     │                                          │
+│                                     ▼                                          │
+│                              ┌──────────────┐                                  │
+│                              │  Lookup in   │◀─────── localStorage             │
+│                              │  Cache       │         (issuers)                │
+│                              └──────┬───────┘                                  │
+│                                     │                                          │
+│                   ┌─────────────────┼─────────────────┐                        │
+│                   │ Found           │ Not Found       │                        │
+│                   ▼                 ▼                 │                        │
+│          ┌──────────────┐   ┌──────────────┐         │                        │
+│          │  Verify      │   │  Return      │         │                        │
+│          │  Credential  │   │  UNKNOWN_    │         │                        │
+│          └──────┬───────┘   │  ISSUER      │         │                        │
+│                 │           └──────────────┘         │                        │
+│       ┌─────────┴─────────┐                          │                        │
+│       │                   │                          │                        │
+│       ▼                   ▼                          │                        │
+│  ┌──────────┐      ┌──────────────┐                 │                        │
+│  │ Crypto   │      │ Trusted      │                 │                        │
+│  │ Verify   │      │ Issuer       │                 │                        │
+│  │ (Ed25519)│      │ Fallback     │                 │                        │
+│  └────┬─────┘      └──────┬───────┘                 │                        │
+│       │                   │                          │                        │
+│       ▼                   ▼                          │                        │
+│  ┌─────────────────────────────────────────────────────────────────────────┐ │
+│  │                      VERIFICATION RESULT                                 │ │
+│  │                                                                          │ │
+│  │  ┌────────────────┐  ┌────────────────┐  ┌────────────────┐             │ │
+│  │  │    SUCCESS     │  │    SUCCESS     │  │ UNKNOWN_ISSUER │             │ │
+│  │  │  CRYPTOGRAPHIC │  │ TRUSTED_ISSUER │  │                │             │ │
+│  │  │  (signature    │  │ (structure     │  │ (sync issuer   │             │ │
+│  │  │   verified)    │  │  validated)    │  │  while online) │             │ │
+│  │  └────────────────┘  └────────────────┘  └────────────────┘             │ │
+│  └─────────────────────────────────────────────────────────────────────────┘ │
+│                                                                                │
+└────────────────────────────────────────────────────────────────────────────────┘
+```
+
+### 9.3 Verification Levels
+
+| Level | Description | When Used |
+|-------|-------------|-----------|
+| **CRYPTOGRAPHIC** | Full signature verification using cached public key | Ed25519 signatures with Web Crypto API |
+| **TRUSTED_ISSUER** | Structure validation against known issuer | secp256k1 signatures, JSON-XT credentials |
+
+### 9.4 How It Works
+
+#### Online Sync Phase
+
+1. **User opens Offline Sync Panel** (floating button in bottom-right)
+2. **User enters an issuer DID** to sync (e.g., `did:polygon:0xD3A288...`)
+3. **Adapter resolves DID** and extracts public key material
+4. **Browser stores** issuer info in localStorage (~200-300 bytes per issuer)
+5. **Templates auto-sync** when first issuer is synced
+
+#### Offline Verification Phase
+
+1. **User scans QR code** containing credential
+2. **PixelPass decode** extracts the payload (JSON-XT URI or JSON-LD)
+3. **Format detection** determines how to process
+4. **JSON-XT decode** (if applicable) uses cached templates
+5. **Issuer lookup** checks localStorage for cached public key
+6. **Verification** attempts cryptographic, falls back to trusted issuer
+
+### 9.5 Supported Formats
+
+| Format | Offline Support | Verification Level |
+|--------|-----------------|-------------------|
+| JSON-LD + Ed25519 | Full | CRYPTOGRAPHIC |
+| JSON-LD + secp256k1 | Partial | TRUSTED_ISSUER |
+| JSON-XT + Ed25519 | Partial | TRUSTED_ISSUER |
+| JSON-XT + secp256k1 | Partial | TRUSTED_ISSUER |
+
+### 9.6 Why Full Crypto Verification Requires Online (for some formats)
+
+The "TRUSTED_ISSUER" verification level appears when full cryptographic verification cannot be performed offline. This happens due to:
+
+#### 1. secp256k1 Not in Web Crypto API
+
+The `did:polygon` credentials use **secp256k1** signatures (same curve as Bitcoin/Ethereum). However, the browser's Web Crypto API only supports:
+- Ed25519 ✓
+- P-256, P-384, P-521 (NIST curves)
+- RSA
+
+To verify secp256k1 offline would require bundling `@noble/secp256k1` (~50KB).
+
+#### 2. JSON-LD Canonicalization Requirements
+
+Proper cryptographic verification requires:
+1. Remove the `proof` object
+2. **Canonicalize** the JSON-LD using URDNA2015 algorithm
+3. Hash the canonical form
+4. Verify signature against that hash
+
+Canonicalization requires:
+- The `jsonld` library (~200KB+ minified)
+- Potentially fetching remote `@context` documents
+- Complex processing that's slow in browsers
+
+The offline verifier uses simplified serialization which doesn't match the canonical form used during signing.
+
+#### 3. JSON-XT Decoder Limitations
+
+The browser's simplified JSON-XT decoder reconstructs credentials from templates, but:
+- Can't perfectly match the actual `jsonxt` library's encoding
+- Missing fields may cause column misalignment
+- Reconstructed credential may differ from original signed bytes
+
+### 9.7 Offline Sync Panel Usage
+
+#### UI Location
+A floating button appears in the bottom-right corner:
+- **Green** = Online (can sync)
+- **Orange** = Offline (using cache)
+- **Badge** = Number of cached issuers
+
+#### Syncing an Issuer
+1. Click the floating button to open panel
+2. Enter the issuer DID (e.g., `did:polygon:0xD3A288e4cCeb5ADE57c5B674475d6728Af3bD9Fd`)
+3. Click "Sync"
+4. Templates auto-sync if not already cached
+
+#### Viewing Cached Issuers
+- Panel shows all cached issuers with:
+  - Truncated DID
+  - Key type (Ed25519, secp256k1)
+  - Cached timestamp
+- Delete button to remove from cache
+
+### 9.8 Implementation Files
+
+| File | Purpose |
+|------|---------|
+| `inji-verify-sdk/src/utils/offlineVerifier.ts` | Main offline verification logic |
+| `inji-verify-sdk/src/utils/offlineCache.ts` | localStorage caching utilities |
+| `inji-verify-sdk/src/utils/api.ts` | Online/offline fallback logic |
+| `verify-ui/src/components/OfflineSync/OfflineSyncPanel.tsx` | Sync UI panel |
+| `adapter/offline-adapter.js` | Server-side `/sync` and `/templates` endpoints |
+
+### 9.9 Adapter Endpoints for Offline Support
+
+| Endpoint | Method | Purpose |
+|----------|--------|---------|
+| `/sync` | POST | Resolve DID and return public key material |
+| `/templates` | GET | Return JSON-XT templates for offline decoding |
+
+**Sync Request:**
+```bash
+curl -X POST http://localhost:8085/sync \
+  -H "Content-Type: application/json" \
+  -d '{"did": "did:polygon:0xD3A288e4cCeb5ADE57c5B674475d6728Af3bD9Fd"}'
+```
+
+**Sync Response:**
+```json
+{
+  "results": [{
+    "did": "did:polygon:0xD3A288e4cCeb5ADE57c5B674475d6728Af3bD9Fd",
+    "success": true,
+    "publicKeyHex": "04a1b2c3...",
+    "keyType": "secp256k1"
+  }]
+}
+```
+
+---
+
+## Part 10: Roadmap to Full Offline Cryptographic Verification
+
+### 10.1 Current Limitations
+
+| Limitation | Impact | Difficulty to Fix |
+|------------|--------|-------------------|
+| No secp256k1 in Web Crypto | Can't verify did:polygon signatures | Medium |
+| No JSON-LD canonicalization | Signature bytes don't match | High |
+| Simplified JSON-XT decoder | Reconstructed credential differs | Medium |
+| Large library sizes | Impacts mobile performance | Medium |
+
+### 10.2 Options for Full Offline Verification
+
+#### Option A: Bundle Crypto Libraries (Recommended)
+
+**Add secp256k1 support:**
+```bash
+npm install @noble/secp256k1  # ~50KB
+```
+
+**Modify `offlineVerifier.ts`:**
+```typescript
+import * as secp256k1 from '@noble/secp256k1';
+
+async function verifySecp256k1(
+  data: Uint8Array,
+  signature: Uint8Array,
+  publicKeyHex: string
+): Promise<boolean> {
+  const publicKey = hexToBytes(publicKeyHex);
+  const messageHash = await sha256(data);
+  return secp256k1.verify(signature, messageHash, publicKey);
+}
+```
+
+**Pros:**
+- Small bundle size increase
+- Pure JavaScript, works everywhere
+- Enables full crypto verification for did:polygon
+
+**Cons:**
+- Still need canonicalization for proper verification
+
+#### Option B: Use WebAssembly Crypto
+
+Bundle WASM implementations for better performance:
+- `@aspect/secp256k1-wasm` - secp256k1 in WASM
+- `libsodium.js` - Ed25519 and more
+
+**Pros:**
+- Faster than pure JS
+- Same API as native
+
+**Cons:**
+- Larger bundle size
+- WASM loading complexity
+
+#### Option C: Pre-compute Canonical Form
+
+Store the canonical form alongside the credential during issuance:
+
+```json
+{
+  "credential": {...},
+  "canonicalHash": "sha256:abc123...",
+  "proof": {...}
+}
+```
+
+Verifier can then:
+1. Hash the credential's canonical form (pre-computed)
+2. Verify signature against that hash
+3. Optionally verify the canonical hash matches (if `jsonld` available)
+
+**Pros:**
+- Enables offline verification without `jsonld` library
+- Small overhead (~32 bytes per credential)
+
+**Cons:**
+- Requires changes to issuance flow
+- Trust that issuer computed canonical form correctly
+
+#### Option D: Switch to SD-JWT Format
+
+SD-JWT (Selective Disclosure JWT) doesn't require JSON-LD canonicalization:
+- Standard JWT signature verification
+- Compact format
+- Wide library support
+
+**Pros:**
+- Simpler verification
+- Better offline support
+- Smaller credentials
+
+**Cons:**
+- Different format from current JSON-LD VCs
+- Migration effort
+
+### 10.3 Recommended Implementation Path
+
+1. **Phase 1 (Current):** Trusted issuer verification
+   - ✅ Completed
+   - Works for known issuers
+   - Provides reasonable assurance
+
+2. **Phase 2:** Add secp256k1 library
+   - Bundle `@noble/secp256k1`
+   - Implement proper signature extraction
+   - ~50KB bundle increase
+
+3. **Phase 3:** Add simplified canonicalization
+   - Implement deterministic JSON serialization
+   - Handle common `@context` patterns
+   - Cache resolved contexts
+
+4. **Phase 4:** Full JSON-LD support (optional)
+   - Bundle `jsonld` library
+   - Pre-cache common contexts
+   - Enable full URDNA2015 canonicalization
+
+### 10.4 Bundle Size Estimates
+
+| Component | Size (minified) | Cumulative |
+|-----------|-----------------|------------|
+| Current offline verifier | ~15KB | 15KB |
+| + @noble/secp256k1 | ~50KB | 65KB |
+| + @noble/hashes | ~20KB | 85KB |
+| + jsonld (optional) | ~200KB | 285KB |
+
+For mobile web apps, keeping under 100KB is recommended. Phase 2 achieves this while enabling secp256k1 verification.
+
+---
+
 ## Appendix A: File Listing
 
 ```
