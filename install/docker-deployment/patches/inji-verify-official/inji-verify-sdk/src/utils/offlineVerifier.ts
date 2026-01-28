@@ -67,9 +67,21 @@ async function decodeJsonXt(uri: string): Promise<any> {
   }
 
   // Decode the data using template
-  // This is a simplified decoder - the full jsonxt library handles this
-  // For now, we'll parse the tilde-separated values
-  const values = encodedData.split('/').map(v => v.replace(/~/g, ' '));
+  // Values are separated by '/' and spaces are encoded as '~' or '+'
+  // Also need to handle URL encoding
+  const values = encodedData.split('/').map(v => {
+    // First URL-decode, then replace ~ and + with spaces
+    try {
+      let decoded = decodeURIComponent(v);
+      decoded = decoded.replace(/~/g, ' ').replace(/\+/g, ' ');
+      return decoded;
+    } catch (e) {
+      // If URL decoding fails, just do simple replacements
+      return v.replace(/~/g, ' ').replace(/\+/g, ' ');
+    }
+  });
+
+  console.log('[OfflineVerifier] JSON-XT decoded values:', values.slice(0, 5));
 
   // Reconstruct credential from template
   const credential = JSON.parse(JSON.stringify(template.template));
@@ -80,6 +92,8 @@ async function decodeJsonXt(uri: string): Promise<any> {
       setNestedValue(credential, col.path, decodeValue(values[index], col.encoder));
     }
   });
+
+  console.log('[OfflineVerifier] Reconstructed credential issuer:', credential.issuer);
 
   return credential;
 }
