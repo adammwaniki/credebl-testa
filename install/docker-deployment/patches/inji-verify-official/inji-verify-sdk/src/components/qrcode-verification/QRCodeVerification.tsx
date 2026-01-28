@@ -450,11 +450,19 @@ const QRCodeVerification: React.FC<QRCodeVerificationProps> = ({
         const decoded = await decodeQrData(new TextEncoder().encode(data));
         // Check if decoded data is a JSON-XT URI (jxt:resolver:type:version:data)
         // If so, return it directly - the adapter will decode it
-        if (typeof decoded === "string" && decoded.startsWith("jxt:")) {
+        const trimmedDecoded = typeof decoded === "string" ? decoded.trim() : decoded;
+        if (typeof trimmedDecoded === "string" && trimmedDecoded.startsWith("jxt:")) {
           console.log("[QRCodeVerification] Detected JSON-XT URI, sending to adapter for decoding");
-          return decoded;  // Return URI string directly, adapter handles decoding
+          return trimmedDecoded;  // Return URI string directly, adapter handles decoding
         }
-        return JSON.parse(decoded);
+        // Try to parse as JSON, but catch errors for better diagnostics
+        try {
+          return JSON.parse(trimmedDecoded);
+        } catch (parseError) {
+          console.error("[QRCodeVerification] Failed to parse decoded data as JSON:",
+            typeof trimmedDecoded === "string" ? trimmedDecoded.substring(0, 50) + "..." : trimmedDecoded);
+          throw new Error("Failed to parse credential data. Format may not be supported.");
+        }
       }
       throw new Error("Unable to access the shared VC, due to unsupported QR data format");
     } catch (error) {

@@ -100,31 +100,41 @@ export const vcVerification = async (credential: unknown, url: string) => {
   } catch (error) {
     console.error("[vcVerification] Online verification failed:", error);
 
-    // Always try offline verification when network fails
-    // Don't rely on canVerifyOffline() as it may fail for various reasons
-    console.log("[vcVerification] Attempting offline verification fallback...");
-    try {
-      const offlineResult = await verifyOffline(credentialString);
-      console.log("[vcVerification] Offline verification result:", offlineResult.status);
-      return {
-        verificationStatus: offlineResult.status,
-        vc: offlineResult.credential,
-        offline: true,
-        verificationLevel: offlineResult.verificationLevel,
-        message: offlineResult.message || "Verified offline (network unavailable)"
-      };
-    } catch (offlineError) {
-      console.error("[vcVerification] Offline fallback also failed:", offlineError);
-      // If offline verification also failed, throw a more helpful error
-      const offlineMsg = offlineError instanceof Error ? offlineError.message : String(offlineError);
-      const onlineMsg = error instanceof Error ? error.message : String(error);
-
-      // If we're offline, prioritize the offline error message
-      if (!navigator.onLine) {
-        throw new Error(`Offline verification failed: ${offlineMsg}`);
+    // Try offline verification if we can
+    if (canVerifyOffline(credentialString)) {
+      console.log("[vcVerification] Attempting offline verification fallback...");
+      try {
+        const offlineResult = await verifyOffline(credentialString);
+        console.log("[vcVerification] Offline verification result:", offlineResult.status);
+        return {
+          verificationStatus: offlineResult.status,
+          vc: offlineResult.credential,
+          offline: true,
+          verificationLevel: offlineResult.verificationLevel,
+          message: offlineResult.message || "Verified offline (network unavailable)"
+        };
+      } catch (offlineError) {
+        console.error("[vcVerification] Offline fallback also failed:", offlineError);
+        const offlineMsg = offlineError instanceof Error ? offlineError.message : String(offlineError);
+        const onlineMsg = error instanceof Error ? error.message : String(error);
+        if (!navigator.onLine) {
+          throw new Error(`Offline verification failed: ${offlineMsg}`);
+        }
+        throw new Error(`Online: ${onlineMsg}. Offline fallback: ${offlineMsg}`);
       }
-      throw new Error(`Online: ${onlineMsg}. Offline fallback: ${offlineMsg}`);
     }
+
+    // Offline verification not available
+    const onlineMsg = error instanceof Error ? error.message : String(error);
+    // Check if this is a JSON-XT credential that needs templates synced
+    if (credentialString.includes("jxt:") || credentialString.startsWith("jxt:")) {
+      throw new Error(`Network unavailable and JSON-XT templates not cached. Please sync templates while online first. (${onlineMsg})`);
+    }
+    // Check if this is an unknown issuer
+    if (!navigator.onLine) {
+      throw new Error(`Network unavailable and issuer not cached. Please sync while online first. (${onlineMsg})`);
+    }
+    throw new Error(onlineMsg);
   }
 };
 
