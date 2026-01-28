@@ -21,21 +21,36 @@ import { IssuerCache, TemplateCache, CachedIssuer } from "./offlineCache";
 import { createOfflineDocumentLoader, ContextCache } from "./cachedContexts";
 
 // Dynamic imports for optional libraries
+// These are loaded at runtime to avoid webpack bundling issues
 let jsonld: any = null;
 let jsonxtLib: any = null;
+let librariesInitialized = false;
 
-// Try to load jsonld
-try {
-  jsonld = require('jsonld');
-} catch (e) {
-  console.warn('[OfflineVerifier] jsonld library not available, using simplified canonicalization');
-}
+// Lazy load optional libraries (avoids webpack bundling Node.js-only modules)
+async function initLibraries() {
+  if (librariesInitialized) return;
+  librariesInitialized = true;
 
-// Try to load jsonxt
-try {
-  jsonxtLib = require('jsonxt');
-} catch (e) {
-  console.warn('[OfflineVerifier] jsonxt library not available, using simplified decoder');
+  // Try to load jsonld (works in browser)
+  try {
+    // Use eval to prevent webpack from analyzing this import
+    jsonld = await eval('import("jsonld")').then((m: any) => m.default || m).catch(() => null);
+    if (jsonld) console.log('[OfflineVerifier] jsonld library loaded');
+  } catch (e) {
+    console.warn('[OfflineVerifier] jsonld library not available, using simplified canonicalization');
+  }
+
+  // jsonxt requires Node.js - skip in browser environment
+  if (typeof window === 'undefined') {
+    try {
+      jsonxtLib = await eval('import("jsonxt")').then((m: any) => m.default || m).catch(() => null);
+      if (jsonxtLib) console.log('[OfflineVerifier] jsonxt library loaded');
+    } catch (e) {
+      console.warn('[OfflineVerifier] jsonxt library not available, using simplified decoder');
+    }
+  } else {
+    console.log('[OfflineVerifier] Running in browser - using simplified JSON-XT decoder');
+  }
 }
 
 export interface OfflineVerificationResult {
@@ -523,6 +538,9 @@ function validateStructure(credential: any, issuer: CachedIssuer): { valid: bool
  * if crypto verification fails.
  */
 export async function verifyOffline(qrData: string): Promise<OfflineVerificationResult> {
+  // Initialize optional libraries on first call
+  await initLibraries();
+
   try {
     let data = qrData.trim();
     let isJsonXtFormat = false;
