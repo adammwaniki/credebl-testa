@@ -12,10 +12,11 @@
 const CONTEXTS_CACHE_KEY = 'inji-verify-jsonld-contexts';
 
 /**
- * Built-in contexts that are always available
+ * Built-in contexts that are always available offline
+ * These are embedded in the bundle and don't require network access
  */
 export const BUILTIN_CONTEXTS: Record<string, object> = {
-  // W3C Credentials v1 Context
+  // W3C Verifiable Credentials v1 Context
   "https://www.w3.org/2018/credentials/v1": {
     "@context": {
       "@version": 1.1,
@@ -86,15 +87,19 @@ export const BUILTIN_CONTEXTS: Record<string, object> = {
           "expires": {"@id": "sec:expiration", "@type": "xsd:dateTime"},
           "jws": "sec:jws",
           "nonce": "sec:nonce",
-          "proofPurpose": {"@id": "sec:proofPurpose", "@type": "@vocab", "@context": {
-            "@version": 1.1,
-            "@protected": true,
-            "id": "@id",
-            "type": "@type",
-            "sec": "https://w3id.org/security#",
-            "assertionMethod": {"@id": "sec:assertionMethod", "@type": "@id", "@container": "@set"},
-            "authentication": {"@id": "sec:authenticationMethod", "@type": "@id", "@container": "@set"}
-          }},
+          "proofPurpose": {
+            "@id": "sec:proofPurpose",
+            "@type": "@vocab",
+            "@context": {
+              "@version": 1.1,
+              "@protected": true,
+              "id": "@id",
+              "type": "@type",
+              "sec": "https://w3id.org/security#",
+              "assertionMethod": {"@id": "sec:assertionMethod", "@type": "@id", "@container": "@set"},
+              "authentication": {"@id": "sec:authenticationMethod", "@type": "@id", "@container": "@set"}
+            }
+          },
           "proofValue": "sec:proofValue",
           "verificationMethod": {"@id": "sec:verificationMethod", "@type": "@id"}
         }
@@ -113,49 +118,27 @@ export const BUILTIN_CONTEXTS: Record<string, object> = {
           "domain": "sec:domain",
           "expires": {"@id": "sec:expiration", "@type": "xsd:dateTime"},
           "nonce": "sec:nonce",
-          "proofPurpose": {"@id": "sec:proofPurpose", "@type": "@vocab", "@context": {
-            "@version": 1.1,
-            "@protected": true,
-            "id": "@id",
-            "type": "@type",
-            "sec": "https://w3id.org/security#",
-            "assertionMethod": {"@id": "sec:assertionMethod", "@type": "@id", "@container": "@set"},
-            "authentication": {"@id": "sec:authenticationMethod", "@type": "@id", "@container": "@set"}
-          }},
+          "proofPurpose": {
+            "@id": "sec:proofPurpose",
+            "@type": "@vocab",
+            "@context": {
+              "@version": 1.1,
+              "@protected": true,
+              "id": "@id",
+              "type": "@type",
+              "sec": "https://w3id.org/security#",
+              "assertionMethod": {"@id": "sec:assertionMethod", "@type": "@id", "@container": "@set"},
+              "authentication": {"@id": "sec:authenticationMethod", "@type": "@id", "@container": "@set"}
+            }
+          },
           "proofValue": "sec:proofValue",
           "verificationMethod": {"@id": "sec:verificationMethod", "@type": "@id"}
-        }
-      },
-      "EcdsaSecp256k1VerificationKey2019": {
-        "@id": "https://w3id.org/security#EcdsaSecp256k1VerificationKey2019",
-        "@context": {
-          "@version": 1.1,
-          "@protected": true,
-          "id": "@id",
-          "type": "@type",
-          "sec": "https://w3id.org/security#",
-          "controller": {"@id": "sec:controller", "@type": "@id"},
-          "publicKeyJwk": "sec:publicKeyJwk",
-          "publicKeyBase58": "sec:publicKeyBase58",
-          "publicKeyHex": "sec:publicKeyHex"
-        }
-      },
-      "Ed25519VerificationKey2020": {
-        "@id": "https://w3id.org/security#Ed25519VerificationKey2020",
-        "@context": {
-          "@version": 1.1,
-          "@protected": true,
-          "id": "@id",
-          "type": "@type",
-          "sec": "https://w3id.org/security#",
-          "controller": {"@id": "sec:controller", "@type": "@id"},
-          "publicKeyMultibase": "sec:publicKeyMultibase"
         }
       }
     }
   },
 
-  // Security v1 Context
+  // W3C Security v1 Context
   "https://w3id.org/security/v1": {
     "@context": {
       "id": "@id",
@@ -204,144 +187,33 @@ export const BUILTIN_CONTEXTS: Record<string, object> = {
     }
   },
 
-  // Security v2 Context
+  // W3C Security v2 Context (simplified)
   "https://w3id.org/security/v2": {
-    "@context": [{
-      "@version": 1.1
-    }, "https://w3id.org/security/v1", {
-      "AesKeyWrappingKey2019": "sec:AesKeyWrappingKey2019",
-      "DeleteKeyOperation": "sec:DeleteKeyOperation",
-      "DeriveSecretOperation": "sec:DeriveSecretOperation",
+    "@context": {
+      "@version": 1.1,
+      "id": "@id",
+      "type": "@type",
+      "dc": "http://purl.org/dc/terms/",
+      "sec": "https://w3id.org/security#",
+      "xsd": "http://www.w3.org/2001/XMLSchema#",
       "Ed25519Signature2018": "sec:Ed25519Signature2018",
       "Ed25519VerificationKey2018": "sec:Ed25519VerificationKey2018",
-      "EquihashProof2018": "sec:EquihashProof2018",
-      "ExportKeyOperation": "sec:ExportKeyOperation",
-      "GenerateKeyOperation": "sec:GenerateKeyOperation",
-      "KmsOperation": "sec:KmsOperation",
-      "RevokeKeyOperation": "sec:RevokeKeyOperation",
-      "RsaSignature2018": "sec:RsaSignature2018",
-      "RsaVerificationKey2018": "sec:RsaVerificationKey2018",
-      "Sha256HmacKey2019": "sec:Sha256HmacKey2019",
-      "SignOperation": "sec:SignOperation",
-      "UnwrapKeyOperation": "sec:UnwrapKeyOperation",
-      "VerifyOperation": "sec:VerifyOperation",
-      "WrapKeyOperation": "sec:WrapKeyOperation",
-      "X25519KeyAgreementKey2019": "sec:X25519KeyAgreementKey2019",
-      "allowedAction": "sec:allowedAction",
+      "EcdsaSecp256k1Signature2019": "sec:EcdsaSecp256k1Signature2019",
+      "EcdsaSecp256k1VerificationKey2019": "sec:EcdsaSecp256k1VerificationKey2019",
       "assertionMethod": {"@id": "sec:assertionMethod", "@type": "@id", "@container": "@set"},
       "authentication": {"@id": "sec:authenticationMethod", "@type": "@id", "@container": "@set"},
-      "capability": {"@id": "sec:capability", "@type": "@id"},
-      "capabilityAction": "sec:capabilityAction",
-      "capabilityChain": {"@id": "sec:capabilityChain", "@type": "@id", "@container": "@list"},
-      "capabilityDelegation": {"@id": "sec:capabilityDelegationMethod", "@type": "@id", "@container": "@set"},
-      "capabilityInvocation": {"@id": "sec:capabilityInvocationMethod", "@type": "@id", "@container": "@set"},
-      "caveat": {"@id": "sec:caveat", "@type": "@id", "@container": "@set"},
-      "challenge": "sec:challenge",
-      "ciphertext": "sec:ciphertext",
       "controller": {"@id": "sec:controller", "@type": "@id"},
-      "delegator": {"@id": "sec:delegator", "@type": "@id"},
-      "equihashParameterK": {"@id": "sec:equihashParameterK", "@type": "xsd:integer"},
-      "equihashParameterN": {"@id": "sec:equihashParameterN", "@type": "xsd:integer"},
-      "invocationTarget": {"@id": "sec:invocationTarget", "@type": "@id"},
-      "invoker": {"@id": "sec:invoker", "@type": "@id"},
+      "challenge": "sec:challenge",
+      "created": {"@id": "dc:created", "@type": "xsd:dateTime"},
+      "domain": "sec:domain",
       "jws": "sec:jws",
-      "keyAgreement": {"@id": "sec:keyAgreementMethod", "@type": "@id", "@container": "@set"},
-      "kmsModule": {"@id": "sec:kmsModule"},
-      "parentCapability": {"@id": "sec:parentCapability", "@type": "@id"},
-      "plaintext": "sec:plaintext",
-      "proof": {"@id": "sec:proof", "@type": "@id", "@container": "@graph"},
-      "proofPurpose": {"@id": "sec:proofPurpose", "@type": "@vocab"},
+      "nonce": "sec:nonce",
+      "proofPurpose": "sec:proofPurpose",
       "proofValue": "sec:proofValue",
-      "referenceId": "sec:referenceId",
-      "unwrappedKey": "sec:unwrappedKey",
-      "verificationMethod": {"@id": "sec:verificationMethod", "@type": "@id"},
-      "verifyData": "sec:verifyData",
-      "wrappedKey": "sec:wrappedKey"
-    }]
-  },
-
-  // secp256k1 2019 Context
-  "https://w3id.org/security/suites/secp256k1-2019/v1": {
-    "@context": {
-      "id": "@id",
-      "type": "@type",
-      "EcdsaSecp256k1Signature2019": {
-        "@id": "https://w3id.org/security#EcdsaSecp256k1Signature2019",
-        "@context": {
-          "@version": 1.1,
-          "@protected": true,
-          "id": "@id",
-          "type": "@type",
-          "challenge": "https://w3id.org/security#challenge",
-          "created": {"@id": "http://purl.org/dc/terms/created", "@type": "http://www.w3.org/2001/XMLSchema#dateTime"},
-          "domain": "https://w3id.org/security#domain",
-          "expires": {"@id": "https://w3id.org/security#expiration", "@type": "http://www.w3.org/2001/XMLSchema#dateTime"},
-          "jws": "https://w3id.org/security#jws",
-          "nonce": "https://w3id.org/security#nonce",
-          "proofPurpose": {"@id": "https://w3id.org/security#proofPurpose", "@type": "@vocab"},
-          "proofValue": "https://w3id.org/security#proofValue",
-          "verificationMethod": {"@id": "https://w3id.org/security#verificationMethod", "@type": "@id"}
-        }
-      },
-      "EcdsaSecp256k1VerificationKey2019": {
-        "@id": "https://w3id.org/security#EcdsaSecp256k1VerificationKey2019",
-        "@context": {
-          "@version": 1.1,
-          "@protected": true,
-          "id": "@id",
-          "type": "@type",
-          "controller": {"@id": "https://w3id.org/security#controller", "@type": "@id"},
-          "publicKeyJwk": "https://w3id.org/security#publicKeyJwk",
-          "publicKeyBase58": "https://w3id.org/security#publicKeyBase58",
-          "publicKeyHex": "https://w3id.org/security#publicKeyHex"
-        }
-      }
-    }
-  },
-
-  // Ed25519 2020 Context
-  "https://w3id.org/security/suites/ed25519-2020/v1": {
-    "@context": {
-      "id": "@id",
-      "type": "@type",
-      "@protected": true,
-      "Ed25519Signature2020": {
-        "@id": "https://w3id.org/security#Ed25519Signature2020",
-        "@context": {
-          "@protected": true,
-          "id": "@id",
-          "type": "@type",
-          "challenge": "https://w3id.org/security#challenge",
-          "created": {"@id": "http://purl.org/dc/terms/created", "@type": "http://www.w3.org/2001/XMLSchema#dateTime"},
-          "domain": "https://w3id.org/security#domain",
-          "nonce": "https://w3id.org/security#nonce",
-          "proofPurpose": {"@id": "https://w3id.org/security#proofPurpose", "@type": "@vocab"},
-          "proofValue": "https://w3id.org/security#proofValue",
-          "verificationMethod": {"@id": "https://w3id.org/security#verificationMethod", "@type": "@id"}
-        }
-      },
-      "Ed25519VerificationKey2020": {
-        "@id": "https://w3id.org/security#Ed25519VerificationKey2020",
-        "@context": {
-          "@protected": true,
-          "id": "@id",
-          "type": "@type",
-          "controller": {"@id": "https://w3id.org/security#controller", "@type": "@id"},
-          "publicKeyMultibase": "https://w3id.org/security#publicKeyMultibase"
-        }
-      }
-    }
-  },
-
-  // Schema.org context (commonly used in credentials)
-  "https://schema.org": {
-    "@context": {
-      "@vocab": "https://schema.org/",
-      "name": "https://schema.org/name",
-      "description": "https://schema.org/description",
-      "identifier": "https://schema.org/identifier",
-      "image": {"@id": "https://schema.org/image", "@type": "@id"},
-      "url": {"@id": "https://schema.org/url", "@type": "@id"}
+      "publicKeyBase58": "sec:publicKeyBase58",
+      "publicKeyHex": "sec:publicKeyHex",
+      "publicKeyJwk": "sec:publicKeyJwk",
+      "verificationMethod": {"@id": "sec:verificationMethod", "@type": "@id"}
     }
   },
 
@@ -370,59 +242,90 @@ export const BUILTIN_CONTEXTS: Record<string, object> = {
 };
 
 /**
- * Context Cache - stores additional contexts in localStorage
+ * Context Cache - manages additional contexts in localStorage
+ * Built-in contexts are always available; fetched contexts are cached
  */
 export const ContextCache = {
-  getAll(): Record<string, object> {
+  /**
+   * Get a context by URL
+   * First checks built-in contexts, then localStorage cache
+   */
+  get(url: string): object | null {
+    // Check built-in contexts first
+    if (BUILTIN_CONTEXTS[url]) {
+      return BUILTIN_CONTEXTS[url];
+    }
+
+    // Check localStorage cache
     try {
-      const data = localStorage.getItem(CONTEXTS_CACHE_KEY);
-      const cached = data ? JSON.parse(data) : {};
-      // Merge with built-in contexts
-      return { ...BUILTIN_CONTEXTS, ...cached };
+      const cached = localStorage.getItem(CONTEXTS_CACHE_KEY);
+      if (cached) {
+        const contexts = JSON.parse(cached);
+        return contexts[url] || null;
+      }
     } catch (e) {
       console.error('[ContextCache] Failed to read cache:', e);
-      return { ...BUILTIN_CONTEXTS };
     }
-  },
-
-  get(url: string): object | null {
-    const contexts = this.getAll();
-    return contexts[url] || null;
-  },
-
-  set(url: string, context: object): void {
-    try {
-      const data = localStorage.getItem(CONTEXTS_CACHE_KEY);
-      const cached = data ? JSON.parse(data) : {};
-      cached[url] = context;
-      localStorage.setItem(CONTEXTS_CACHE_KEY, JSON.stringify(cached));
-      console.log('[ContextCache] Cached context:', url);
-    } catch (e) {
-      console.error('[ContextCache] Failed to save context:', e);
-    }
-  },
-
-  clear(): void {
-    localStorage.removeItem(CONTEXTS_CACHE_KEY);
-    console.log('[ContextCache] Cache cleared');
+    return null;
   },
 
   /**
-   * Pre-fetch and cache a context from URL (while online)
+   * Get all cached contexts (built-in + localStorage)
+   */
+  getAll(): Record<string, object> {
+    const all = { ...BUILTIN_CONTEXTS };
+
+    try {
+      const cached = localStorage.getItem(CONTEXTS_CACHE_KEY);
+      if (cached) {
+        const contexts = JSON.parse(cached);
+        Object.assign(all, contexts);
+      }
+    } catch (e) {
+      console.error('[ContextCache] Failed to read cache:', e);
+    }
+
+    return all;
+  },
+
+  /**
+   * Cache a context (only if not built-in)
+   */
+  set(url: string, context: object): void {
+    // Don't cache built-in contexts
+    if (BUILTIN_CONTEXTS[url]) {
+      return;
+    }
+
+    try {
+      const cached = localStorage.getItem(CONTEXTS_CACHE_KEY);
+      const contexts = cached ? JSON.parse(cached) : {};
+      contexts[url] = context;
+      localStorage.setItem(CONTEXTS_CACHE_KEY, JSON.stringify(contexts));
+      console.log('[ContextCache] Cached context:', url);
+    } catch (e) {
+      console.error('[ContextCache] Failed to cache context:', e);
+    }
+  },
+
+  /**
+   * Fetch and cache a context from URL (online only)
    */
   async fetch(url: string): Promise<object | null> {
-    // Check if already cached
-    const existing = this.get(url);
-    if (existing) return existing;
+    // Return from cache if available
+    const cached = this.get(url);
+    if (cached) {
+      return cached;
+    }
 
-    // Check if it's a built-in
-    if (BUILTIN_CONTEXTS[url]) return BUILTIN_CONTEXTS[url];
-
+    // Fetch from network
     try {
       const response = await fetch(url, {
         headers: { 'Accept': 'application/ld+json, application/json' }
       });
-      if (!response.ok) throw new Error(`HTTP ${response.status}`);
+      if (!response.ok) {
+        throw new Error(`Failed to fetch context: ${response.status}`);
+      }
       const context = await response.json();
       this.set(url, context);
       return context;
@@ -430,74 +333,104 @@ export const ContextCache = {
       console.error('[ContextCache] Failed to fetch context:', url, e);
       return null;
     }
+  },
+
+  /**
+   * List all cached context URLs
+   */
+  listUrls(): string[] {
+    const urls = Object.keys(BUILTIN_CONTEXTS);
+
+    try {
+      const cached = localStorage.getItem(CONTEXTS_CACHE_KEY);
+      if (cached) {
+        const contexts = JSON.parse(cached);
+        urls.push(...Object.keys(contexts));
+      }
+    } catch (e) {
+      console.error('[ContextCache] Failed to list URLs:', e);
+    }
+
+    return Array.from(new Set(urls)); // Remove duplicates
+  },
+
+  /**
+   * Get count of cached contexts
+   */
+  count(): number {
+    return this.listUrls().length;
+  },
+
+  /**
+   * Clear cached contexts (not built-in)
+   */
+  clear(): void {
+    localStorage.removeItem(CONTEXTS_CACHE_KEY);
+    console.log('[ContextCache] Cache cleared');
   }
 };
 
 /**
  * Create an offline document loader for jsonld library
- * This loader uses cached contexts instead of fetching from URLs
+ * Returns cached contexts without making network requests
  */
 export function createOfflineDocumentLoader() {
-  return async (url: string): Promise<{
-    contextUrl: string | null;
-    document: object;
-    documentUrl: string;
-  }> => {
+  return async (url: string) => {
     console.log('[DocumentLoader] Loading:', url);
 
-    // Check cache (includes built-ins)
-    const cached = ContextCache.get(url);
-    if (cached) {
+    const context = ContextCache.get(url);
+    if (context) {
       return {
         contextUrl: null,
-        document: cached,
+        document: context,
         documentUrl: url
       };
     }
 
-    // Handle inline contexts (objects passed directly)
-    if (typeof url === 'object') {
-      return {
-        contextUrl: null,
-        document: url,
-        documentUrl: ''
-      };
-    }
-
-    throw new Error(`JSON-LD context not cached: ${url}. Sync contexts while online.`);
+    throw new Error(`Context not cached: ${url}. Sync while online first.`);
   };
 }
 
 /**
- * Extract all context URLs from a credential for pre-caching
+ * Pre-cache contexts from a credential's @context array
+ * Call this while online to prepare for offline verification
  */
-export function extractContextUrls(credential: object): string[] {
-  const urls: string[] = [];
-  const context = (credential as any)['@context'];
+export async function precacheContextsForCredential(credential: any): Promise<void> {
+  const contexts = credential['@context'];
+  if (!contexts) return;
 
-  if (!context) return urls;
+  const urls = Array.isArray(contexts)
+    ? contexts.filter((c: any) => typeof c === 'string')
+    : typeof contexts === 'string' ? [contexts] : [];
 
-  const processContext = (ctx: any) => {
-    if (typeof ctx === 'string') {
-      urls.push(ctx);
-    } else if (Array.isArray(ctx)) {
-      ctx.forEach(processContext);
-    }
-    // Objects are inline contexts, no URL to fetch
-  };
-
-  processContext(context);
-  return urls;
-}
-
-/**
- * Pre-cache all contexts needed for a credential
- */
-export async function precacheContextsForCredential(credential: object): Promise<void> {
-  const urls = extractContextUrls(credential);
-  console.log('[ContextCache] Pre-caching contexts:', urls);
+  console.log('[ContextCache] Pre-caching contexts for credential:', urls);
 
   for (const url of urls) {
     await ContextCache.fetch(url);
+  }
+}
+
+/**
+ * Sync standard contexts commonly used by credentials
+ * Call this while online to prepare for offline verification
+ */
+export async function syncStandardContexts(): Promise<void> {
+  const standardUrls = [
+    'https://www.w3.org/2018/credentials/v1',
+    'https://w3id.org/security/v1',
+    'https://w3id.org/security/v2',
+    'https://www.w3.org/ns/did/v1'
+  ];
+
+  console.log('[ContextCache] Syncing standard contexts...');
+  for (const url of standardUrls) {
+    // These are all built-in, so this just verifies they're available
+    const context = ContextCache.get(url);
+    if (context) {
+      console.log('[ContextCache] ✓', url);
+    } else {
+      console.log('[ContextCache] ✗', url, '(will try to fetch)');
+      await ContextCache.fetch(url);
+    }
   }
 }

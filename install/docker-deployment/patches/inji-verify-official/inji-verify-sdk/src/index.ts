@@ -1,6 +1,10 @@
 export { default as OpenID4VPVerification } from '././components/openid4vp-verification/OpenID4VPVerification';
 export { default as QRCodeVerification } from '././components/qrcode-verification/QRCodeVerification';
 
+// Offline Sync UI Components
+export { OfflineSyncButton, OfflineSyncPanel } from './components/offline-sync';
+export type { OfflineSyncButtonProps, OfflineSyncPanelProps, SyncStatus } from './components/offline-sync';
+
 // Offline verification utilities
 export {
   IssuerCache,
@@ -8,8 +12,6 @@ export {
   OfflineSettingsStore,
   syncIssuer,
   syncTemplates,
-  syncStandardContexts,
-  syncContextsFromCredential,
   isOnline,
   shouldUseOffline
 } from './utils/offlineCache';
@@ -21,11 +23,11 @@ export {
 } from './utils/offlineVerifier';
 
 export {
+  BUILTIN_CONTEXTS,
   ContextCache,
   createOfflineDocumentLoader,
-  extractContextUrls,
   precacheContextsForCredential,
-  BUILTIN_CONTEXTS
+  syncStandardContexts
 } from './utils/cachedContexts';
 
 export type {
