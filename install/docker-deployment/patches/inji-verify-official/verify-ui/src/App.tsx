@@ -1,4 +1,4 @@
-import React, { useEffect, useRef } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import "./App.css";
 import Home from "./pages/Home";
 import Offline from "./pages/Offline";
@@ -20,7 +20,10 @@ import {
   syncIssuer,
   OfflineSettingsStore,
   IssuerCache,
-  TemplateCache
+  TemplateCache,
+  isOnline,
+  OfflineSyncButton,
+  OfflineSyncPanel
 } from "@mosip/react-inji-verify-sdk";
 
 function switchToVerificationMethod(method: VerificationMethod) {
@@ -91,6 +94,28 @@ function App() {
   const rtl = isRTL(language);
   const preloadImages = ['/assets/images/under_construction.svg', '/assets/images/inji-logo.svg'];
   const syncAttemptedRef = useRef(false);
+  const [syncPanelOpen, setSyncPanelOpen] = useState(false);
+  const [online, setOnline] = useState(isOnline());
+  const [issuerCount, setIssuerCount] = useState(IssuerCache.count());
+
+  // Track online/offline status
+  useEffect(() => {
+    const handleOnline = () => setOnline(true);
+    const handleOffline = () => setOnline(false);
+    window.addEventListener('online', handleOnline);
+    window.addEventListener('offline', handleOffline);
+    return () => {
+      window.removeEventListener('online', handleOnline);
+      window.removeEventListener('offline', handleOffline);
+    };
+  }, []);
+
+  // Update issuer count when panel closes (user may have added/removed issuers)
+  useEffect(() => {
+    if (!syncPanelOpen) {
+      setIssuerCount(IssuerCache.count());
+    }
+  }, [syncPanelOpen]);
 
   // Auto-sync offline caches when online
   useEffect(() => {
@@ -146,11 +171,28 @@ function App() {
     document.documentElement.classList.add('default_theme');
   }, [rtl]);
 
+  // Get the adapter URL for sync operations
+  const adapterUrl = window.location.origin + (window._env_?.VERIFY_SERVICE_API_URL || '/v1/verify');
+
   return (
     <div className="font-base">
       <RouterProvider router={router}/>
       <AlertMessage isRtl={rtl}/>
       <PreloadImages imageUrls={preloadImages}/>
+
+      {/* Offline Sync Button - Floating action button */}
+      <OfflineSyncButton
+        onClick={() => setSyncPanelOpen(true)}
+        isOnline={online}
+        issuerCount={issuerCount}
+      />
+
+      {/* Offline Sync Panel - Drawer for managing offline data */}
+      <OfflineSyncPanel
+        isOpen={syncPanelOpen}
+        onClose={() => setSyncPanelOpen(false)}
+        adapterUrl={adapterUrl}
+      />
     </div>
   );
 }
