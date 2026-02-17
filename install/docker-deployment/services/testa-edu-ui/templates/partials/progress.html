@@ -1,0 +1,26 @@
+{{define "progress"}}
+<div class="card">
+    <h2>Issuing Credential</h2>
+
+    <div class="credential-summary">
+        <p><strong>Student:</strong> {{.Form.StudentName}}</p>
+        <p><strong>Institution:</strong> {{.Form.Institution}}</p>
+        <p><strong>Degree:</strong> {{.Form.Degree}}</p>
+        {{if .Form.FieldOfStudy}}<p><strong>Field of Study:</strong> {{.Form.FieldOfStudy}}</p>{{end}}
+        {{if .Form.EnrollmentDate}}<p><strong>Enrollment:</strong> {{.Form.EnrollmentDate}}</p>{{end}}
+        {{if .Form.GraduationDate}}<p><strong>Graduation:</strong> {{.Form.GraduationDate}}</p>{{end}}
+        {{if .Form.StudentID}}<p><strong>Student ID:</strong> {{.Form.StudentID}}</p>{{end}}
+        {{if .Form.GPA}}<p><strong>GPA:</strong> {{.Form.GPA}}</p>{{end}}
+        {{if .Form.Honors}}<p><strong>Honors:</strong> {{.Form.Honors}}</p>{{end}}
+    </div>
+
+    <div class="steps">
+        <div id="step-1" hx-post="/step/token" hx-trigger="load" hx-swap="outerHTML">
+            <div class="step step-loading">
+                <span class="spinner"></span>
+                <span>Step 1: Getting JWT token...</span>
+            </div>
+        </div>
+    </div>
+</div>
+{{end}}

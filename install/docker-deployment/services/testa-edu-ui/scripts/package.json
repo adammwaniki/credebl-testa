@@ -1,0 +1,10 @@
+{
+  "name": "testa-edu-qr",
+  "version": "1.0.0",
+  "private": true,
+  "dependencies": {
+    "@injistack/pixelpass": "^0.8.0-RC2",
+    "jsonxt": "^0.0.19",
+    "qrcode": "^1.5.4"
+  }
+}

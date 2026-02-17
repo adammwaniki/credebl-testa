@@ -1,0 +1,26 @@
+{{define "step-token"}}
+{{if .Error}}
+<div id="step-1">
+    <div class="step step-error">
+        <span class="icon">&#10007;</span>
+        <span>Step 1: Failed to get token &mdash; {{.Error}}</span>
+    </div>
+    <div class="retry-section">
+        <button hx-post="/step/token" hx-target="#step-1" hx-swap="outerHTML" class="btn btn-small">Retry</button>
+    </div>
+</div>
+{{else}}
+<div id="step-1">
+    <div class="step step-success">
+        <span class="icon">&#10003;</span>
+        <span>Step 1: JWT token obtained</span>
+    </div>
+</div>
+<div id="step-2" hx-post="/step/sign" hx-trigger="load" hx-swap="outerHTML">
+    <div class="step step-loading">
+        <span class="spinner"></span>
+        <span>Step 2: Signing credential...</span>
+    </div>
+</div>
+{{end}}
+{{end}}

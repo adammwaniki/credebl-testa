@@ -1,0 +1,29 @@
+{{define "layout"}}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Testa Edu - Credential Issuance</title>
+    <script src="https://unpkg.com/htmx.org@2.0.4"></script>
+    <link rel="stylesheet" href="/static/style.css">
+</head>
+<body>
+    <header>
+        <div class="header-inner">
+            <img src="/static/logo.svg" alt="Testa Edu" class="logo">
+            <div>
+                <h1>Testa Edu</h1>
+                <p class="subtitle">Education Credential Issuance Portal</p>
+            </div>
+        </div>
+    </header>
+    <main>
+        {{template "content" .}}
+    </main>
+    <footer>
+        Powered by CREDEBL &middot; Verifiable with Inji Verify
+    </footer>
+</body>
+</html>
+{{end}}

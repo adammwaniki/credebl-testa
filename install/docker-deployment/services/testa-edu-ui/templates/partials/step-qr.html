@@ -1,0 +1,43 @@
+{{define "step-qr"}}
+{{if .Error}}
+<div id="step-4">
+    <div class="step step-error">
+        <span class="icon">&#10007;</span>
+        <span>Step 4: QR generation failed &mdash; {{.Error}}</span>
+    </div>
+    <div class="retry-section">
+        <button hx-post="/step/qr" hx-target="#step-4" hx-swap="outerHTML" class="btn btn-small">Retry</button>
+    </div>
+</div>
+{{else}}
+<div id="step-4">
+    <div class="step step-success">
+        <span class="icon">&#10003;</span>
+        <span>Step 4: QR code generated ({{.Sizes.JSONXT}} chars JSON-XT, {{.Sizes.QRData}} chars QR data)</span>
+    </div>
+</div>
+
+<div class="qr-section">
+    <div class="qr-card">
+        <img src="data:image/png;base64,{{.QRPngBase64}}" alt="Verification QR Code" class="qr-image">
+        <p class="qr-hint">Scan with Inji Verify</p>
+    </div>
+
+    <div class="download-buttons">
+        <a href="/download/qr.png" class="btn btn-primary">Download QR (PNG)</a>
+        <a href="/download/credential.pdf" class="btn btn-green">Download Certificate (PDF)</a>
+        <a href="/download/credential.json" class="btn btn-gray">Download JSON-LD</a>
+        <a href="/download/credential.jsonxt" class="btn btn-gray">Download JSON-XT</a>
+    </div>
+</div>
+
+<details class="json-viewer">
+    <summary>View Signed Credential JSON</summary>
+    <pre><code>{{.CredentialJSON}}</code></pre>
+</details>
+
+<div class="issue-another">
+    <a href="/">Issue another credential</a>
+</div>
+{{end}}
+{{end}}

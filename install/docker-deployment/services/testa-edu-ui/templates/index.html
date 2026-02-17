@@ -1,0 +1,60 @@
+{{template "layout" .}}
+{{define "content"}}
+<div id="main-content">
+    <form hx-post="/issue" hx-target="#main-content" hx-swap="innerHTML" class="card">
+        <h2>Issue Education Credential</h2>
+        <p class="form-desc">Fill in the student details below to issue a verifiable education credential.</p>
+
+        <div class="form-group">
+            <label for="studentName">Student Name <span class="required">*</span></label>
+            <input type="text" id="studentName" name="studentName" required placeholder="e.g. Alice Johnson">
+        </div>
+
+        <div class="form-group">
+            <label for="institution">Institution / University <span class="required">*</span></label>
+            <input type="text" id="institution" name="institution" value="Testa Edu" required>
+        </div>
+
+        <div class="form-group">
+            <label for="degree">Degree / Qualification <span class="required">*</span></label>
+            <input type="text" id="degree" name="degree" required placeholder="e.g. Bachelor of Science">
+        </div>
+
+        <details class="optional-section">
+            <summary>Optional Fields</summary>
+            <div class="optional-fields">
+                <div class="form-group">
+                    <label for="fieldOfStudy">Field of Study / Major</label>
+                    <input type="text" id="fieldOfStudy" name="fieldOfStudy" placeholder="e.g. Computer Science">
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="enrollmentDate">Enrollment Date</label>
+                        <input type="date" id="enrollmentDate" name="enrollmentDate">
+                    </div>
+                    <div class="form-group">
+                        <label for="graduationDate">Graduation Date</label>
+                        <input type="date" id="graduationDate" name="graduationDate">
+                    </div>
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="studentId">Student ID</label>
+                        <input type="text" id="studentId" name="studentId" placeholder="e.g. STU2024001">
+                    </div>
+                    <div class="form-group">
+                        <label for="gpa">GPA</label>
+                        <input type="text" id="gpa" name="gpa" placeholder="e.g. 3.85">
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label for="honors">Honors</label>
+                    <input type="text" id="honors" name="honors" placeholder="e.g. magna cum laude">
+                </div>
+            </div>
+        </details>
+
+        <button type="submit" class="btn btn-primary">Issue Credential</button>
+    </form>
+</div>
+{{end}}
