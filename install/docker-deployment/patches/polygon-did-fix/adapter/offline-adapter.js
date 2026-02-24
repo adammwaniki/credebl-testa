@@ -72,8 +72,8 @@ const CONFIG = {
     injiVerifyUrl: process.env.UPSTREAM_VERIFY_SERVICE || 'http://inji-verify-service:8080',
 
     // Polygon RPC for DID resolution
-    polygonRpcUrl: process.env.POLYGON_RPC_URL || 'https://rpc-amoy.polygon.technology',
-    polygonDidRegistry: process.env.POLYGON_DID_REGISTRY || '0x0C76cc3DC2c12E274123e84a34eb176C3912543c',
+    polygonRpcUrl: process.env.POLYGON_RPC_URL || 'https://polygon-bor-rpc.publicnode.com',
+    polygonDidRegistry: process.env.POLYGON_DID_REGISTRY || '0x0C16958c4246271622201101C83B9F0Fc7180d15',
 
     // Cache settings
     cacheFile: process.env.CACHE_FILE || './issuer-cache.json', // Legacy JSON (for migration)

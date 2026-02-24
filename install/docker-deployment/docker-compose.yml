@@ -336,7 +336,7 @@ services:
       - USE_OFFLINE_ADAPTER=true
       - RUN_CONTEXT_PROXY=true
       # Polygon Mainnet RPC and DID Registry
-      - POLYGON_RPC_URL=${POLYGON_RPC_URL:-https://polygon-rpc.com}
+      - POLYGON_RPC_URL=${POLYGON_RPC_URL:-https://polygon-bor-rpc.publicnode.com}
       - POLYGON_DID_REGISTRY=${POLYGON_DID_REGISTRY:-0x0C16958c4246271622201101C83B9F0Fc7180d15}
       - CACHE_FILE=/app/cache/issuer-cache.json
       - CACHE_TTL_MS=604800000
