@@ -111,6 +111,135 @@ type Backend interface {
 
 `DIDResolverBackend` is an optional extension for backends that can resolve DID documents (used by `/sync`).
 
+## JSON-LD verification flow
+
+```txt
+┌──────────────────────────────────────────────────────────────────────┐
+│  Input: W3C Verifiable Credential (JSON-LD with proof)               │
+│                                                                      │
+│  {                                                                   │
+│    "@context": ["https://www.w3.org/2018/credentials/v1", ...],      │
+│    "type": ["VerifiableCredential"],                                 │
+│    "issuer": "did:key:z6Mk...",                                      │
+│    "credentialSubject": { ... },                                     │
+│    "proof": {                                                        │
+│      "type": "Ed25519Signature2020",                                 │
+│      "proofValue": "z5Vad...",                                       │
+│      "verificationMethod": "did:key:z6Mk...#z6Mk...",                │
+│      ...                                                             │
+│    }                                                                 │
+│  }                                                                   │
+└──────────────┬───────────────────────────────────────────────────────┘
+               │
+               ▼
+┌──────────────────────────────────────────────────────────────────────┐
+│  1. Separate document from proof                                     │
+│                                                                      │
+│     document = credential minus "proof" field                        │
+│     proofOptions = proof minus "proofValue"/"jws", plus @context     │
+│                    inherited from the document                       │
+└──────────────┬───────────────────────────────────────────────────────┘
+               │
+               ▼
+┌──────────────────────────────────────────────────────────────────────┐
+│  2. Canonicalize both (URDNA2015 via json-gold)                      │
+│                                                                      │
+│     For each of document and proofOptions:                           │
+│       a. Fetch @context URLs → expand all terms to full IRIs         │
+│       b. Convert expanded JSON-LD to RDF triples                     │
+│       c. Canonicalize blank node identifiers (URDNA2015)             │
+│       d. Serialize as sorted N-Quads string                          │
+│                                                                      │
+│     json-gold's CachingDocumentLoader fetches context URLs over      │
+│     HTTP on first use. Contexts are cached in memory for the         │
+│     process lifetime. No persistent context cache.                   │
+│                                                                      │
+│     If a context URL is unreachable (true air-gap), canonicalization │
+│     fails and the adapter falls back to TRUSTED_ISSUER.              │
+└──────────────┬───────────────────────────────────────────────────────┘
+               │
+               ▼
+┌──────────────────────────────────────────────────────────────────────┐
+│  3. Two-hash pattern (W3C Data Integrity)                            │
+│                                                                      │
+│     proofHash = SHA-256( canonicalized proofOptions )                │
+│     docHash   = SHA-256( canonicalized document )                    │
+│     hashData  = proofHash ‖ docHash          (64 bytes)              │
+└──────────────┬───────────────────────────────────────────────────────┘
+               │
+               ▼
+┌──────────────────────────────────────────────────────────────────────┐
+│  4. Extract signature from proof                                     │
+│                                                                      │
+│     proofValue "z..." → base58btc decode (Ed25519Signature2020)      │
+│     jws "eyJ..."      → split on ".", base64url decode part 3        │
+└──────────────┬───────────────────────────────────────────────────────┘
+               │
+               ▼
+┌──────────────────────────────────────────────────────────────────────┐
+│  5. Verify signature against cached public key                       │
+│                                                                      │
+│     Ed25519:   ed25519.Verify(pubKey, hashData, signature)           │
+│     secp256k1: ecdsa.Verify(SHA256(hashData), signature, pubKey)     │
+│     RSA:       rsa.VerifyPKCS1v15(pubKey, SHA256, SHA256(hashData),  │
+│                                   signature)                         │
+│                                                                      │
+│     Public key source: SQLite cache, populated by POST /sync         │
+│     Key formats: multibase, hex, base58, JWK (Ed25519, secp256k1,    │
+│                  RSA)                                                │
+└──────────────┬───────────────────────────────────────────────────────┘
+               │
+               ▼
+┌──────────────────────────────────────────────────────────────────────┐
+│  6. Result                                                           │
+│                                                                      │
+│     Signature valid   → { verificationStatus: SUCCESS,               │
+│                           verificationLevel: CRYPTOGRAPHIC }         │
+│     Signature invalid → { verificationStatus: INVALID }              │
+│     Error (context fetch, unsupported proof type)                    │
+│                       → fall back to validateStructure()             │
+│                       → TRUSTED_ISSUER or INVALID                    │
+└──────────────────────────────────────────────────────────────────────┘
+```
+
+## SD-JWT verification flow
+
+```txt
+┌──────────────────────────────────────────────────────────────────────┐
+│  Input: SD-JWT token string                                          │
+│  Content-Type: application/vc+sd-jwt                                 │
+│                                                                      │
+│  eyJhbGciOiJFZERTQSIsInR5cCI6InZjK3NkLWp3dCIsIng1YyI6Wy4uLl19...~ │
+└──────────────┬───────────────────────────────────────────────────────┘
+               │
+               ▼
+┌──────────────────────────────────────────────────────────────────────┐
+│  Adapter: raw passthrough                                            │
+│                                                                      │
+│  No JSON parsing. No canonicalization. The token string (including   │
+│  trailing ~) is forwarded to each backend in registration order      │
+│  with the original Content-Type preserved.                           │
+│                                                                      │
+│  First backend returning SUCCESS or INVALID wins.                    │
+└──────────────┬───────────────────────────────────────────────────────┘
+               │
+               ▼
+┌──────────────────────────────────────────────────────────────────────┐
+│  Backend (Inji Verify): SdJwtVerifier                                │
+│                                                                      │
+│  1. Parse JWT header → extract x5c certificate chain                 │
+│  2. x5c[0] → X.509 certificate → extract public key                  │
+│  3. Verify EdDSA/ES256 signature over header.payload                 │
+│  4. Validate claims: _sd_alg, typ, alg                               │
+│  5. Validate disclosures against _sd digests                         │
+│                                                                      │
+│  ⚠ Key resolution is x5c-only. did:key/did:web in kid header         │
+│    is not resolved — SdJwtVerifier does not call                     │
+│    PublicKeyResolverFactory. Issuer must embed X.509 cert in         │
+│    JWT header.                                                       │
+└──────────────────────────────────────────────────────────────────────┘
+```
+
 ## Verification modes
 
 ### Online (LDP_VC)
@@ -125,17 +254,11 @@ Raw token string forwarded to each backend in registration order with the origin
 
 ### Offline (CRYPTOGRAPHIC)
 
-```txt
-credential (without proof)  ──>  URDNA2015  ──>  SHA256  ────> ┐
-                                                               ├──>  Ed25519.Verify / RSA.Verify
-proof options (with @context) ──>  URDNA2015  ──>  SHA256  ──> ┘
-```
-
-json-gold fetches `@context` URLs over HTTP on first use and caches them. Custom contexts (e.g. `credissuer.com/templates/...`) resolve automatically.
+The JSON-LD verification flow above, using a cached public key from SQLite. Requires network access to fetch `@context` URLs (json-gold has no persistent context cache).
 
 ### Offline (TRUSTED_ISSUER)
 
-Fallback when cryptographic verification fails (unsupported proof type, context fetch error). Checks: issuer DID matches cache, proof references issuer, required VC fields present.
+Fallback when cryptographic verification fails (unsupported proof type, context fetch error, true air-gap). Checks: issuer DID matches cache, proof references issuer, required VC fields present.
 
 ## Connectivity
 
