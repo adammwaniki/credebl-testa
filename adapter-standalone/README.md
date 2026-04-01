@@ -107,6 +107,52 @@ Adapter offline:  SUCCESS (level: CRYPTOGRAPHIC)
 
 Credentials from credissuer.com (Ed25519Signature2020) and Inji Certify (RsaSignature2018) verify through the adapter. Walt.id's `issuer-api:0.18.2` issues `jwt_vc_json` format natively; for `ldp_vc` credentials, sign with json-gold using the walt.id-onboarded keypair.
 
+## Testing offline verification
+
+`POST /verify-offline` forces offline mode regardless of backend connectivity. The adapter looks up the issuer's cached public key in SQLite and verifies the signature locally using URDNA2015 canonicalization.
+
+**Prerequisite:** sync the issuer while online so the public key is cached:
+
+```bash
+curl -X POST http://localhost:8085/sync \
+  -H "Content-Type: application/json" \
+  -d '{"did": "did:web:did.credissuer.com:d2bd3fa6-48d4-4f30-8be5-83f4c48fa088"}'
+```
+
+Then verify offline:
+
+```bash
+curl -X POST http://localhost:8085/verify-offline \
+  -H "Content-Type: application/json" \
+  -d @credential.json
+```
+
+### True air-gap test
+
+To simulate a fully disconnected environment, run the adapter with `--network none`:
+
+```bash
+# Copy the SQLite cache from the running adapter
+docker cp adapter:/app/cache/issuer-cache.db /tmp/issuer-cache.db
+
+# Run with no network
+docker run --rm --network none \
+  -v /tmp/issuer-cache.db:/app/cache/issuer-cache.db \
+  adapter-standalone-adapter
+```
+
+### Offline verification levels by network state
+
+| Scenario | Result | Why |
+| --- | --- | --- |
+| `/verify-offline` with network | CRYPTOGRAPHIC | json-gold fetches `@context` URLs over HTTP, canonicalizes, verifies signature |
+| `/verify-offline` after restart, with network | CRYPTOGRAPHIC | json-gold re-fetches contexts (no persistent context cache) |
+| `--network none` (true air-gap) | TRUSTED_ISSUER | Context fetch fails → canonicalization fails → falls back to structural check |
+
+json-gold's `DefaultDocumentLoader` does not bundle W3C contexts — it always fetches over HTTP. In a true air-gap, canonicalization fails for any credential whose `@context` URLs are not reachable, and the adapter falls back to `TRUSTED_ISSUER` (issuer DID matches cache, proof structure valid, but no cryptographic signature check).
+
+For CRYPTOGRAPHIC verification in a true air-gap, the adapter would need pre-cached JSON-LD contexts — either embedded in the binary or loaded from a local file at startup. This is what the WASM module with embedded contexts solved (archived to `~/Projects/2026/adapter-wasm-archive/`), and what Inji Verify's `LocalDocumentLoader` does internally.
+
 ## Why Inji Verify rejects some cross-platform credentials and how the adapter handles it
 
 ### Content-Type
