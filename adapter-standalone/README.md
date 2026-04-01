@@ -76,7 +76,18 @@ docker compose -f docker-compose.test.yml up --build
 ./test/smoke.sh
 ```
 
-The test compose starts the adapter with `mosipid/inji-verify-service:0.16.0` and `waltid/verifier-api:0.18.2`. CREDEBL requires its full multi-service stack and connects via `host.docker.internal:8004` when running separately.
+The test compose starts the adapter with `mosipid/inji-verify-service:0.16.0` and `waltid/verifier-api:0.18.2`.
+
+### Testing with CREDEBL
+
+CREDEBL is 14+ NestJS microservices (NATS, Redis, PostgreSQL, agent-provisioning, credo-controller, etc.) and has no single Docker image. To test with CREDEBL:
+
+1. Start the full CREDEBL stack from its own docker-compose (`install/docker-deployment/` or [credebl/platform](https://github.com/credebl/platform)).
+2. Ensure the Credo agent is provisioned and listening on port 8004.
+3. The adapter's `backends.json` already includes a `credebl-agent` entry pointing to `http://host.docker.internal:8004`. On Linux Docker (no `host.docker.internal`), use `http://172.17.0.1:8004` or add `extra_hosts: ["host.docker.internal:host-gateway"]` to the adapter service in docker-compose.
+4. Credentials with `did:polygon`, `did:indy`, `did:sov`, or `did:peer` issuers will route to the CREDEBL agent. Other DID methods route to Inji Verify or walt.id.
+
+When the CREDEBL agent is unreachable, the adapter falls back to offline verification for those DID methods (CRYPTOGRAPHIC if the issuer is cached, TRUSTED_ISSUER otherwise).
 
 ## Testing issuance → verification
 
@@ -120,7 +131,16 @@ The divergence that causes verification failures is not in the URDNA2015 algorit
 
 ### SD-JWT
 
-This adapter addresses JSON-LD Data Integrity proofs. SD-JWT credentials use JWS signatures over JCS-serialized payloads and require no JSON-LD processing — that is a separate workstream.
+The adapter passes SD-JWT credentials (`Content-Type: application/vc+sd-jwt`) through to backends as raw strings — no JSON-LD canonicalization involved. The token body (including trailing `~`) is forwarded with the original content type preserved.
+
+**Working flow:** Inji Verify 0.16.0's SD-JWT verifier (`SdJwtVerifier` in `vcverifier-jar:1.6.0`) resolves the issuer's public key exclusively from the `x5c` claim in the JWT header — an X.509 certificate chain, not a DID. It does not call the `PublicKeyResolverFactory` that the LDP verifier uses for `did:key`/`did:web` resolution. This means:
+
+| Issuer key source | SD-JWT verification |
+| --- | --- |
+| `x5c` in JWT header (X.509 cert) | **Works** |
+| `kid` referencing a DID | Does not work (no DID resolution in SD-JWT path) |
+
+To issue an SD-JWT that Inji Verify accepts: generate an Ed25519 keypair, create a self-signed X.509 certificate, include it in the JWT header as `x5c`, and sign with EdDSA. The trailing `~` is required even with no selective disclosures. Tested end-to-end with `mosipid/inji-verify-service:0.16.0`.
 
 ## References
 

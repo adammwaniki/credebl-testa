@@ -17,6 +17,7 @@ import (
 	"io"
 	"log"
 	"net/http"
+	"strings"
 )
 
 // NewRouter creates an http.Handler with all adapter endpoints.
@@ -78,6 +79,17 @@ func (a *Adapter) doVerify(w http.ResponseWriter, r *http.Request, forceOffline 
 		return
 	}
 
+	ct := r.Header.Get("Content-Type")
+
+	// SD-JWT: raw string body, not JSON. Pass through to backend with
+	// the original content type preserved.
+	if isSDJWTContentType(ct) {
+		log.Printf("[ADAPTER] SD-JWT credential detected (Content-Type: %s)", ct)
+		result := a.VerifySDJWT(string(body), ct, forceOffline)
+		writeJSON(w, http.StatusOK, result)
+		return
+	}
+
 	parsed, jsonxt, err := a.ParseRequestBody(string(body))
 	if err != nil {
 		writeJSON(w, http.StatusBadRequest, VerificationResult{Status: "ERROR", Error: err.Error()})
@@ -101,6 +113,11 @@ func (a *Adapter) doVerify(w http.ResponseWriter, r *http.Request, forceOffline 
 	result.VCField = credential
 
 	writeJSON(w, http.StatusOK, result)
+}
+
+func isSDJWTContentType(ct string) bool {
+	ct = strings.ToLower(ct)
+	return strings.Contains(ct, "sd-jwt")
 }
 
 func (a *Adapter) handleSync(w http.ResponseWriter, r *http.Request) {

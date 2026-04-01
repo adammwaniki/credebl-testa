@@ -284,6 +284,41 @@ func (a *Adapter) SyncIssuer(did string) SyncResult {
 }
 
 // --------------------------------------------------------------------------
+// SD-JWT verification — raw string passthrough to backend.
+// --------------------------------------------------------------------------
+
+// VerifySDJWT forwards an SD-JWT credential (raw string, not JSON) to a
+// backend that supports SD-JWT verification. The adapter does not parse or
+// canonicalize SD-JWT — it passes the token through with the correct
+// Content-Type. Offline SD-JWT verification is not supported (no JSON-LD
+// canonicalization involved).
+func (a *Adapter) VerifySDJWT(token string, contentType string, forceOffline bool) VerificationResult {
+	if forceOffline {
+		return VerificationResult{
+			Status:  "ERROR",
+			Offline: true,
+			Error:   "SD-JWT offline verification not supported; requires online backend",
+		}
+	}
+
+	// Try each reachable backend. SD-JWT verification is not DID-method-specific.
+	for _, b := range a.registry.All() {
+		log.Printf("[VERIFY] SD-JWT: trying backend %s", b.Name())
+		result := b.VerifyRaw(token, contentType)
+		if result.Status == "SUCCESS" || result.Status == "INVALID" {
+			result.Backend = b.Name()
+			return result
+		}
+		log.Printf("[VERIFY] SD-JWT: backend %s: %s", b.Name(), result.Error)
+	}
+
+	return VerificationResult{
+		Status: "ERROR",
+		Error:  "no backend could verify SD-JWT credential",
+	}
+}
+
+// --------------------------------------------------------------------------
 // Request body parsing with PixelPass + JSON-XT support.
 // --------------------------------------------------------------------------
 

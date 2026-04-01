@@ -38,6 +38,9 @@ type Backend interface {
 	CanVerify(didMethod string) bool
 	// Verify sends a credential for online verification and returns the result.
 	Verify(credential map[string]any) VerificationResult
+	// VerifyRaw sends a raw credential string (e.g. SD-JWT) with the given
+	// Content-Type. Used for non-JSON credential formats.
+	VerifyRaw(token string, contentType string) VerificationResult
 	// HealthEndpoint returns the full URL probed by the connectivity checker.
 	HealthEndpoint() string
 }
@@ -225,6 +228,33 @@ func (b *ConfigurableBackend) Verify(credential map[string]any) VerificationResu
 	req.Header.Set("Content-Type", ct)
 
 	// Auth.
+	if err := b.authenticate(req); err != nil {
+		return VerificationResult{Status: "ERROR", Error: "auth: " + err.Error()}
+	}
+
+	resp, err := b.client.Do(req)
+	if err != nil {
+		return VerificationResult{Status: "ERROR", Error: err.Error()}
+	}
+	defer resp.Body.Close()
+
+	respBody, err := io.ReadAll(resp.Body)
+	if err != nil {
+		return VerificationResult{Status: "ERROR", Error: "read response: " + err.Error()}
+	}
+
+	return b.parseResponse(respBody)
+}
+
+// VerifyRaw sends a raw string credential (SD-JWT) to the backend with the
+// specified Content-Type. No JSON wrapping — the token is the body.
+func (b *ConfigurableBackend) VerifyRaw(token string, contentType string) VerificationResult {
+	req, err := http.NewRequest("POST", b.cfg.URL+b.cfg.VerifyPath, strings.NewReader(token))
+	if err != nil {
+		return VerificationResult{Status: "ERROR", Error: err.Error()}
+	}
+	req.Header.Set("Content-Type", contentType)
+
 	if err := b.authenticate(req); err != nil {
 		return VerificationResult{Status: "ERROR", Error: "auth: " + err.Error()}
 	}
